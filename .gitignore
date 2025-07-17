@@ -1,0 +1,28 @@
+# ==================================
+# intellij files
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# ==================================
+# gradle files
+.gradle/
+build/
+
+# ==================================
+# OS files
+.DS_Store
+Thumbs.db
+
+# ==================================
+# log files
+*.log
+*.log.*
+
+# ==================================
+# project-specific files
+# ignore user-generated content at runtime
+src/main/resources/Server/Files/
+src/main/resources/Client/*/Downloads/

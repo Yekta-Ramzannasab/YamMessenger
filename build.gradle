@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'com.yamyam.messenger'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Dependency for GUI ( JavaFX )
+    implementation 'org.openjfx:javafx-controls:21.0.2'
+    implementation 'org.openjfx:javafx-fxml:21.0.2'
+
+    // Dependency for JSON
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+application {
+    // The essential class of the graphics program that has a main method
+    mainClass = 'com.yamyam.messenger.client.gui.TelegramClientApp'
+}
+
+javafx {
+    version = "21.0.2"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
