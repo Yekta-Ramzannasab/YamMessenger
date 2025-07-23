@@ -1,4 +1,6 @@
 package com.yamyam.messenger.shared;
 
-public record User(String username, String password) {
+import java.sql.Timestamp;
+
+public record User(String username,String password  ) {
 }

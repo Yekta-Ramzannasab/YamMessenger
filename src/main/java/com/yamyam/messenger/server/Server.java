@@ -3,15 +3,22 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.User;
+import com.yamyam.messenger.shared.UserHandler;
+import com.yamyam.messenger.shared.Users;
 
 public class Server {
     // Predefined users for authentication
+
     private static final User[] users;
 
     static {
@@ -28,11 +35,22 @@ public class Server {
         }
     }
 
+
+
     // List of currently connected clients
     private static final List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
     private static final int PORT = 5001;
 
     public static void main(String[] args) {
+        // Try to connect database
+        try{
+            Database.getConnection();
+        }
+        catch (SQLException e){
+            System.out.println("Not connect!");
+        }
+
+
         try (ServerSocket serverSocket = new ServerSocket(PORT)){
             System.out.println("Server is listening on   port " + PORT );
             while (true){
@@ -48,6 +66,7 @@ public class Server {
         }
     }
 
+
     public static boolean authenticate(String username, String password) {
         for (User user : users) {
             if (user.username().equals(username) && user.password().equals(password)) {
@@ -56,4 +75,6 @@ public class Server {
         }
         return false;
     }
+
+
 }
