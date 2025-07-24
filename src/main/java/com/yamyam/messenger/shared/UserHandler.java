@@ -5,6 +5,7 @@ import com.yamyam.messenger.server.Database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserHandler {
@@ -20,27 +21,41 @@ public class UserHandler {
                 "email, " +
                 "password)" +
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try(Connection con = Database.getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql)){
-                stmt.setInt(1,user.getId());
-                stmt.setString(2, user.getUsername());
-                stmt.setString(3, user.getProfileName());
-                stmt.setString(4, user.getBio());
-                stmt.setTimestamp(5, user.getCreateAt());
-                stmt.setTimestamp(6, user.getLastSeen());
-                stmt.setBoolean(7, user.isVerified());
-                stmt.setBoolean(8, user.isOnline());
-                stmt.setBoolean(9, user.isDeleted());
-                stmt.setString(10, user.getEmail());
-                stmt.setString(11, user.getPassword());
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, user.getId());
+            stmt.setString(2, user.getUsername());
+            stmt.setString(3, user.getProfileName());
+            stmt.setString(4, user.getBio());
+            stmt.setTimestamp(5, user.getCreateAt());
+            stmt.setTimestamp(6, user.getLastSeen());
+            stmt.setBoolean(7, user.isVerified());
+            stmt.setBoolean(8, user.isOnline());
+            stmt.setBoolean(9, user.isDeleted());
+            stmt.setString(10, user.getEmail());
+            stmt.setString(11, user.getPassword());
 
 
-                stmt.executeUpdate();
-                return true;
+            stmt.executeUpdate();
+            return true;
 
-            }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public boolean login(String username, String password) {
+        String sql = "SELECT username,password FROM users WHERE username = ?\n" +
+                "AND password = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1,username);
+            stmt.setString(2,password);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

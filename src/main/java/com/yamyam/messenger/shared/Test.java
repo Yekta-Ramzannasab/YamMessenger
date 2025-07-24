@@ -9,33 +9,13 @@ public class Test {
     public static void main(String[] ar){
         try{
             Database.getConnection();
+            System.out.println("connected");
         }
         catch (SQLException e){
             System.out.println("Not connect!");
         }
-        UserHandler handler = new UserHandler();
-
-        Users user = new Users(
-                0,
-                "mobin2025",
-                "Mobin T",
-                "hi i'm mobin",
-                new Timestamp(System.currentTimeMillis()),
-                new Timestamp(System.currentTimeMillis()),
-                true,
-                true,
-                false,
-                "mobin@example.com",
-                "123456"
-        );
-
-        boolean success = handler.registerUser(user);
-
-        if (success) {
-            System.out.println("yessss");
-        } else {
-            System.out.println("nooo");
-        }
+        UserHandler uh = new UserHandler();
+        System.out.println(uh.login("mobin2025","123456"));
 
 
     }
