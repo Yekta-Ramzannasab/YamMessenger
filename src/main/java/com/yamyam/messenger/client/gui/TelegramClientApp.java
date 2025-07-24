@@ -13,10 +13,17 @@ public class TelegramClientApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Location of fxml file in resources folder
-        URL fxmlLocation = getClass().getResource("/com/yamyam/messenger/client/gui/fxml/main-view.fxml");
+        URL fxmlLocation = getClass().getResource("/fxml/welcome.fxml");
         Parent root = FXMLLoader.load(fxmlLocation);
-        Scene scene = new Scene(root, 320, 240);
-        stage.setTitle("Hello!");
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+
+        stage.setWidth(1000);
+        stage.setHeight(700);
+        stage.setResizable(false);
+
+
+        stage.setTitle("Yamyam");
         stage.setScene(scene);
         stage.show();
     }
