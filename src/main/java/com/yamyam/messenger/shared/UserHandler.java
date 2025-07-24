@@ -27,13 +27,13 @@ public class UserHandler {
         }
     }
 
-    public Users CompleteRegisterUser(String name, String password, String username) {
+    public Users CompleteRegisterUser(String profileName, String password, String username) {
         // Username saved with UI
-        String sql = "UPDATE users SET name = ? , password = ? , is_verified = true , updated_at = ? WHERE username = ? AND is_verified = false ";
+        String sql = "UPDATE users SET profile_name = ? , password = ? , is_verified = true , updated_at = ? WHERE username = ? AND is_verified = false ";
         try {
             Connection con = Database.getConnection();
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, name);
+            stmt.setString(1, profileName);
             stmt.setString(2, hashPassword(password));
             stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             stmt.setString(4, username);
