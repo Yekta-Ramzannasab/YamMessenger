@@ -1,0 +1,68 @@
+.main-box {
+    -fx-background-color: #ffffff;
+    -fx-spacing: 20;
+    -fx-padding: 20;
+}
+
+.top-row {
+    -fx-background-color: #f5f5f5;
+}
+
+.bottom-row {
+    -fx-background-color: #e0e0e0;
+}
+
+#startMessagingButton {
+    -fx-background-color: linear-gradient(to bottom right, #6A5ACD, #1E90FF);
+        -fx-text-fill: white;
+        -fx-font-size: 16px;
+        -fx-font-family: "Arial Rounded MT Bold";
+        -fx-padding: 10 20;
+        -fx-background-radius: 15;
+}
+
+#welcome-text {
+    -fx-text-fill: #444;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+.link-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 10px;
+    -fx-cursor: hand;
+    -fx-underline: false;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI";
+}
+
+.link-label:hover {
+    -fx-text-fill: #1E90FF;
+}
+
+.signup-container {
+    -fx-background-color: linear-gradient(to bottom right, #5B86E5, #8B5CF6);
+    -fx-padding: 30;
+}
+
+.title-label {
+    -fx-font-size: 22px;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.signup-button {
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+    -fx-background-color: linear-gradient(to right, #6A5ACD, #00BFFF);
+}
+
+/* .link-label {
+    -fx-text-fill: white;
+    -fx-underline: true;
+    -fx-cursor: hand;
+
+*/
