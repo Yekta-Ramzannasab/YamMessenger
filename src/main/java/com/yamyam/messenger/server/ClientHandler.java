@@ -178,12 +178,25 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleLogin(String username, String password) throws IOException {
-        boolean isAuthenticated = Server.authenticate(username, password);
-        Message response = isAuthenticated
-                ? new Message(0, "Server", "true")
-                : new Message(0, "Server", "false");
-        sendJsonMessage(response);
+    private void handleLogin(String email, String otherArguments) throws IOException {
+        String[] parts = otherArguments.split(",", 3);
+        boolean singUp = Boolean.parseBoolean(parts[0]);
+        String name = parts[1];
+        String pass = parts[2];
+
+        if ( singUp ){
+
+        } else {
+
+        }
+
+
+
+//        boolean isAuthenticated = Server.authenticate(username, password);
+//        Message response = isAuthenticated
+//                ? new Message(0, "Server", "true")
+//                : new Message(0, "Server", "false");
+//        sendJsonMessage(response);
     }
 
     private void sendJsonMessage(Message message) throws IOException {

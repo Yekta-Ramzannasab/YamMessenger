@@ -21,7 +21,7 @@ public class SignUpController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
-        // for now only go to next page , but later for verifiy email
+        // for now only go to next page , but later for verify email
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/verify.fxml"));
             Parent root = loader.load();

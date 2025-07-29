@@ -36,7 +36,7 @@ public class NetworkService {
             boolean loggedIn = false;
 
 
-            // TODO: Receive and check the server's login response
+            // receive and check the server's login response
             while (!loggedIn) {
                 // login with asking name and pass from the user
                 System.out.print("Username: ");
@@ -295,5 +295,36 @@ public class NetworkService {
         } catch (Exception e) {
             System.err.println("❌ Error saving file: " + e.getMessage());
         }
+    }
+
+    public static String clientHandleLogin ( Socket socket , String name , String pass , String email , boolean signUp ) throws Exception {
+        DataInputStream binaryIn = new DataInputStream(socket.getInputStream());
+        pass = hashPassword(pass);
+
+        // create a message and send to server fo login request
+        Message loginMessage = new Message(0 , email , signUp + "," + name + "," + pass ) ;
+        sendJsonMessage(loginMessage);
+
+        int length = binaryIn.readInt(); // reading length of response
+        if (length > 0) {
+            byte[] jsonBytes = new byte[length];
+            binaryIn.readFully(jsonBytes, 0, length); // reading response
+            String jsonResponse = new String(jsonBytes, StandardCharsets.UTF_8);
+
+            // response processing
+            Gson gson = new Gson();
+            Message response = gson.fromJson(jsonResponse, Message.class);
+
+            // parse content
+            String[] parts = response.getContent().split(":", 2);
+            String status = parts[0];
+            String responseContent = parts[1];
+
+            if ( status.equals("true") )
+                return "S" + responseContent ;
+            else
+                return "F" + responseContent ;
+        } else
+            return "F" + "received an empty response from server";
     }
 }
