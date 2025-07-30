@@ -16,7 +16,7 @@ public class WelcomeController {
     @FXML
     private void handleStartMessagingClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/signup.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/info.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

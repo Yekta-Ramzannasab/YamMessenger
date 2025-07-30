@@ -9,6 +9,22 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<AnchorPane fx:controller="com.yamyam.messenger.client.gui.controller.SignUpController"
+            xmlns:fx="http://javafx.com/fxml" prefHeight="600.0" prefWidth="400.0">
+
+   <children>
+      <VBox layoutX="50" layoutY="150" spacing="20">
+         <children>
+            <Label text="Enter your email" style="-fx-font-size: 18px; -fx-text-fill: #333;" />
+
+            <TextField fx:id="emailField" promptText="Email address" prefWidth="300"/>
+
+            <Button text="Next" onAction="#handleNextClick" prefWidth="300"/>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
+<!--
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.yamyam.messenger.client.gui.controller.SignUpController">
    <left>
@@ -72,8 +88,5 @@
    </center>
 </BorderPane>
 
-<!-- <RadioButton fx:id="termsCheckbox" mnemonicParsing="false" prefHeight="37.0" prefWidth="433.0" text="I Accept terms and conditions and privicy policy">
-                     <padding>
-                        <Insets left="50.0" right="30.0" />
-                     </padding>
-                  </RadioButton> -->
+-->
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to bottom right, #586ee5, #885CF6);" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.yamyam.messenger.client.gui.controller.EmailController">
+
+    <children>
+
+        <Label layoutX="200.0" layoutY="120.0" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" text="Enter your email" />
+
+        <TextField fx:id="emailField" layoutX="200.0" layoutY="180.0" prefWidth="300.0" promptText="Email (e.g. example@email.com)" style="-fx-font-size: 16px; -fx-background-radius: 10;" />
+
+        <Label fx:id="errorLabel" layoutX="200.0" layoutY="220.0" style="-fx-text-fill: red; -fx-font-size: 14px;" text="" />
+
+        <Button layoutX="510.0" layoutY="180.0" onAction="#handleNext" style="-fx-shape: 'M 0 0 L 10 5 L 0 10 Z'; -fx-background-color: white; -fx-padding: 10; -fx-background-radius: 50%;" />
+
+    </children>
+</AnchorPane>

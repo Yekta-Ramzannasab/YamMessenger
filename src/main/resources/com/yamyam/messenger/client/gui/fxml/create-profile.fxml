@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+
+<AnchorPane prefWidth="700" prefHeight="500"
+            style="-fx-background-color: linear-gradient(to bottom right, #586ee5, #885CF6);"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.yamyam.messenger.client.gui.controller.ProfileController">
+
+    <children>
+
+        <Label layoutX="250" layoutY="40" text="Create your profile"
+               style="-fx-font-size: 22px; -fx-text-fill: white; -fx-font-weight: bold;" />
+
+        <!-- پروفایل فیک دایره‌ای  که شاید بعدا پشیمون شم و ایمیج ویوو به جاش بزارم-->
+        <Circle layoutX="350" layoutY="120" radius="40"
+                fill="white" stroke="#bbb" strokeWidth="1.5"/>
+
+        <Label layoutX="280" layoutY="170" text="Full Name *"
+               style="-fx-text-fill: white;" />
+        <TextField fx:id="fullNameField" layoutX="280" layoutY="190" prefWidth="250"
+                   promptText="e.g. Yamyam User"
+                   style="-fx-background-radius: 10;"/>
+
+        <Label layoutX="280" layoutY="230" text="Username"
+               style="-fx-text-fill: white;" />
+        <TextField fx:id="usernameField" layoutX="280" layoutY="250" prefWidth="250"
+                   promptText="@example"
+                   style="-fx-background-radius: 10;" />
+
+        <Label layoutX="280" layoutY="290" text="Short Bio"
+               style="-fx-text-fill: white;" />
+        <TextArea fx:id="bioField" layoutX="280" layoutY="310" prefWidth="250" prefHeight="60"
+                  promptText="Tell us something about you"
+                  style="-fx-background-radius: 10;" wrapText="true"/>
+
+        <Label fx:id="errorLabel" layoutX="280" layoutY="380" text=""
+               style="-fx-text-fill: red;" />
+
+        <Button layoutX="280" layoutY="410" text="Continue"
+                onAction="#handleContinue"
+                style="-fx-background-radius: 20; -fx-font-size: 15px;" />
+
+    </children>
+</AnchorPane>

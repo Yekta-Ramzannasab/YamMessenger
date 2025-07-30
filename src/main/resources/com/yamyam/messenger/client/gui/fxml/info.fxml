@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #5B86E5, #8B5CF6);"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.InfoController">
+
+    <children>
+
+        <Label layoutX="287.0" layoutY="211.0" style="-fx-font-size: 28px; -fx-text-fill: white; -fx-font-weight: bold;" text="Welcome to Yamyam Messenger!" />
+
+
+        <Button fx:id="backButton" layoutX="250" layoutY="400" onAction="#goToPreviousPage" style="-fx-font-size: 16px; -fx-background-radius: 20; -fx-padding: 10 20;" text="Back" />
+
+
+        <Button fx:id="nextButton" layoutX="681.0" layoutY="400.0" onAction="#goToNextPage" style="-fx-font-size: 16px; -fx-background-radius: 20; -fx-padding: 10 20;" text="Next" />
+    </children>
+</AnchorPane>
+
+
+
+        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+        <!--<?import javafx.scene.control.*?>-->
+        <!--<?import javafx.scene.layout.*?>-->
+        <!--<?import javafx.geometry.Insets?>-->
+        <!--<AnchorPane xmlns:fx="http://javafx.com/fxml/1"-->
+        <!--            fx:controller="com.yamyam.messenger.client.gui.controller.InfoController"-->
+        <!--            prefWidth="800" prefHeight="500">-->
+        <!--    <children>-->
+        <!--        <VBox layoutX="200" layoutY="150" spacing="20" alignment="CENTER">-->
+        <!--            <Label text="Welcome to Yamyam Messenger!" style="-fx-font-size: 24px;" />-->
+        <!--            <Label text="This is a secure desktop chat app." />-->
+        <!--            <Button text="Next" onAction="#goToNextPage"/>-->
+        <!--            <Button text="← Back" onAction="#goToPreviousPage"/>-->
+        <!--        </VBox>-->
+        <!--    </children>-->
+        <!--</AnchorPane>-->
+        <!--        &lt;!&ndash;<?xml version="1.0" encoding="UTF-8"?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<?import java.lang.*?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<?import java.util.*?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<?import javafx.scene.*?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<?import javafx.scene.control.*?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<?import javafx.scene.layout.*?>&ndash;&gt;-->
+        <!--&lt;!&ndash;<AnchorPane xmlns="http://javafx.com/javafx"&ndash;&gt;-->
+        <!--&lt;!&ndash;            xmlns:fx="http://javafx.com/fxml"&ndash;&gt;-->
+        <!--&lt;!&ndash;            fx:controller="com.yamyam.messenger.client.gui.controller.InfoController"&ndash;&gt;-->
+        <!--&lt;!&ndash;            prefHeight="400.0" prefWidth="600.0">&ndash;&gt;-->
+        <!--&lt;!&ndash;    <children>&ndash;&gt;-->
+        <!--&lt;!&ndash;        <Label layoutX="180" layoutY="100" text="This is the Info Page!" style="-fx-font-size: 20px;" />&ndash;&gt;-->
+        <!--&lt;!&ndash;        <Button fx:id="backButton" layoutX="100" layoutY="300" text="Back" onAction="#goToPreviousPage"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;        <Button fx:id="nextButton" layoutX="400" layoutY="300" text="Next" onAction="#goToNextPage"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;    </children>&ndash;&gt;-->
+        <!--&lt;!&ndash;</AnchorPane>&ndash;&gt;-->
