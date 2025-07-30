@@ -20,6 +20,7 @@ public class SignUpController {
         String username = usernameField.getText().trim();
         String email = emailField.getText().trim();
 
+
         if (username.isEmpty() || email.isEmpty()) {
             showError("Please fill in all fields.");
             return;
@@ -46,8 +47,11 @@ public class SignUpController {
     }
 
     private void goToVerifyPage(ActionEvent event) {
+
+        // for now only go to next page , but later for verify email
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/verify.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/verify.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -61,7 +65,7 @@ public class SignUpController {
     @FXML
     private void handleGoToLogin(MouseEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/login.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -74,7 +78,7 @@ public class SignUpController {
     @FXML
     private void handleBackToWelcome(MouseEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/welcome.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/welcome.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node)event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
