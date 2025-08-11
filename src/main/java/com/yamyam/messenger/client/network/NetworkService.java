@@ -348,5 +348,33 @@ public class NetworkService {
             return "F" + "received an empty response from server";
     }
 
+    public Integer requestVerificationCode(String email) {
+        try {
+            // Message type 5 to request a verification code
+            Message request = new Message(5, email, "SEND_CODE");
+            sendJsonMessage(request);
 
+            // Waiting for a response from the server containing the code
+            int length = binaryIn.readInt();
+            if (length > 0) {
+                byte[] jsonBytes = new byte[length];
+                binaryIn.readFully(jsonBytes, 0, length);
+                String jsonResponse = new String(jsonBytes, StandardCharsets.UTF_8);
+                Message response = new Gson().fromJson(jsonResponse, Message.class);
+
+                // Convert the message content, which is the confirmation code, to an Integer and return it
+                try {
+                    return Integer.parseInt(response.getContent());
+                } catch (NumberFormatException e) {
+                    // If the server does not return a number (e.g. an error message)
+                    System.err.println("Server did not return a valid code: " + response.getContent());
+                    return null;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // If any communication problem occurs, return null
+        return null;
+    }
 }
