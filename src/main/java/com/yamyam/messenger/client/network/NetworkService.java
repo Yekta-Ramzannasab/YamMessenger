@@ -13,6 +13,26 @@ import java.util.Base64;
 import java.util.Scanner;
 
 public class NetworkService {
+    // Singleton section
+    private static NetworkService instance;
+
+    private NetworkService() {
+        // Private constructor for singleton
+        try (Socket socket = new Socket("localhost", 5001)) {
+            binaryIn = new DataInputStream(socket.getInputStream());
+            binaryOut = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            System.out.println("Connection error: " + e.getMessage());
+        }
+    }
+
+    public static NetworkService getInstance() {
+        if (instance == null) {
+            instance = new NetworkService();
+        }
+        return instance;
+    }
+
     private static DataInputStream binaryIn;
     private static DataOutputStream binaryOut;
 
