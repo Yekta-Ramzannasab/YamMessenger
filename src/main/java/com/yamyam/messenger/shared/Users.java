@@ -3,7 +3,7 @@ package com.yamyam.messenger.shared;
 import java.sql.Timestamp;
 
 public class Users {
-    private int id;
+    private long id;
     private String profileName;
     private Timestamp createAt;
     private Timestamp lastSeen;
@@ -11,17 +11,18 @@ public class Users {
     private boolean isOnline;
     private boolean isDeleted;
     private String email;
+    private UserProfile userProfile;
 
 
-    public Users(int id,
-                 String profileName,
-                 Timestamp createAt,
-                 Timestamp lastSeen,
-                 boolean isVerified,
-                 boolean isOnline,
-                 boolean isDeleted,
-                 String email
-    ) {
+    public Users(long id ,
+                 String profileName ,
+                 Timestamp createAt ,
+                 Timestamp lastSeen ,
+                 boolean isVerified ,
+                 boolean isOnline ,
+                 boolean isDeleted ,
+                 String email,
+                 UserProfile userProfile) {
         this.id = id;
         this.profileName = profileName;
         this.createAt = createAt;
@@ -30,10 +31,11 @@ public class Users {
         this.isOnline = isOnline;
         this.isDeleted = isDeleted;
         this.email = email;
+        this.userProfile = userProfile;
     }
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

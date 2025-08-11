@@ -1,5 +1,6 @@
 package com.yamyam.messenger.shared;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class UserProfile {
@@ -9,33 +10,27 @@ public class UserProfile {
     private String bio;
     private LocalDateTime createdAt;
     private boolean isActive;
-    private LocalDateTime updatedAt;
+    private Timestamp updatedAt;
     private String username;
     private String passwordHashed;
-    private User user;
 
     public UserProfile() {}
 
     public UserProfile(long profileId,
-                       long userId,
                        String profileImageUrl,
                        String bio,
                        boolean isActive,
                        String username,
-                       User user,
                        String passwordHashed,
-                       LocalDateTime updatedAt,
-                       LocalDateTime createdAt) {
+                       Timestamp updatedAt) {
         this.profileId = profileId;
         this.userId = userId;
         this.profileImageUrl = profileImageUrl;
         this.bio = bio;
         this.isActive = isActive;
         this.username = username;
-        this.user = user;
         this.passwordHashed = passwordHashed;
         this.updatedAt = updatedAt;
-        this.createdAt = createdAt;
     }
 
     public long getProfileId() {
@@ -61,24 +56,11 @@ public class UserProfile {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;
-    }
-    public LocalDateTime getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
-    }
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
     }
     public String getBio() {
         return bio;
