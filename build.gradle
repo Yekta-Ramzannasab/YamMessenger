@@ -15,11 +15,16 @@ dependencies {
     // Dependency for GUI ( JavaFX )
     implementation 'org.openjfx:javafx-controls:21.0.2'
     implementation 'org.openjfx:javafx-fxml:21.0.2'
+
     // Dependency for DATABASE ( postgres )
     implementation 'org.postgresql:postgresql:42.7.3'
 
     // Dependency for JSON
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Dependency for Sending Emails 
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    implementation 'org.eclipse.angus:angus-mail:2.0.3'
 }
 
 application {

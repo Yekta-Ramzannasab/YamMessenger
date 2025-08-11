@@ -70,6 +70,9 @@ public class ClientHandler implements Runnable {
                             else
                                 sendFile(request.getContent());
                             break;
+                        case 5:
+
+                            break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
@@ -207,4 +210,6 @@ public class ClientHandler implements Runnable {
         binaryOut.write(jsonBytes);           // send data
         binaryOut.flush();
     }
+
+
 }
