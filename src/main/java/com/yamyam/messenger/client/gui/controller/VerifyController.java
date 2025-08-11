@@ -18,16 +18,29 @@ public class VerifyController {
     @FXML
     private Label errorLabel;
 
+    private Integer correctCode;
+
+    // This method is called to provide the correct code to this controller
+    public void initData(Integer code) {
+        this.correctCode = code;
+    }
+
     @FXML
     private void handleVerify(ActionEvent event) {
-        String code = codeField.getText().trim();
+        String userInput = codeField.getText().trim();
 
-        if (!code.matches("\\d{6}")) {
-            errorLabel.setText("Please enter a valid 6-digit code.");
-        } else {
-            errorLabel.setText("");
-            // TODO: checking real code in future
-            navigator.goToNext(event);
+        try {
+            int userCode = Integer.parseInt(userInput);
+
+            // compare the code entered by the user with the correct code
+            if (correctCode.equals(userCode)) {
+                errorLabel.setText("Verification Successful!");
+                navigator.goToNext(event);
+            } else {
+                errorLabel.setText("Incorrect code. Please try again.");
+            }
+        } catch (NumberFormatException e) {
+            errorLabel.setText("Please enter a valid number.");
         }
     }
 }
