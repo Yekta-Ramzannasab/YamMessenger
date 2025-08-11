@@ -36,4 +36,15 @@ public class PageNavigator {
             e.printStackTrace();
         }
     }
+
+    // It goes to the next page and the controller returns it to send data
+    public <T> T goToNextAndGetController(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(nextPage));
+        Parent root = loader.load();
+
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.getScene().setRoot(root);
+
+        return loader.getController();
+    }
 }

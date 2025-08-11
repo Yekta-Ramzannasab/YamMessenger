@@ -1,5 +1,6 @@
 package com.yamyam.messenger.client.gui.controller;
 
+import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.PageNavigator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,9 @@ public class EmailController {
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
     );
 
+    // Get an instance of the network service
+    private final NetworkService networkService = NetworkService.getInstance();
+
     @FXML
     private void handleNext(ActionEvent event) {
         String email = emailField.getText().trim();
@@ -39,7 +43,8 @@ public class EmailController {
         new Thread(() -> {
             try {
                 Thread.sleep(2000); // sample connecting to server
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
 
             // after late go to verify page with code
             javafx.application.Platform.runLater(() -> {
