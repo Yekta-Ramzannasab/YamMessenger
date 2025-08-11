@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class EmailController {
@@ -39,17 +40,25 @@ public class EmailController {
 
         errorLabel.setText("Sending code to email... please wait.");
 
-        // sample of sending code with 2 second late
+        // Go to the verification page with the authentication code
         new Thread(() -> {
-            try {
-                Thread.sleep(2000); // sample connecting to server
-            } catch (InterruptedException ignored) {
-            }
+            Integer verificationCode = networkService.requestVerificationCode(email);
 
-            // after late go to verify page with code
             javafx.application.Platform.runLater(() -> {
-                errorLabel.setText(""); // delete the error
-                navigator.goToNext(event);
+                if (verificationCode != null) {
+                    try {
+                        VerifyController verifyController = navigator.goToNextAndGetController(event);
+
+                        // pass the data to the new controller
+                        verifyController.initData(verificationCode);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        errorLabel.setText("Error: Could not load the next page.");
+                    }
+                } else {
+                    errorLabel.setText("Failed to send code. This email may already be registered.");
+                }
             });
         }).start();
     }
