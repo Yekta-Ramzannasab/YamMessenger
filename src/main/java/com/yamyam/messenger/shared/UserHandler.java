@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 import static com.yamyam.messenger.client.network.NetworkService.hashPassword;
+import static java.time.LocalTime.now;
 
 import java.sql.*;
 
@@ -19,27 +20,34 @@ public class UserHandler {
     }
 
     public Users checkOrCreateUser(String email) throws SQLException {
-        String sqlCheck = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.email = ?";
+        String sqlCheck = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id WHERE u.email = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sqlCheck)) {
+
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
 
+            if (rs.next()) {
+                long userId = rs.getLong("user_id");
+                String sqlUpdateUser = "UPDATE users SET is_verified = true WHERE user_id = ?";
+                try (PreparedStatement stm = connection.prepareStatement(sqlUpdateUser)) {
+
+                    stm.setLong(1, userId);
+                    stm.executeUpdate();
+                }
                 UserProfile profile = new UserProfile(
                         rs.getLong("profile_id"),
                         rs.getString("profile_image_url"),
                         rs.getString("bio"),
-                        rs.getBoolean("is_active"),
                         rs.getString("username"),
                         rs.getString("password"),
-                        rs.getTimestamp("updated_at")
+                        rs.getTimestamp("updated_at"),
+                        rs.getString("profile_name")
                 );
 
                 Users user = new Users(
-                        rs.getLong("id"),
-                        rs.getString("profile_name"),
+                        rs.getLong("user_id"),
                         rs.getTimestamp("created_at"),
                         rs.getTimestamp("last_seen"),
                         rs.getBoolean("is_verified"),
@@ -54,23 +62,52 @@ public class UserHandler {
         }
 
 
-        String sqlInsert = "INSERT INTO users (email, is_verified, is_online, is_deleted, created_at) VALUES (?, false, false, false, NOW()) RETURNING id";
+        String sqlInsert = "INSERT INTO users (created_at," +
+                "last_seen," +
+                "is_verified," +
+                " is_online," +
+                " is_deleted," +
+                "email) " +
+                "VALUES ( now(), null, false,false,false,?) RETURNING user_id ,created_at";
 
         try (PreparedStatement stmt = connection.prepareStatement(sqlInsert)) {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                long newUserId = rs.getLong("id");
-                Users newUser = new Users(
+                String sql = "INSERT INTO user_profiles(user_id," +
+                        "profile_image_url," +
+                        "bio," +
+                        "updated_at," +
+                        "username," +
+                        "password," +
+                        "profile_name)" +
+                        "VALUES (?,null,null,now(),null,null,'username')";
+                long newUserId = rs.getLong("user_id");
+                try (PreparedStatement profileStmt = connection.prepareStatement(sql)) {
+                    profileStmt.setLong(1, newUserId);
+                    profileStmt.executeUpdate();
+                }
+
+                UserProfile profile = new UserProfile(
                         newUserId,
                         null,
-                        new Timestamp(System.currentTimeMillis()),
                         null,
+                        null,
+                        null,
+                        null,
+                        "username"
+
+
+                );
+                Users newUser = new Users(
+                        newUserId,
+                        rs.getTimestamp("created_at"),
+                        new Timestamp(System.currentTimeMillis()),
                         false,
                         false,
                         false,
                         email,
-                        null
+                        profile
                 );
                 return newUser;
             }
@@ -78,6 +115,8 @@ public class UserHandler {
 
         return null;
     }
+}
+    /*
 
 
     public Users completeUserProfile(long userId, String profileName, String username, String bio, String profileImageUrl) throws SQLException {
@@ -89,8 +128,8 @@ public class UserHandler {
             stmt.executeUpdate();
         }
 
-        String sqlInsertProfile = "INSERT INTO user_profiles (user_id, username, bio, profile_image_url, is_active, created_at, updated_at) " +
-                "VALUES (?, ?, ?, ?, true, NOW(), NOW())";
+        String sqlInsertProfile = "INSERT INTO user_profiles (user_id, username, bio, profile_image_url, is_active, updated_at) " +
+                "VALUES (?, ?, ?, ?, true, NOW())";
         try (PreparedStatement stmt = connection.prepareStatement(sqlInsertProfile)) {
             stmt.setLong(1, userId);
             stmt.setString(2, username);
@@ -137,5 +176,6 @@ public class UserHandler {
         }
         return null;
     }
-}
+
+     */
 

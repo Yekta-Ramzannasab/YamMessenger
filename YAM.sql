@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.5
 
--- Started on 2025-08-11 23:15:10
+-- Started on 2025-08-13 01:26:39
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -32,11 +32,11 @@ CREATE TABLE public.user_profiles (
     profile_id bigint NOT NULL,
     user_id bigint,
     profile_image_url text,
-    bio character varying(120),
-    is_active boolean DEFAULT true,
+    bio character varying(150),
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     username character varying(25),
-    password text
+    password text,
+    profile_name character varying(25) NOT NULL
 );
 
 
@@ -58,7 +58,7 @@ CREATE SEQUENCE public.user_profiles_profile_id_seq
 ALTER SEQUENCE public.user_profiles_profile_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4915 (class 0 OID 0)
+-- TOC entry 4913 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: user_profiles_profile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -73,7 +73,6 @@ ALTER SEQUENCE public.user_profiles_profile_id_seq OWNED BY public.user_profiles
 
 CREATE TABLE public.users (
     user_id bigint NOT NULL,
-    profile_name character varying(100) DEFAULT NULL::character varying,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     last_seen timestamp with time zone,
     is_verified boolean DEFAULT false,
@@ -101,7 +100,7 @@ CREATE SEQUENCE public.users_user_id_seq
 ALTER SEQUENCE public.users_user_id_seq OWNER TO postgres;
 
 --
--- TOC entry 4916 (class 0 OID 0)
+-- TOC entry 4914 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -110,7 +109,7 @@ ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
 
 
 --
--- TOC entry 4753 (class 2604 OID 16599)
+-- TOC entry 4752 (class 2604 OID 16599)
 -- Name: user_profiles profile_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -126,46 +125,48 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 
 
 --
--- TOC entry 4909 (class 0 OID 16596)
+-- TOC entry 4907 (class 0 OID 16596)
 -- Dependencies: 220
 -- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.user_profiles (profile_id, user_id, profile_image_url, bio, is_active, updated_at, username, password) FROM stdin;
+COPY public.user_profiles (profile_id, user_id, profile_image_url, bio, updated_at, username, password, profile_name) FROM stdin;
+1	5	\N	\N	2025-08-13 01:23:42.354081	\N	\N	username
 \.
 
 
 --
--- TOC entry 4907 (class 0 OID 16560)
+-- TOC entry 4905 (class 0 OID 16560)
 -- Dependencies: 218
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (user_id, profile_name, created_at, last_seen, is_verified, is_online, is_deleted, email) FROM stdin;
-3	\N	2025-07-24 12:31:54.952129+03:30	\N	f	f	f	mobin@email
+COPY public.users (user_id, created_at, last_seen, is_verified, is_online, is_deleted, email) FROM stdin;
+3	2025-07-24 12:31:54.952129+03:30	\N	t	f	f	mobin@email
+5	2025-08-13 01:23:42.348183+03:30	\N	f	f	f	amir@email
 \.
 
 
 --
--- TOC entry 4917 (class 0 OID 0)
+-- TOC entry 4915 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: user_profiles_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 1, false);
+SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 1, true);
 
 
 --
--- TOC entry 4918 (class 0 OID 0)
+-- TOC entry 4916 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 4, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 5, true);
 
 
 --
--- TOC entry 4759 (class 2606 OID 16606)
+-- TOC entry 4757 (class 2606 OID 16606)
 -- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -174,7 +175,7 @@ ALTER TABLE ONLY public.user_profiles
 
 
 --
--- TOC entry 4757 (class 2606 OID 16571)
+-- TOC entry 4755 (class 2606 OID 16571)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -183,7 +184,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4760 (class 2606 OID 16607)
+-- TOC entry 4758 (class 2606 OID 16607)
 -- Name: user_profiles user_profiles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -191,7 +192,7 @@ ALTER TABLE ONLY public.user_profiles
     ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
--- Completed on 2025-08-11 23:15:10
+-- Completed on 2025-08-13 01:26:39
 
 --
 -- PostgreSQL database dump complete

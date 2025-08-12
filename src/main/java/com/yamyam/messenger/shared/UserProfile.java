@@ -9,28 +9,35 @@ public class UserProfile {
     private String profileImageUrl;
     private String bio;
     private LocalDateTime createdAt;
-    private boolean isActive;
     private Timestamp updatedAt;
     private String username;
     private String passwordHashed;
+    private String profileName;
 
     public UserProfile() {}
 
     public UserProfile(long profileId,
                        String profileImageUrl,
                        String bio,
-                       boolean isActive,
                        String username,
                        String passwordHashed,
-                       Timestamp updatedAt) {
+                       Timestamp updatedAt,
+                       String profileName) {
         this.profileId = profileId;
         this.userId = userId;
         this.profileImageUrl = profileImageUrl;
         this.bio = bio;
-        this.isActive = isActive;
         this.username = username;
         this.passwordHashed = passwordHashed;
         this.updatedAt = updatedAt;
+        this.profileName = profileName;
+    }
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
     }
 
     public long getProfileId() {
@@ -67,12 +74,6 @@ public class UserProfile {
     }
     public void setBio(String bio) {
         this.bio = bio;
-    }
-    public boolean isActive() {
-        return isActive;
-    }
-    public void setActive(boolean active) {
-        isActive = active;
     }
     public String getUsername() {
         return username;

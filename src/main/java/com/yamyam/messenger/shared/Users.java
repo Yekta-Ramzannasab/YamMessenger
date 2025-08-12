@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class Users {
     private long id;
-    private String profileName;
+
     private Timestamp createAt;
     private Timestamp lastSeen;
     private boolean isVerified;
@@ -15,7 +15,6 @@ public class Users {
 
 
     public Users(long id ,
-                 String profileName ,
                  Timestamp createAt ,
                  Timestamp lastSeen ,
                  boolean isVerified ,
@@ -24,7 +23,6 @@ public class Users {
                  String email,
                  UserProfile userProfile) {
         this.id = id;
-        this.profileName = profileName;
         this.createAt = createAt;
         this.lastSeen = lastSeen;
         this.isVerified = isVerified;
@@ -41,14 +39,6 @@ public class Users {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getProfileName() {
-        return profileName;
-    }
-
-    public void setProfileName(String profileName) {
-        this.profileName = profileName;
     }
 
     public Timestamp getCreateAt() {
