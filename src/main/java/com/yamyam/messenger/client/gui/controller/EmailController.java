@@ -57,7 +57,7 @@ public class EmailController {
                         errorLabel.setText("Error: Could not load the next page.");
                     }
                 } else {
-                    errorLabel.setText("Failed to send code. This email may already be registered.");
+                    errorLabel.setText("Failed to send code.");
                 }
             });
         }).start();
