@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 
@@ -71,7 +72,12 @@ public class ClientHandler implements Runnable {
                                 sendFile(request.getContent());
                             break;
                         case 5:
+                            String email = request.getSender();
+                            int verificationCode = generateAndSendVerificationCode(email);
 
+                            String responseContent = (verificationCode != -1) ? String.valueOf(verificationCode) : "EMAIL_FAILED";
+                            Message codeResponse = new Message(5, "Server", responseContent);
+                            sendJsonMessage(codeResponse);
                             break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());
@@ -209,6 +215,24 @@ public class ClientHandler implements Runnable {
         binaryOut.writeInt(jsonBytes.length); // send length
         binaryOut.write(jsonBytes);           // send data
         binaryOut.flush();
+    }
+
+    private int generateAndSendVerificationCode(String email) {
+        // ۱. ساخت کد تصادفی (بدون تغییر)
+        SecureRandom random = new SecureRandom();
+        int code = 100000 + random.nextInt(900000);
+
+        // ۲. ارسال ایمیل واقعی با استفاده از EmailService
+        boolean emailSent = EmailService.sendVerificationCode(email, code);
+
+        if (emailSent) {
+            // ۳. فقط در صورت ارسال موفق، کد را به کلاینت برگردان
+            return code;
+        } else {
+            // در صورت بروز خطا در ارسال ایمیل، یک مقدار نامعتبر (مثلا -1) برگردان
+            // تا کلاینت متوجه خطا شود.
+            return -1;
+        }
     }
 
 
