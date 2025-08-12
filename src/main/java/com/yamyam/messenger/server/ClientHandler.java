@@ -218,22 +218,19 @@ public class ClientHandler implements Runnable {
     }
 
     private int generateAndSendVerificationCode(String email) {
-        // ۱. ساخت کد تصادفی (بدون تغییر)
+        // create random code
         SecureRandom random = new SecureRandom();
         int code = 100000 + random.nextInt(900000);
 
-        // ۲. ارسال ایمیل واقعی با استفاده از EmailService
+        // sending email using EmailService
         boolean emailSent = EmailService.sendVerificationCode(email, code);
 
         if (emailSent) {
-            // ۳. فقط در صورت ارسال موفق، کد را به کلاینت برگردان
+            // Return the code to the client only if the submission is successful
             return code;
         } else {
-            // در صورت بروز خطا در ارسال ایمیل، یک مقدار نامعتبر (مثلا -1) برگردان
-            // تا کلاینت متوجه خطا شود.
+            // If an error occurs while sending the email, return an invalid value (e.g. -1)
             return -1;
         }
     }
-
-
 }

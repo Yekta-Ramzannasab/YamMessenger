@@ -15,10 +15,12 @@ import java.util.Scanner;
 public class NetworkService {
     // Singleton section
     private static NetworkService instance;
+    private static Socket socket;
 
     private NetworkService() {
-        // Private constructor for singleton
-        try (Socket socket = new Socket("localhost", 5001)) {
+        try {
+            // اتصال را برقرار کرده و در متغیر استاتیک ذخیره می‌کنیم
+            socket = new Socket("localhost", 5001);
             binaryIn = new DataInputStream(socket.getInputStream());
             binaryOut = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {

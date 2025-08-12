@@ -18,7 +18,7 @@ public class EmailService {
         }
 
         try {
-            // ساختن ایمیل با استفاده از الگوی Builder
+            // Creating an Email Using the Builder Template
             Email email = EmailBuilder.startingBlank()
                     .from("YAM Messenger", senderEmail)
                     .to(recipientEmail)
@@ -26,20 +26,20 @@ public class EmailService {
                     .withPlainText("Hello,\n\nYour verification code is: " + code)
                     .buildEmail();
 
-            // ساختن ارسال‌کننده ایمیل (Mailer) و تنظیم آن برای جیمیل
+            // Creating a Mailer and Configuring It for Gmail
             Mailer mailer = MailerBuilder
                     .withSMTPServer("smtp.gmail.com", 587, senderEmail, senderPassword)
                     .withTransportStrategy(TransportStrategy.SMTP_TLS)
                     .buildMailer();
 
-            // ارسال ایمیل
+            // Sending Email
             mailer.sendMail(email);
 
             System.out.println("Verification email sent successfully to " + recipientEmail);
             return true;
 
         } catch (Exception e) {
-            // کتابخانه Simple Java Mail خطاهای خود را throw می‌کند
+            // The Simple Java Mail library throws its own errors.
             e.printStackTrace();
             return false;
         }
