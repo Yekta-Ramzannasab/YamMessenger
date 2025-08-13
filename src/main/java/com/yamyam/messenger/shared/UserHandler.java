@@ -7,121 +7,175 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
 import static com.yamyam.messenger.client.network.NetworkService.hashPassword;
+import static java.time.LocalTime.now;
+
+import java.sql.*;
 
 public class UserHandler {
-    public boolean registerUser(String username, String email) {
-        String sql = "INSERT INTO users (username,email)" +
-                "VALUES(?,?)";
-        try {
-            Connection con = Database.getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, email);
-            stmt.executeUpdate();
-            return true;
 
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    private Connection connection;
+
+    public UserHandler(Connection connection) {
+        this.connection = connection;
     }
 
-    public Users CompleteRegisterUser(String profileName, String password, String username) {
-        // Username saved with UI
-        String sql = "UPDATE users SET profile_name = ? , password = ? , is_verified = true , updated_at = ? WHERE username = ? AND is_verified = false ";
-        try {
-            Connection con = Database.getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setString(1, profileName);
-            stmt.setString(2, hashPassword(password));
-            stmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            stmt.setString(4, username);
-            int updated = stmt.executeUpdate();
-            if (updated == 1){
-                String sq = "SELECT * FROM users WHERE username = ?";
-                PreparedStatement selectStmt = con.prepareStatement(sq);
-                selectStmt.setString(1, username);
-                ResultSet rs = selectStmt.executeQuery();
-                if (rs.next()) {
-                    // New USER
-                    return new Users(
-                            rs.getInt("user_id"),
-                            rs.getString("username"),
-                            rs.getString("profile_name"),
-                            rs.getTimestamp("created_at"),
-                            rs.getTimestamp("last_seen"),
-                            rs.getBoolean("is_verified"),
-                            rs.getBoolean("is_online"),
-                            rs.getBoolean("is_deleted"),
-                            rs.getString("email"),
-                            rs.getString("password"),
-                            rs.getTimestamp("updated_at"));
+    public Users checkOrCreateUser(String email) throws SQLException {
+        String sqlCheck = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id WHERE u.email = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sqlCheck)) {
+
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+
+
+            if (rs.next()) {
+                long userId = rs.getLong("user_id");
+                String sqlUpdateUser = "UPDATE users SET is_verified = true WHERE user_id = ?";
+                try (PreparedStatement stm = connection.prepareStatement(sqlUpdateUser)) {
+
+                    stm.setLong(1, userId);
+                    stm.executeUpdate();
+                }
+                UserProfile profile = new UserProfile(
+                        rs.getLong("profile_id"),
+                        rs.getString("profile_image_url"),
+                        rs.getString("bio"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getTimestamp("updated_at"),
+                        rs.getString("profile_name")
+                );
+
+                Users user = new Users(
+                        rs.getLong("user_id"),
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("last_seen"),
+                        rs.getBoolean("is_verified"),
+                        rs.getBoolean("is_online"),
+                        rs.getBoolean("is_deleted"),
+                        rs.getString("email"),
+                        profile
+                );
+
+                return user;
+            }
+        }
+
+
+        String sqlInsert = "INSERT INTO users (created_at," +
+                "last_seen," +
+                "is_verified," +
+                " is_online," +
+                " is_deleted," +
+                "email) " +
+                "VALUES ( now(), null, false,false,false,?) RETURNING user_id ,created_at";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sqlInsert)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String sql = "INSERT INTO user_profiles(user_id," +
+                        "profile_image_url," +
+                        "bio," +
+                        "updated_at," +
+                        "username," +
+                        "password," +
+                        "profile_name)" +
+                        "VALUES (?,null,null,now(),null,null,'username')";
+                long newUserId = rs.getLong("user_id");
+                try (PreparedStatement profileStmt = connection.prepareStatement(sql)) {
+                    profileStmt.setLong(1, newUserId);
+                    profileStmt.executeUpdate();
                 }
 
+                UserProfile profile = new UserProfile(
+                        newUserId,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "username"
+
+
+                );
+                Users newUser = new Users(
+                        newUserId,
+                        rs.getTimestamp("created_at"),
+                        new Timestamp(System.currentTimeMillis()),
+                        false,
+                        false,
+                        false,
+                        email,
+                        profile
+                );
+                return newUser;
             }
-
         }
-        catch (NoSuchAlgorithmException | SQLException e) {
-            e.printStackTrace();
 
+        return null;
+    }
+}
+    /*
+
+
+    public Users completeUserProfile(long userId, String profileName, String username, String bio, String profileImageUrl) throws SQLException {
+
+        String sqlUpdateUser = "UPDATE users SET profile_name = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sqlUpdateUser)) {
+            stmt.setString(1, profileName);
+            stmt.setLong(2, userId);
+            stmt.executeUpdate();
+        }
+
+        String sqlInsertProfile = "INSERT INTO user_profiles (user_id, username, bio, profile_image_url, is_active, updated_at) " +
+                "VALUES (?, ?, ?, ?, true, NOW())";
+        try (PreparedStatement stmt = connection.prepareStatement(sqlInsertProfile)) {
+            stmt.setLong(1, userId);
+            stmt.setString(2, username);
+            stmt.setString(3, bio);
+            stmt.setString(4, profileImageUrl);
+            stmt.executeUpdate();
+        }
+
+        return getUserById(userId);
+    }
+
+
+    public Users getUserById(long userId) throws SQLException {
+        String sql = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.id = p.user_id WHERE u.id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                UserProfile profile = new UserProfile(
+                        rs.getLong("profile_id"),
+                        rs.getString("profile_image_url"),
+                        rs.getString("bio"),
+                        rs.getBoolean("is_active"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getTimestamp("updated_at")
+                );
+
+                Users user = new Users(
+                        rs.getLong("id"),
+                        rs.getString("profile_name"),
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("last_seen"),
+                        rs.getBoolean("is_verified"),
+                        rs.getBoolean("is_online"),
+                        rs.getBoolean("is_deleted"),
+                        rs.getString("email"),
+                        profile
+                );
+
+                return user;
+            }
         }
         return null;
     }
 
-    public boolean login(String username, String password) {
-        String sql = "SELECT username,password FROM users WHERE username = ?\n" +
-                "AND password = ? AND is_verified = true";
-        try (Connection con = Database.getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-}
-
-    /*
-    public boolean registerUser(Users user) {
-
-        String sql = "INSERT INTO users (user_id ,username," +
-                " profile_name, " +
-                "bio," +
-                "created_at, " +
-                "last_seen, " +
-                "is_verified, " +
-                "is_online, " +
-                "is_deleted, " +
-                "email, " +
-                "password)" +
-                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = Database.getConnection();
-             PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setInt(1, user.getId());
-            stmt.setString(2, user.getUsername());
-            stmt.setString(3, user.getProfileName());
-            stmt.setString(4, user.getBio());
-            stmt.setTimestamp(5, user.getCreateAt());
-            stmt.setTimestamp(6, user.getLastSeen());
-            stmt.setBoolean(7, user.isVerified());
-            stmt.setBoolean(8, user.isOnline());
-            stmt.setBoolean(9, user.isDeleted());
-            stmt.setString(10, user.getEmail());
-            stmt.setString(11, user.getPassword());
-
-
-            stmt.executeUpdate();
-            return true;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
-    */
+     */
 
