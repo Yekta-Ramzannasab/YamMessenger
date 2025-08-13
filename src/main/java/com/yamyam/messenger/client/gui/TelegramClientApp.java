@@ -16,13 +16,20 @@ import java.net.URL;
 
 
 public class TelegramClientApp extends Application {
+
+    private static Scene scene; // one scene for whole app
+
     @Override
     public void start(Stage stage) throws IOException {
         // Location of fxml file in resources folder
         URL fxmlLocation = getClass().getResource("/com/yamyam/messenger/client/gui/fxml/welcome.fxml");
         Parent root = FXMLLoader.load(fxmlLocation);
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/com/yamyam/messenger/client/gui/styles/style.css").toExternalForm());
+        scene = new Scene(root);
+        scene.getStylesheets().add(
+                getClass().getResource("/com/yamyam/messenger/client/gui/styles/style.css").toExternalForm()
+        );
+
+
 
         // Set icon on title bar
         Image appIcon = new Image("/com/yamyam/messenger/client/gui/images/icon.png");
@@ -42,6 +49,13 @@ public class TelegramClientApp extends Application {
         stage.setTitle("Yamyam");
         stage.setScene(scene);
         stage.show();
+    }
+
+    public static void setRoot(String fxmlSimpleName) throws IOException {
+        Parent root = FXMLLoader.load(TelegramClientApp.class.getResource(
+                "/com/yamyam/messenger/client/gui/fxml/" + fxmlSimpleName + ".fxml"
+        ));
+        scene.setRoot(root);
     }
 
     public static void main(String[] args) {

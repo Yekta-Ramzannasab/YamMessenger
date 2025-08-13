@@ -1,0 +1,13 @@
+.root {
+    -fx-color-main-bg: #ffffff;
+    -fx-color-top-bg: #f5f5f5;
+    -fx-color-bottom-bg: #e0e0e0;
+
+    -fx-color-primary-grad-start: #6A5ACD;
+    -fx-color-primary-grad-end: #1E90FF;
+
+    -fx-color-muted: #666;
+    -fx-color-muted-hover: #1E90FF;
+    -fx-color-text: #444;
+    -fx-color-error: #e53935;
+}

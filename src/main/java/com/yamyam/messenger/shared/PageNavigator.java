@@ -30,8 +30,8 @@ public class PageNavigator {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(pagePath));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
+            stage.getScene().setRoot(root);
+            //stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }

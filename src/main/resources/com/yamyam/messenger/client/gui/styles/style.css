@@ -14,11 +14,11 @@
 
 #startMessagingButton {
     -fx-background-color: linear-gradient(to bottom right, #6A5ACD, #1E90FF);
-        -fx-text-fill: white;
-        -fx-font-size: 16px;
-        -fx-font-family: "Arial Rounded MT Bold";
-        -fx-padding: 10 20;
-        -fx-background-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-family: "Arial Rounded MT Bold";
+    -fx-padding: 10 20;
+    -fx-background-radius: 15;
 }
 
 #welcome-text {
@@ -60,7 +60,6 @@
     -fx-background-color: linear-gradient(to right, #6A5ACD, #00BFFF);
 }
 
-//.....
 /* ============ Sign Up Exclusive Additions ============ */
 
 #signupTitle {
@@ -104,6 +103,7 @@
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
+
 .back-button:hover {
     -fx-text-fill: #333;
 }
@@ -114,5 +114,3 @@
     -fx-padding: 5 0 0 10;
     -fx-font-family: "Segoe UI";
 }
-
-
