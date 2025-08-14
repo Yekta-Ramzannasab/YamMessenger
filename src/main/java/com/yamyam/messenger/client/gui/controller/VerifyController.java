@@ -1,6 +1,8 @@
 package com.yamyam.messenger.client.gui.controller;
 
+import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.PageNavigator;
+import com.yamyam.messenger.shared.Users;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -20,9 +22,12 @@ public class VerifyController {
 
     private Integer correctCode;
 
+    private String email ;
+
     // This method is called to provide the correct code to this controller
-    public void initData(Integer code) {
+    public void initData(Integer code , String email) {
         this.correctCode = code;
+        this.email = email;
     }
 
     @FXML
@@ -35,7 +40,19 @@ public class VerifyController {
             // compare the code entered by the user with the correct code
             if (correctCode.equals(userCode)) {
                 errorLabel.setText("Verification Successful!");
-                navigator.goToNext(event);
+
+                Users user ;
+                try {
+                    user = NetworkService.clientHandleLogin(email);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                if(user.isVerified()){
+                    navigator.goToNext(event);
+                } else {
+                    navigator.goToNext(event);
+                }
             } else {
                 errorLabel.setText("Incorrect code. Please try again.");
             }

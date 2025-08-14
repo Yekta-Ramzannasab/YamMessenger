@@ -50,7 +50,7 @@ public class EmailController {
                         VerifyController verifyController = navigator.goToNextAndGetController(event);
 
                         // pass the data to the new controller
-                        verifyController.initData(verificationCode);
+                        verifyController.initData(verificationCode,email);
 
                     } catch (IOException e) {
                         e.printStackTrace();
