@@ -1,13 +1,4 @@
-package com.yamyam.messenger.client.gui.controller;
-
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.*;
-import javafx.stage.Stage;
-import java.io.IOException;
+package com.yamyam.messenger.client.gui.controller.auth;
 
 public class SignUpController {
 //    @FXML private TextField usernameField;

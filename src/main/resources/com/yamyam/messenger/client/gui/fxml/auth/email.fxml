@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to bottom right, #586ee5, #885CF6);" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.yamyam.messenger.client.gui.controller.EmailController">
+<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to bottom right, #586ee5, #885CF6);" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.yamyam.messenger.client.gui.controller.auth.EmailController">
 
     <children>
 

@@ -1,15 +1,12 @@
-package com.yamyam.messenger.shared;
+package com.yamyam.messenger.server.database;
 
 
-import com.yamyam.messenger.server.Database;
+import com.yamyam.messenger.shared.model.UserProfile;
+import com.yamyam.messenger.shared.model.Users;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 
-import static com.yamyam.messenger.client.network.NetworkService.hashPassword;
 import static java.time.LocalTime.now;
-
-import java.sql.*;
 
 public class UserHandler {
 

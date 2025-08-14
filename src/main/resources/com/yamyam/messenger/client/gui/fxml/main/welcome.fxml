@@ -9,11 +9,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="526.0" prefWidth="890.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.WelcomeController">
+<AnchorPane prefHeight="526.0" prefWidth="890.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.main.WelcomeController">
    <children>
       <ImageView fitHeight="350.0" fitWidth="1200.0" layoutX="-11.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../images/yam.png" />
+            <Image url="@../../images/yam.png" />
          </image>
       </ImageView>
       <Button id="startMessagingButton" layoutX="427.0" layoutY="439.0" mnemonicParsing="false" onAction="#handleStartMessagingClick" prefHeight="35.0" prefWidth="155.0" text="Start Messaging" />

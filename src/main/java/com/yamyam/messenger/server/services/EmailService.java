@@ -1,4 +1,4 @@
-package com.yamyam.messenger.server;
+package com.yamyam.messenger.server.services;
 
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.mailer.Mailer;

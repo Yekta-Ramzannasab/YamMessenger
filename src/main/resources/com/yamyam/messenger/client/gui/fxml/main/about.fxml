@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.AboutController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.main.AboutController">
    <children>
    
        <Text layoutX="218.0" layoutY="97.0" style="-fx-font-size: 24px;" text="About This App" />

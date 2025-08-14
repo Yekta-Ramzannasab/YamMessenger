@@ -1,6 +1,6 @@
 package com.yamyam.messenger.client.network;
 
-import com.yamyam.messenger.shared.Message;
+import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 

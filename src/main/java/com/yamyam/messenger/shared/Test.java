@@ -1,11 +1,9 @@
 package com.yamyam.messenger.shared;
 
-import com.yamyam.messenger.server.Database;
+import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.server.database.UserHandler;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 public class Test {
     public static void main(String[] ar) {

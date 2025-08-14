@@ -1,9 +1,11 @@
 package com.yamyam.messenger.server;
 
-import com.yamyam.messenger.shared.Message;
+import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.server.services.EmailService;
+import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
-import com.yamyam.messenger.shared.UserHandler;
-import com.yamyam.messenger.shared.Users;
+import com.yamyam.messenger.server.database.UserHandler;
+import com.yamyam.messenger.shared.model.Users;
 
 import java.io.*;
 import java.net.Socket;

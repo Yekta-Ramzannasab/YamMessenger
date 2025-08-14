@@ -6,7 +6,7 @@
 <?import javafx.geometry.Insets?>
 
 <AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #5B86E5, #8B5CF6);"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.InfoController">
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yamyam.messenger.client.gui.controller.main.InfoController">
 
     <children>
 
@@ -27,7 +27,7 @@
         <!--<?import javafx.scene.layout.*?>-->
         <!--<?import javafx.geometry.Insets?>-->
         <!--<AnchorPane xmlns:fx="http://javafx.com/fxml/1"-->
-        <!--            fx:controller="com.yamyam.messenger.client.gui.controller.InfoController"-->
+        <!--            fx:controller="com.yamyam.messenger.client.gui.controller.main.InfoController"-->
         <!--            prefWidth="800" prefHeight="500">-->
         <!--    <children>-->
         <!--        <VBox layoutX="200" layoutY="150" spacing="20" alignment="CENTER">-->
@@ -46,7 +46,7 @@
         <!--&lt;!&ndash;<?import javafx.scene.layout.*?>&ndash;&gt;-->
         <!--&lt;!&ndash;<AnchorPane xmlns="http://javafx.com/javafx"&ndash;&gt;-->
         <!--&lt;!&ndash;            xmlns:fx="http://javafx.com/fxml"&ndash;&gt;-->
-        <!--&lt;!&ndash;            fx:controller="com.yamyam.messenger.client.gui.controller.InfoController"&ndash;&gt;-->
+        <!--&lt;!&ndash;            fx:controller="com.yamyam.messenger.client.gui.controller.main.InfoController"&ndash;&gt;-->
         <!--&lt;!&ndash;            prefHeight="400.0" prefWidth="600.0">&ndash;&gt;-->
         <!--&lt;!&ndash;    <children>&ndash;&gt;-->
         <!--&lt;!&ndash;        <Label layoutX="180" layoutY="100" text="This is the Info Page!" style="-fx-font-size: 20px;" />&ndash;&gt;-->

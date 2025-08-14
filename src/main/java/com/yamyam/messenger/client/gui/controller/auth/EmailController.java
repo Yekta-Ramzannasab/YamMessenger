@@ -1,7 +1,7 @@
-package com.yamyam.messenger.client.gui.controller;
+package com.yamyam.messenger.client.gui.controller.auth;
 
 import com.yamyam.messenger.client.network.NetworkService;
-import com.yamyam.messenger.shared.PageNavigator;
+import com.yamyam.messenger.shared.util.PageNavigator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 public class EmailController {
 
     private final PageNavigator navigator = new PageNavigator(
-            "/com/yamyam/messenger/client/gui/fxml/info.fxml",
-            "/com/yamyam/messenger/client/gui/fxml/verify.fxml"
+            "/com/yamyam/messenger/client/gui/fxml/main/info.fxml",
+            "/com/yamyam/messenger/client/gui/fxml/auth/verify.fxml"
     );
 
     @FXML

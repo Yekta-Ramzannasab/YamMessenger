@@ -1,8 +1,8 @@
 package com.yamyam.messenger.client.network;
 
-import com.yamyam.messenger.shared.Message;
+import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
-import com.yamyam.messenger.shared.Users;
+import com.yamyam.messenger.shared.model.Users;
 
 import java.io.*;
 import java.net.Socket;

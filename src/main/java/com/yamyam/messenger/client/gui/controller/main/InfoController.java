@@ -1,13 +1,13 @@
-package com.yamyam.messenger.client.gui.controller;
+package com.yamyam.messenger.client.gui.controller.main;
 
-import com.yamyam.messenger.shared.PageNavigator;
+import com.yamyam.messenger.shared.util.PageNavigator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 public class InfoController {
     private final PageNavigator navigator = new PageNavigator(
-            "/com/yamyam/messenger/client/gui/fxml/welcome.fxml",
-            "/com/yamyam/messenger/client/gui/fxml/email.fxml"
+            "/com/yamyam/messenger/client/gui/fxml/main/welcome.fxml",
+            "/com/yamyam/messenger/client/gui/fxml/auth/email.fxml"
     );
 
     @FXML

@@ -1,6 +1,6 @@
-package com.yamyam.messenger.client.gui.controller;
+package com.yamyam.messenger.client.gui.controller.chat;
 
-import com.yamyam.messenger.shared.PageNavigator;
+import com.yamyam.messenger.shared.util.PageNavigator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -8,8 +8,8 @@ import javafx.scene.control.*;
 public class ProfileController {
 
     private final PageNavigator navigator = new PageNavigator(
-            "/com/yamyam/messenger/client/gui/fxml/verify.fxml",
-            "/com/yamyam/messenger/client/gui/fxml/main-view.fxml"
+            "/com/yamyam/messenger/client/gui/fxml/auth/verify.fxml",
+            "/com/yamyam/messenger/client/gui/fxml/main/main-view.fxml"
     );
 
     @FXML

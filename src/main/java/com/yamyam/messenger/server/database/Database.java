@@ -1,4 +1,4 @@
-package com.yamyam.messenger.server;
+package com.yamyam.messenger.server.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -20,4 +20,10 @@ module com.yam.messenger {
     // making the main program package and shared classes available for execution
     exports com.yamyam.messenger.client.gui;
     exports com.yamyam.messenger.shared;
+    opens com.yamyam.messenger.client.gui.controller.main to javafx.fxml;
+    opens com.yamyam.messenger.client.gui.controller.auth to javafx.fxml;
+    opens com.yamyam.messenger.client.gui.controller.chat to javafx.fxml;
+    exports com.yamyam.messenger.server.database;
+    exports com.yamyam.messenger.shared.util;
+    exports com.yamyam.messenger.shared.model;
 }

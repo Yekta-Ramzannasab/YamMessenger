@@ -9,7 +9,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:controller="com.yamyam.messenger.client.gui.controller.SignUpController"
+<AnchorPane fx:controller="com.yamyam.messenger.client.gui.controller.auth.SignUpController"
             xmlns:fx="http://javafx.com/fxml" prefHeight="600.0" prefWidth="400.0">
 
    <children>
@@ -26,7 +26,7 @@
 </AnchorPane>
 <!--
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.yamyam.messenger.client.gui.controller.SignUpController">
+            fx:controller="com.yamyam.messenger.client.gui.controller.auth.SignUpController">
    <left>
       <ImageView fitHeight="700.0" fitWidth="485.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
          <image>
