@@ -87,4 +87,37 @@ public class UserProfile {
     public void setPasswordHashed(String passwordHashed) {
         this.passwordHashed = passwordHashed;
     }
+
+    @Override
+    public String toString (){
+        return ( profileId + "," + userId + "," + profileImageUrl + "," + bio + "," +
+                createdAt + "," + updatedAt + "," + username + "," + passwordHashed + "," + profileName );
+    }
+
+    public static UserProfile fromString(String profileDataString) {
+        if (profileDataString == null || profileDataString.isEmpty()) {
+            return null;
+        }
+
+        // Split string into parts based on commas
+        String[] parts = profileDataString.split(",", 7);
+        if (parts.length < 7) return null;// if number of parts less than 8 return null
+
+        try {
+            // Convert each part to the corresponding data type
+            long profileId = Long.parseLong(parts[0]);
+            String profileImageUrl = parts[1].equals("null") ? null : parts[1];
+            String bio = parts[2].equals("null") ? null : parts[2];
+            String username = parts[3].equals("null") ? null : parts[3];
+            String password = parts[4].equals("null") ? null : parts[4];
+            Timestamp updatedAt = parts[5].equals("null") ? null : Timestamp.valueOf(parts[5]);
+            String profileName = parts[6].equals("null") ? null : parts[6];
+
+            // Create and return a new object with the extracted values.
+            return new UserProfile(profileId, profileImageUrl, bio, username, password, updatedAt, profileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
