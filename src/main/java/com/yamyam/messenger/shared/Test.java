@@ -16,12 +16,8 @@ public class Test {
             System.out.println("Not connect!");
         }
         try {
-            String sq = "INSERT INTO users(username,email) VALUES(?,?)";
-            Connection con = Database.getConnection();
-            PreparedStatement st = con.prepareStatement(sq);
-            st.setString(1,"mobin2025");
-            st.setString(2,"mobin@email");
-            st.executeUpdate();
+            UserHandler uh = new UserHandler(Database.getConnection());
+            System.out.println(uh.checkOrCreateUser("amir@email").isVerified());
         }
         catch (SQLException e) {
             e.printStackTrace();
