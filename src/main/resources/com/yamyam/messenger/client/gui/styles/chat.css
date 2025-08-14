@@ -1,0 +1,84 @@
+.themed.chat-root {
+  -fx-background-color: -app-bg;
+  -fx-font-family: "Inter","Segoe UI",sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.themed .chat-sidebar {
+  -fx-background-color: -app-surface;
+  -fx-padding: 16;
+  -fx-background-radius: 16;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0.2, 0, 8);
+}
+.themed .chat-sidebar__header { -fx-padding: 0 4 8 4; }
+.themed .chat-brand { -fx-text-fill: -app-text; -fx-font-size: 20px; -fx-font-weight: 700; }
+
+.themed .chat-search {
+  -fx-background-color: -app-input-bg;
+  -fx-border-color: -app-input-border;
+  -fx-border-radius: 12; -fx-background-radius: 12;
+  -fx-padding: 10;
+  -fx-text-fill: -app-text;
+}
+
+/* لیست چت‌ها: حذف رگه‌های راه‌راه */
+.themed .list-view { -fx-background-color: transparent; }
+.themed .list-view .virtual-flow .clipped-container .sheet { -fx-background-color: transparent; }
+.themed .list-cell { -fx-background-color: transparent; -fx-padding: 6 10 6 10; }
+.themed .list-cell:filled:selected, .themed .list-cell:filled:selected:focused {
+  -fx-background-color: rgba(124,77,255,0.25);
+  -fx-background-radius: 12;
+}
+
+/* ===== CONVERSATION ===== */
+.themed .chat-conv {
+  /* لایه نور بنفش مانند عکس دوم */
+  -fx-background-color:
+     radial-gradient(center 60% 60%, radius 80%, rgba(124,77,255,0.25), transparent),
+     radial-gradient(center 40% 40%, radius 60%, rgba(66,165,245,0.18), transparent),
+     transparent;
+  -fx-background-insets: 0, 0, 0;
+  -fx-padding: 0;
+}
+
+.themed .chat-conv__header {
+  -fx-background-color: rgba(255,255,255,0.06);
+  -fx-padding: 12 16;
+  -fx-background-radius: 16 16 0 0;
+}
+.themed .chat-conv__name   { -fx-text-fill: -app-text;  -fx-font-size: 16px; -fx-font-weight: 700; }
+.themed .chat-conv__status { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
+
+.themed .chat-composer {
+  -fx-background-color: rgba(255,255,255,0.06);
+  -fx-padding: 10;
+  -fx-background-radius: 0 0 16 16;
+}
+.themed .chat-iconbtn { -fx-background-radius: 999; -fx-padding: 8 10; }
+.themed .chat-send {
+  -fx-background-color: linear-gradient(to right, -app-accent-start, -app-accent-end);
+  -fx-text-fill: white; -fx-background-radius: 999; -fx-font-size: 16px; -fx-padding: 12 16;
+}
+
+/* پیام‌ها */
+.themed .bubble {
+  -fx-padding: 10 12;
+  -fx-background-radius: 16;
+  -fx-wrap-text: true;
+  -fx-max-width: 540;
+  -fx-font-size: 14px;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0.2, 0, 3);
+}
+.themed .bubble.me    { -fx-background-color: -msg-me-bg;    -fx-text-fill: -msg-me-text; }
+.themed .bubble.other { -fx-background-color: -msg-other-bg; -fx-text-fill: -app-text; }
+
+/* ===== RIGHT PANE ===== */
+.themed .chat-info {
+  -fx-background-color: -app-surface;
+  -fx-padding: 16;
+  -fx-background-radius: 16;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0.2, 0, 8);
+}
+.themed .chat-info__name     { -fx-text-fill: -app-text;  -fx-font-weight: 700; -fx-font-size: 16px; }
+.themed .chat-info__presence { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
+.themed .chat-section        { -fx-text-fill: -app-muted; -fx-font-size: 12px; -fx-font-weight: 700; }

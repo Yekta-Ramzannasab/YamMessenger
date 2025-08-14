@@ -1,0 +1,12 @@
+/* tokens and skeleton */
+
+.themed {
+  -app-bg:#111; -app-surface:#1a1a1a; -app-text:#e7ecf2; -app-muted:#9aa6b2;
+  -app-input-bg:#131722; -app-input-border:#283142;
+  -app-accent-start:#6b68ff; -app-accent-end:#4aa3ff;
+
+  /* پیام‌ها (جدا گذاشتم تا دقیق کنترل‌شون کنی) */
+  -msg-me-bg:#5562ff;   -msg-me-text:#ffffff;
+  -msg-other-bg: rgba(255,255,255,0.10);
+}
+

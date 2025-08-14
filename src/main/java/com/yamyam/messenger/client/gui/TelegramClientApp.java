@@ -1,5 +1,6 @@
 package com.yamyam.messenger.client.gui;
 
+import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,6 +30,9 @@ public class TelegramClientApp extends Application {
                 getClass().getResource("/com/yamyam/messenger/client/gui/styles/style.css").toExternalForm()
         );
 
+        com.yamyam.messenger.client.gui.theme.ThemeManager.apply(scene,
+                com.yamyam.messenger.client.gui.theme.ThemeManager.Theme.DARK); // dark default theme
+
 
 
         // Set icon on title bar
@@ -47,6 +51,7 @@ public class TelegramClientApp extends Application {
         stage.setHeight(700);
         stage.setResizable(false);
         stage.setTitle("Yamyam");
+        ThemeManager.apply(scene, ThemeManager.Theme.DARK);
         stage.setScene(scene);
         stage.show();
     }
@@ -56,6 +61,8 @@ public class TelegramClientApp extends Application {
                 "/com/yamyam/messenger/client/gui/fxml/" + fxmlSimpleName + ".fxml"
         ));
         scene.setRoot(root);
+        ThemeManager.reapply(scene);
+
     }
 
     public static void main(String[] args) {

@@ -2,6 +2,7 @@ module com.yam.messenger {
     // requirement for core JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.prefs;
 
     // requirement of GSON and SQL library to work with JSON and PostgresSQL
     requires com.google.gson;
@@ -17,6 +18,8 @@ module com.yam.messenger {
     opens com.yamyam.messenger.client.gui to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller to javafx.fxml;
 
+
+
     // making the main program package and shared classes available for execution
     exports com.yamyam.messenger.client.gui;
     exports com.yamyam.messenger.shared;
@@ -26,4 +29,6 @@ module com.yam.messenger {
     exports com.yamyam.messenger.server.database;
     exports com.yamyam.messenger.shared.util;
     exports com.yamyam.messenger.shared.model;
+    exports com.yamyam.messenger.client.gui.theme;
+    opens com.yamyam.messenger.client.gui.theme to javafx.fxml;
 }

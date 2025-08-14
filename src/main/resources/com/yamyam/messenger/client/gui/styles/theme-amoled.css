@@ -1,0 +1,10 @@
+.themed {
+  -app-bg:#000; -app-surface:rgba(255,255,255,0.05);
+  -app-text:#eaeaea; -app-muted:#9b9b9b;
+  -app-input-bg:#0a0a0a; -app-input-border:#1c1c1c;
+  -app-accent-start:#7f5af0; -app-accent-end:#2cb67d;
+
+
+  -msg-me-bg:#7f5af0;   -msg-me-text:#fff;
+  -msg-other-bg:#111316;
+}
