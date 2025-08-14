@@ -10,11 +10,9 @@ import com.yamyam.messenger.shared.model.Users;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Base64;
 import java.util.List;
 
 public class ClientHandler implements Runnable {
@@ -24,7 +22,7 @@ public class ClientHandler implements Runnable {
     private final DataInputStream binaryIn;
     private final DataOutputStream binaryOut;
 
-    private final List<ClientHandler> allClients;
+    private final List allClients;
 
     public ClientHandler(Socket socket , List allClients) throws IOException {
         this.socket = socket;
@@ -61,22 +59,6 @@ public class ClientHandler implements Runnable {
                     }
 
                     switch (request.getType()) { // do tasks base on request type
-                        case 0:
-                            //handleLogin(request.getSender(), request.getContent());
-                            break;
-                        case 1:
-                            broadcast(request.getSender(), request.getContent());
-                            System.out.println(request.getSender() + " : " + request.getContent());
-                            break;
-                        case 2:
-                            receiveFile(request.getContent()) ;
-                            break;
-                        case 3:
-                            if (request.getContent().equals("l"))
-                                sendFileList();
-                            else
-                                sendFile(request.getContent());
-                            break;
                         case 5:
                             String email = request.getSender();
                             int verificationCode = generateAndSendVerificationCode(email);
@@ -106,99 +88,6 @@ public class ClientHandler implements Runnable {
             System.err.println("Error with client " + socket.getInetAddress() + ": " + e.getMessage());
         } finally {
             System.out.println("finally error");
-        }
-    }
-
-    private void broadcast(String username, String msg) throws IOException {
-        Message message = new Message(1, username, msg);
-
-        // we use synchronized block for security in multithreaded apps
-        synchronized (allClients) {
-            for (ClientHandler aClient : allClients) {
-                // broadcast message to all clients
-                aClient.sendJsonMessage(message);
-            }
-        }
-    }
-
-    private void sendFileList() throws IOException {
-        // List all files in the server directory
-        File userDirectory = new File("src/main/resources/Server/Files" );
-        File[] files = userDirectory.listFiles();
-        if (files == null || files.length == 0) {
-            System.out.println("No files to upload.");
-            return;
-        }
-
-        // Send a message containing file names as a comma-separated string
-        StringBuilder list ;
-        list = new StringBuilder("l,"+files[0].getName());
-        for (int i = 1; i < files.length; i++) {
-            list.append(",").append(files[i].getName());
-        }
-        String finalList = list.toString();
-        Message sendList = new Message(3,"server",finalList) ;
-        sendJsonMessage(sendList);
-    }
-
-    private void sendFile(String fileIndex){
-        // finding selected file
-        File userDirectory = new File("src/main/resources/Server/Files" );
-        File[] files = userDirectory.listFiles();
-        if ( files == null ){
-            System.out.println("no files in directory");
-            return;
-        }
-        File selectedFile = files[Integer.parseInt(fileIndex)];
-
-        try { // encode and send file
-            System.out.println("Encoding " + selectedFile.getName() + "...");
-            byte[] fileBytes = Files.readAllBytes(selectedFile.toPath()); // convert file to byte array
-
-            String encodedFileString = Base64.getEncoder().encodeToString(fileBytes);
-            String payload = selectedFile.getName() + ":" + encodedFileString;// convert byte array into string
-
-
-            Message fileMessage = new Message(3, "server", payload);
-            sendJsonMessage(fileMessage);// sending payload string
-
-            System.out.println("✅ File sent successfully as a JSON message.");
-        } catch (IOException e) {
-            System.err.println("❌ Error during file encoding/sending: " + e.getMessage());
-        }
-        System.out.println("✅ File upload complete.");
-    }
-
-    private void receiveFile(String payload)
-    {
-        try {
-            // split file name from base64 string
-            String[] parts = payload.split(":", 2);
-            if (parts.length != 2) {
-                System.err.println("Invalid Base64 file format.");
-                return;
-            }
-
-            String fileName = parts[0];
-            String encodedFileString = parts[1];
-
-            System.out.println("Receiving Base64 file: " + fileName);
-
-            // decoding base64 string into byte array
-            byte[] fileBytes = Base64.getDecoder().decode(encodedFileString);
-
-            // saving file
-            File serverUploadsDir = new File("src/main/resources/Server/Files");
-            if (!serverUploadsDir.exists()) {
-                serverUploadsDir.mkdirs();
-            }
-            File fileToSave = new File(serverUploadsDir, fileName);
-            Files.write(fileToSave.toPath(), fileBytes);
-
-            System.out.println("✅ File '" + fileName + "' decoded and saved.");
-
-        } catch (IllegalArgumentException | IOException e) {
-            System.err.println("❌ Invalid Base64 string received: " + e.getMessage());
         }
     }
 
