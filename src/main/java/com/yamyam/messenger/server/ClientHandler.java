@@ -2,12 +2,16 @@ package com.yamyam.messenger.server;
 
 import com.yamyam.messenger.shared.Message;
 import com.google.gson.Gson;
+import com.yamyam.messenger.shared.UserHandler;
+import com.yamyam.messenger.shared.Users;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Base64;
 import java.util.List;
 
@@ -56,7 +60,7 @@ public class ClientHandler implements Runnable {
 
                     switch (request.getType()) { // do tasks base on request type
                         case 0:
-                            handleLogin(request.getSender(), request.getContent());
+                            //handleLogin(request.getSender(), request.getContent());
                             break;
                         case 1:
                             broadcast(request.getSender(), request.getContent());
@@ -78,6 +82,15 @@ public class ClientHandler implements Runnable {
                             String responseContent = (verificationCode != -1) ? String.valueOf(verificationCode) : "EMAIL_FAILED";
                             Message codeResponse = new Message(5, "Server", responseContent);
                             sendJsonMessage(codeResponse);
+                            break;
+                        case 6:
+                            Users user = handleLogin(request.getSender());
+
+                            Message loginUser = null;
+                            if (user != null) {
+                                loginUser = new Message(5, "Server", user.toString() );
+                            }
+                            sendJsonMessage(loginUser);
                             break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());
@@ -187,25 +200,32 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void handleLogin(String email, String otherArguments) throws IOException {
-        String[] parts = otherArguments.split(",", 3);
-        boolean singUp = Boolean.parseBoolean(parts[0]);
-        String name = parts[1];
-        String pass = parts[2];
+    private Users handleLogin(String email) throws IOException {
+        try {
+            // Establish a connection to the database.
+            Connection dbConnection = Database.getConnection();
 
-        if ( singUp ){
+            // Create an instance of UserHandler and pass the connection to it
+            UserHandler userHandler = new UserHandler(dbConnection);
 
-        } else {
+            // Call the checkOrCreateUser method with the user's email
+            Users user = userHandler.checkOrCreateUser(email);
 
+            // result
+            if (user != null) {
+                System.out.println("SUCCESS: User checked or created successfully for email: " + user.getEmail());
+            } else {
+                System.err.println("FAILURE: Could not check or create user for email: " + email);
+            }
+
+            // Close the database connection
+            dbConnection.close();
+            return user ;
+        } catch (SQLException e) {
+            System.err.println("Database error during checkOrCreateUser: " + e.getMessage());
+            e.printStackTrace();
+            return null ;
         }
-
-
-
-//        boolean isAuthenticated = Server.authenticate(username, password);
-//        Message response = isAuthenticated
-//                ? new Message(0, "Server", "true")
-//                : new Message(0, "Server", "false");
-//        sendJsonMessage(response);
     }
 
     private void sendJsonMessage(Message message) throws IOException {

@@ -2,6 +2,7 @@ package com.yamyam.messenger.client.network;
 
 import com.yamyam.messenger.shared.Message;
 import com.google.gson.Gson;
+import com.yamyam.messenger.shared.Users;
 
 import java.io.*;
 import java.net.Socket;
@@ -19,7 +20,7 @@ public class NetworkService {
 
     private NetworkService() {
         try {
-            // اتصال را برقرار کرده و در متغیر استاتیک ذخیره می‌کنیم
+            // create the connection and save it in static changes
             socket = new Socket("localhost", 5001);
             binaryIn = new DataInputStream(socket.getInputStream());
             binaryOut = new DataOutputStream(socket.getOutputStream());
@@ -319,12 +320,9 @@ public class NetworkService {
         }
     }
 
-    public static String clientHandleLogin ( Socket socket , String name , String pass , String email , boolean signUp ) throws Exception {
-        DataInputStream binaryIn = new DataInputStream(socket.getInputStream());
-        pass = hashPassword(pass);
-
-        // create a message and send to server fo login request
-        Message loginMessage = new Message(0 , email , signUp + "," + name + "," + pass ) ;
+    public static Users clientHandleLogin (String email ) throws Exception {
+        // create a message and send to server for login request
+        Message loginMessage = new Message( 6 , email , "CHECK_WITH_DATABASE" ) ;
         sendJsonMessage(loginMessage);
 
         int length = binaryIn.readInt(); // reading length of response
@@ -338,16 +336,13 @@ public class NetworkService {
             Message response = gson.fromJson(jsonResponse, Message.class);
 
             // parse content
-            String[] parts = response.getContent().split(":", 2);
-            String status = parts[0];
-            String responseContent = parts[1];
+            Users user ;
+            user = Users.fromString(response.getContent()) ;
 
-            if ( status.equals("true") )
-                return "S" + responseContent ;
-            else
-                return "F" + responseContent ;
+            // send user to ui
+            return user ;
         } else
-            return "F" + "received an empty response from server";
+            return null;
     }
 
     public Integer requestVerificationCode(String email) {
