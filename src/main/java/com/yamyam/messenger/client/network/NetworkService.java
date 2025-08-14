@@ -13,20 +13,21 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class NetworkService {
-    private static final int PORT = 5001;
+    private final int PORT = 5001;
 
     // Singleton section
     private static NetworkService instance;
-    private static Socket socket;
+    private Socket socket;
 
     private NetworkService() {
         try {
-            // create the connection and save it in static changes
-            socket = new Socket("localhost", PORT);
-            binaryIn = new DataInputStream(socket.getInputStream());
-            binaryOut = new DataOutputStream(socket.getOutputStream());
+            // We establish the connection and store it in a class variable
+            this.socket = new Socket("localhost", PORT);
+            this.binaryIn = new DataInputStream(this.socket.getInputStream());
+            this.binaryOut = new DataOutputStream(this.socket.getOutputStream());
         } catch (IOException e) {
-            System.out.println("Connection error: " + e.getMessage());
+            System.err.println("CRITICAL: Could not connect to the server. " + e.getMessage());
+            throw new RuntimeException("Failed to connect to the server", e);
         }
     }
 
@@ -37,10 +38,10 @@ public class NetworkService {
         return instance;
     }
 
-    private static DataInputStream binaryIn;
-    private static DataOutputStream binaryOut;
+    private DataInputStream binaryIn;
+    private DataOutputStream binaryOut;
 
-    public static String hashPassword(String password) throws NoSuchAlgorithmException {
+    public String hashPassword(String password) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
@@ -55,7 +56,7 @@ public class NetworkService {
         return hexString.toString();
     }
 
-    private static void sendJsonMessage(Message message) throws IOException {
+    private void sendJsonMessage(Message message) throws IOException {
         // convert message into a json string then convert it to a byte array
         String json = new Gson().toJson(message);
         byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
@@ -68,7 +69,7 @@ public class NetworkService {
         binaryOut.flush();
     }
 
-    public static Users clientHandleLogin (String email ) throws Exception {
+    public Users clientHandleLogin (String email ) throws Exception {
         // create a message and send to server for login request
         Message loginMessage = new Message( 6 , email , "CHECK_WITH_DATABASE" ) ;
         sendJsonMessage(loginMessage);

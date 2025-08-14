@@ -24,6 +24,13 @@ public class VerifyController {
 
     private String email ;
 
+    private final NetworkService networkService;
+
+    public VerifyController() {
+
+        this.networkService = NetworkService.getInstance();
+    }
+
     // This method is called to provide the correct code to this controller
     public void initData(Integer code , String email) {
         this.correctCode = code;
@@ -43,7 +50,7 @@ public class VerifyController {
 
                 Users user ;
                 try {
-                    user = NetworkService.clientHandleLogin(email);
+                    user = networkService.clientHandleLogin(email);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
