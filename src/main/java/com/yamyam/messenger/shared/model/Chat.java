@@ -1,11 +1,13 @@
 package com.yamyam.messenger.shared.model;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 
 public class Chat {
     private long chatId;
     private Timestamp createdAt;
     private ChatType type;
+
     public Chat(long chatId, Timestamp createdAt, ChatType type){
         this.chatId = chatId;
         this.createdAt = createdAt;

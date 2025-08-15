@@ -12,6 +12,7 @@ public class Users {
     private String email;
     private UserProfile userProfile;
 
+    public Users(){}
 
     public Users(long id ,
                  Timestamp createAt ,
