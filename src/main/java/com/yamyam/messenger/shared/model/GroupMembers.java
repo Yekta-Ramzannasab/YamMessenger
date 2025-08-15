@@ -2,7 +2,7 @@ package com.yamyam.messenger.shared.model;
 
 import java.sql.Timestamp;
 
-public class GroupMember{
+public class GroupMembers {
 
     private GroupChat groupChat;
     private Role role;
@@ -10,7 +10,7 @@ public class GroupMember{
     private Users invitedBy;
     private Timestamp joinedAt;
 
-    public GroupMember(GroupChat groupChat,Role role, Users member,Users invitedBy) {
+    public GroupMembers(GroupChat groupChat, Role role, Users member, Users invitedBy) {
         this.groupChat = groupChat;
         this.member = member;
         this.invitedBy = invitedBy;
