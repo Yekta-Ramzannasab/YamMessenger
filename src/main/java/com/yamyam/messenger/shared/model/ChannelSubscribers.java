@@ -2,17 +2,17 @@ package com.yamyam.messenger.shared.model;
 
 import java.sql.Timestamp;
 
-public class ChannelSubscribes {
+public class ChannelSubscribers {
     private Channel channel;
     private Role role;
     private Timestamp joinedAt;
-    private Users subscribe;
+    private long subscribeId;
     private boolean approve;
 
-    public ChannelSubscribes(Channel channel,Role role,Users subscribe,boolean approve) {
+    public ChannelSubscribers(Channel channel, Role role, long subscribeId, boolean approve) {
         this.channel = channel;
         this.role = role;
-        this.subscribe = subscribe;
+        this.subscribeId = subscribeId;
         this.approve = approve;
         this.joinedAt = new Timestamp(System.currentTimeMillis());
     }
@@ -33,12 +33,12 @@ public class ChannelSubscribes {
         this.approve = approve;
     }
 
-    public Users getSubscribe() {
-        return subscribe;
+    public long getSubscribe() {
+        return subscribeId;
     }
 
-    public void setSubscribe(Users subscribe) {
-        this.subscribe = subscribe;
+    public void setSubscribe(long subscribeId) {
+        this.subscribeId = subscribeId;
     }
 
     public Timestamp getJoinedAt() {
