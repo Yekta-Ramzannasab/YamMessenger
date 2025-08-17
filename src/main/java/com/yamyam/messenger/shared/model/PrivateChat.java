@@ -13,19 +13,19 @@ public class PrivateChat extends Chat {
         this.user2 = user2;
     }
 
-    public Users getUser2() {
+    public long getUser2() {
         return user2;
     }
 
-    public void setUser2(Users user2) {
+    public void setUser2(long user2) {
         this.user2 = user2;
     }
 
-    public Users getUser1() {
+    public long getUser1() {
         return user1;
     }
 
-    public void setUser1(Users user1) {
+    public void setUser1(long user1) {
         this.user1 = user1;
     }
 }

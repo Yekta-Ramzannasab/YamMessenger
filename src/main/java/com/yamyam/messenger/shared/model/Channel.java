@@ -5,11 +5,11 @@ import java.sql.Timestamp;
 public class Channel extends Chat{
 
     private String channelName;
-    private Users owner;
+    private long owner;
     private String description;
     private boolean isPrivate;
 
-    public Channel(long id,String channelName,Users owner,boolean isPrivate,String description){
+    public Channel(long id,String channelName,long owner,boolean isPrivate,String description){
         super(id,new Timestamp(System.currentTimeMillis()),ChatType.CHANNEL);
         this.channelName = channelName;
         this.description = description;
@@ -41,11 +41,11 @@ public class Channel extends Chat{
         this.description = description;
     }
 
-    public Users getOwner() {
+    public long getOwner() {
         return owner;
     }
 
-    public void setOwner(Users owner) {
+    public void setOwner(long owner) {
         this.owner = owner;
     }
 }
