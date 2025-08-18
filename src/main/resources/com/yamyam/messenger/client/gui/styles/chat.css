@@ -1,19 +1,20 @@
+/* chat root */
 .themed.chat-root {
   -fx-background-color: -app-bg;
   -fx-font-family: "Inter","Segoe UI",sans-serif;
 }
 
-/* ===== SIDEBAR ===== */
-.themed .chat-sidebar {
+/*  SIDEBAR  */
+.themed.chat-root .chat-sidebar {
   -fx-background-color: -app-surface;
   -fx-padding: 16;
   -fx-background-radius: 16;
   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0.2, 0, 8);
 }
-.themed .chat-sidebar__header { -fx-padding: 0 4 8 4; }
-.themed .chat-brand { -fx-text-fill: -app-text; -fx-font-size: 20px; -fx-font-weight: 700; }
+.themed.chat-root .chat-sidebar__header { -fx-padding: 0 4 8 4; }
+.themed.chat-root .chat-brand { -fx-text-fill: -app-text; -fx-font-size: 20px; -fx-font-weight: 700; }
 
-.themed .chat-search {
+.themed.chat-root .chat-search {
   -fx-background-color: -app-input-bg;
   -fx-border-color: -app-input-border;
   -fx-border-radius: 12; -fx-background-radius: 12;
@@ -21,18 +22,18 @@
   -fx-text-fill: -app-text;
 }
 
-/* لیست چت‌ها: حذف رگه‌های راه‌راه */
-.themed .list-view { -fx-background-color: transparent; }
-.themed .list-view .virtual-flow .clipped-container .sheet { -fx-background-color: transparent; }
-.themed .list-cell { -fx-background-color: transparent; -fx-padding: 6 10 6 10; }
-.themed .list-cell:filled:selected, .themed .list-cell:filled:selected:focused {
+/* chatlist + omit the lines + cell styles */
+.themed.chat-root .list-view { -fx-background-color: transparent; }
+.themed.chat-root .list-view .virtual-flow .clipped-container .sheet { -fx-background-color: transparent; }
+.themed.chat-root .list-cell { -fx-background-color: transparent; -fx-padding: 6 10 6 10; }
+.themed.chat-root .list-cell:filled:selected, .themed .list-cell:filled:selected:focused {
   -fx-background-color: rgba(124,77,255,0.25);
   -fx-background-radius: 12;
 }
 
-/* ===== CONVERSATION ===== */
-.themed .chat-conv {
-  /* لایه نور بنفش مانند عکس دوم */
+/*  CONVERSATION  */
+.themed.chat-root .chat-conv {
+  /* light blue  */
   -fx-background-color:
      radial-gradient(center 60% 60%, radius 80%, rgba(124,77,255,0.25), transparent),
      radial-gradient(center 40% 40%, radius 60%, rgba(66,165,245,0.18), transparent),
@@ -41,27 +42,28 @@
   -fx-padding: 0;
 }
 
-.themed .chat-conv__header {
+.themed.chat-root .chat-conv__header {
   -fx-background-color: rgba(255,255,255,0.06);
   -fx-padding: 12 16;
   -fx-background-radius: 16 16 0 0;
 }
-.themed .chat-conv__name   { -fx-text-fill: -app-text;  -fx-font-size: 16px; -fx-font-weight: 700; }
-.themed .chat-conv__status { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
+.themed.chat-root .chat-conv__name   { -fx-text-fill: -app-text;  -fx-font-size: 16px; -fx-font-weight: 700; }
+.themed.chat-root .chat-conv__status { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
 
-.themed .chat-composer {
+/* Composer */
+.themed.chat-root .chat-composer {
   -fx-background-color: rgba(255,255,255,0.06);
   -fx-padding: 10;
   -fx-background-radius: 0 0 16 16;
 }
-.themed .chat-iconbtn { -fx-background-radius: 999; -fx-padding: 8 10; }
-.themed .chat-send {
+.themed.chat-root .chat-iconbtn { -fx-background-radius: 999; -fx-padding: 8 10; }
+.themed.chat-root .chat-send {
   -fx-background-color: linear-gradient(to right, -app-accent-start, -app-accent-end);
   -fx-text-fill: white; -fx-background-radius: 999; -fx-font-size: 16px; -fx-padding: 12 16;
 }
 
-/* پیام‌ها */
-.themed .bubble {
+/* msgss */
+.themed.chat-root .bubble {
   -fx-padding: 10 12;
   -fx-background-radius: 16;
   -fx-wrap-text: true;
@@ -69,16 +71,75 @@
   -fx-font-size: 14px;
   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0.2, 0, 3);
 }
-.themed .bubble.me    { -fx-background-color: -msg-me-bg;    -fx-text-fill: -msg-me-text; }
-.themed .bubble.other { -fx-background-color: -msg-other-bg; -fx-text-fill: -app-text; }
+.themed.chat-root .bubble.me    { -fx-background-color: -msg-me-bg;    -fx-text-fill: -msg-me-text; }
+.themed.chat-root .bubble.other { -fx-background-color: -msg-other-bg; -fx-text-fill: -app-text; }
 
-/* ===== RIGHT PANE ===== */
-.themed .chat-info {
+/*  RIGHT PANE  */
+.themed.chat-root .chat-info {
   -fx-background-color: -app-surface;
   -fx-padding: 16;
   -fx-background-radius: 16;
   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0.2, 0, 8);
 }
-.themed .chat-info__name     { -fx-text-fill: -app-text;  -fx-font-weight: 700; -fx-font-size: 16px; }
-.themed .chat-info__presence { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
-.themed .chat-section        { -fx-text-fill: -app-muted; -fx-font-size: 12px; -fx-font-weight: 700; }
+.themed.chat-root .chat-info__name     { -fx-text-fill: -app-text;  -fx-font-weight: 700; -fx-font-size: 16px; }
+.themed.chat-root .chat-info__presence { -fx-text-fill: -app-muted; -fx-font-size: 12px; }
+.themed.chat-root .chat-section        { -fx-text-fill: -app-muted; -fx-font-size: 12px; -fx-font-weight: 700; }
+
+/* sync with themess input */
+.themed.chat-root .text-area, .themed .text-field {
+  -fx-background-color: -app-input-bg;
+  -fx-text-fill: -app-text;
+  -fx-border-color: -app-input-border;
+  -fx-background-radius: 12;
+  -fx-border-radius: 12;
+}
+.themed.chat-root .text-area .content { -fx-background-color: transparent; }
+
+/*  Theme button & popup  */
+.menu-button.theme-picker {
+  -fx-background-color: linear-gradient(to bottom,
+    derive(-app-accent-start, +15%), derive(-app-accent-end, -5%));
+  -fx-background-radius: 18;
+  -fx-padding: 6 14;
+  -fx-cursor: hand;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0.2, 0, 2);
+  -fx-border-color: rgba(255,255,255,0.10);
+  -fx-border-radius: 18;
+}
+.menu-button.theme-picker:hover {
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, 0.3, 0, 3);
+}
+.menu-button.theme-picker .label {
+  -fx-text-fill: white;
+  -fx-font-weight: bold;
+}
+
+/* pop up menu window */
+.menu-button.theme-picker .context-menu {
+  -fx-background-color: -app-surface;
+  -fx-background-radius: 12;
+  -fx-padding: 6 6;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.35, 0, 4);
+  -fx-border-color: -app-input-border;
+  -fx-border-radius: 12;
+}
+
+/* menu items */
+.menu-button.theme-picker .menu-item {
+  -fx-background-radius: 8;
+  -fx-padding: 8 14;
+}
+.menu-button.theme-picker .menu-item .label { -fx-text-fill: -app-text; }
+.menu-button.theme-picker .menu-item:hover,
+.menu-button.theme-picker .menu-item:focused {
+  -fx-background-color: derive(-app-surface, +10%);
+}
+
+/*  selected (RadioMenuItem) */
+.menu-button.theme-picker .radio-menu-item:checked {
+  -fx-background-color: derive(-app-accent-start, +35%);
+}
+.menu-button.theme-picker .radio-menu-item:checked .label {
+  -fx-font-weight: 700;
+  -fx-text-fill: -app-text;
+}

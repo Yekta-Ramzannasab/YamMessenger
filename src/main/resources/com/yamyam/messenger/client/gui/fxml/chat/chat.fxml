@@ -8,7 +8,13 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.yamyam.messenger.client.gui.controller.chat.ChatController"
             stylesheets="@/com/yamyam/messenger/client/gui/styles/chat.css"
-            styleClass="themed chat-root" prefWidth="1120" prefHeight="720">
+            styleClass="themed chat-root"
+            prefWidth="1120" prefHeight="720">
+
+    <!-- only one time defining outer the tree -->
+    <fx:define>
+        <ToggleGroup fx:id="themeGroup"/>
+    </fx:define>
 
     <left>
         <VBox spacing="12" prefWidth="320" styleClass="chat-sidebar">
@@ -30,14 +36,22 @@
                         <Label fx:id="headerStatus" styleClass="chat-conv__status" text=""/>
                     </VBox>
                     <Pane HBox.hgrow="ALWAYS"/>
+
+                    <!-- theme button  -->
                     <MenuButton fx:id="themeBtn"
                                 text="Theme"
-                                styleClass="chat-iconbtn"
-                                onMouseClicked="#cycleTheme">   <!-- کلیک روی خود دکمه -->
+                                styleClass="chat-iconbtn theme-picker"
+                                onMouseClicked="#cycleTheme">
                         <items>
-                            <MenuItem text="Light"  onAction="#setThemeLight"/>
-                            <MenuItem text="Dark"   onAction="#setThemeDark"/>
-                            <MenuItem text="AMOLED" onAction="#setThemeAmoled"/>
+                            <RadioMenuItem fx:id="miLight"  text="Light"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeLight"/>
+                            <RadioMenuItem fx:id="miDark"   text="Dark"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeDark"/>
+                            <RadioMenuItem fx:id="miAmoled" text="AMOLED"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeAmoled"/>
                         </items>
                     </MenuButton>
                 </HBox>
@@ -68,4 +82,5 @@
             <FlowPane fx:id="mediaGrid" hgap="8" vgap="8"/>
         </VBox>
     </right>
+
 </BorderPane>
