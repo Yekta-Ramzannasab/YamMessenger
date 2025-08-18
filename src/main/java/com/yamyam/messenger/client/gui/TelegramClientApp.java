@@ -30,9 +30,12 @@ public class TelegramClientApp extends Application {
                 getClass().getResource("/com/yamyam/messenger/client/gui/styles/style.css").toExternalForm()
         );
 
-        com.yamyam.messenger.client.gui.theme.ThemeManager.apply(scene,
-                com.yamyam.messenger.client.gui.theme.ThemeManager.Theme.DARK); // dark default theme
+        ThemeManager.apply(scene, ThemeManager.current()); // یا ThemeManager.Theme.DARK
 
+
+//        com.yamyam.messenger.client.gui.theme.ThemeManager.apply(scene,
+//                com.yamyam.messenger.client.gui.theme.ThemeManager.Theme.DARK); // dark default theme
+//
 
 
         // Set icon on title bar

@@ -4,7 +4,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.yamyam.messenger.client.gui.controller.chat.ChatController"
             stylesheets="@/com/yamyam/messenger/client/gui/styles/chat.css"
             styleClass="themed chat-root" prefWidth="1120" prefHeight="720">
@@ -29,10 +30,15 @@
                         <Label fx:id="headerStatus" styleClass="chat-conv__status" text=""/>
                     </VBox>
                     <Pane HBox.hgrow="ALWAYS"/>
-                    <MenuButton text="Theme" styleClass="chat-iconbtn">
-                        <MenuItem text="Light"  onAction="#setThemeLight"/>
-                        <MenuItem text="Dark"   onAction="#setThemeDark"/>
-                        <MenuItem text="AMOLED" onAction="#setThemeAmoled"/>
+                    <MenuButton fx:id="themeBtn"
+                                text="Theme"
+                                styleClass="chat-iconbtn"
+                                onMouseClicked="#cycleTheme">   <!-- کلیک روی خود دکمه -->
+                        <items>
+                            <MenuItem text="Light"  onAction="#setThemeLight"/>
+                            <MenuItem text="Dark"   onAction="#setThemeDark"/>
+                            <MenuItem text="AMOLED" onAction="#setThemeAmoled"/>
+                        </items>
                     </MenuButton>
                 </HBox>
             </top>
