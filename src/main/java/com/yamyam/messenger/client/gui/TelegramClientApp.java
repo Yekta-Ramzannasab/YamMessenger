@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+
 public class TelegramClientApp extends Application {
 
     private static Scene scene;                                // Global scene for the app
