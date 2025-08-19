@@ -1,6 +1,7 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
+import com.yamyam.messenger.client.util.AppSession;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -52,6 +53,29 @@ public class ChatController implements Initializable {
         setupMessageList();
         setupComposer();
         loadMockData();
+
+        if (!AppSession.isLoggedIn()) {
+            Platform.runLater(() -> {
+                Scene scene = headerName.getScene();
+                if (scene == null) return;
+
+                var urlCss = getClass().getResource("/com/yamyam/messenger/client/gui/styles/chat.css");
+                if (urlCss != null) {
+                    String chatCss = urlCss.toExternalForm();
+                    if (!scene.getStylesheets().contains(chatCss)) scene.getStylesheets().add(chatCss);
+                }
+                var root = scene.getRoot();
+                var classes = root.getStyleClass();
+                if (!classes.contains("themed")) classes.add("themed");
+                if (!classes.contains("chat-root")) classes.add("chat-root");
+
+                ThemeManager.reapply(scene);
+                syncThemeMenu(ThemeManager.current());
+            });
+            return;
+        }
+
+
 
         // Select the first chat by default (so the middle area isn't empty)
         if (!allChats.isEmpty()) {
