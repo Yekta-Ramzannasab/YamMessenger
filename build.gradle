@@ -25,6 +25,8 @@ dependencies {
     // Dependency for Sending Emails
     implementation 'org.simplejavamail:simple-java-mail:8.11.0'
     implementation 'org.slf4j:slf4j-simple:2.0.13'
+    // Connection Pool
+    implementation 'com.zaxxer:HikariCP:5.1.0'
 }
 
 application {
