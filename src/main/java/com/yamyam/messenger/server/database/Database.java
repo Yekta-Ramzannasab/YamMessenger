@@ -1,10 +1,12 @@
 package com.yamyam.messenger.server.database;
 
+import com.yamyam.messenger.shared.model.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Database {
 
@@ -51,5 +53,85 @@ public class Database {
      */
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
+    }
+    public static Users loadUser(long userId) throws SQLException {
+        // profile could be null?
+        try (Connection connection = Database.getConnection()) {
+
+            String sqlCheck = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id WHERE u.user_id = ?";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sqlCheck)) {
+                stmt.setLong(1, userId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    // Build UserProfile object
+                    UserProfile profile = new UserProfile(
+                            rs.getLong("profile_id"),
+                            rs.getString("profile_image_url"),
+                            rs.getString("bio"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getTimestamp("updated_at"),
+                            rs.getString("profile_name")
+                    );
+
+                    // Build Users object
+                    Users user = new Users(
+                            rs.getLong("user_id"),
+                            rs.getTimestamp("created_at"),
+                            rs.getTimestamp("last_seen"),
+                            rs.getBoolean("is_verified"),
+                            rs.getBoolean("is_online"),
+                            rs.getBoolean("is_deleted"),
+                            rs.getString("email"),
+                            profile
+                    );
+
+                    return user;
+                }
+                else{return null;}
+            }
+        }
+    }
+
+    public static List<Users> loadAllUsers() throws SQLException {
+        // TODO: Implement DB query to load all users
+        return null;
+    }
+
+    public static long getUserIdByEmail(String email) throws SQLException {
+        // TODO: Implement DB query to get userId by email
+        return 0;
+    }
+
+    public static Users checkOrCreateUser(String email) throws SQLException {
+        // TODO: Check if user exists, if not create, then return the Users object
+        return null;
+    }
+
+    // ----- Messages -----
+    public static List<MessageEntity> loadMessages(long chatId) throws SQLException {
+        // TODO: Load all messages of a chat
+        return null;
+    }
+
+    public static void insertMessage(long chatId, long senderId, String message) throws SQLException {
+        // TODO: Insert message into DB
+    }
+
+    // ----- Chats -----
+    public static PrivateChat loadPrivateChat(long chatId) throws SQLException {
+        // TODO: Load private chat by chatId
+        return null;
+    }
+
+    public static GroupChat loadGroupChat(long chatId) throws SQLException {
+        // TODO: Load group chat by chatId
+        return null;
+    }
+
+    public static Channel loadChannel(long chatId) throws SQLException {
+        // TODO: Load channel by chatId
+        return null;
     }
 }
