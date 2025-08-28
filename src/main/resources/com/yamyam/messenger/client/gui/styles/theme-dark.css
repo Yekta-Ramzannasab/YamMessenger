@@ -1,0 +1,10 @@
+.themed {
+  -app-bg: linear-gradient(to bottom right, #1f2430, #0f1220);
+  -app-surface: rgba(255,255,255,0.06);
+  -app-text:#e7ecf2; -app-muted:#9aa6b2;
+  -app-input-bg:#0f1520; -app-input-border:#2b323b;
+  -app-accent-start:#6b68ff; -app-accent-end:#4aa3ff;
+
+  -msg-me-bg:#5562ff;  -msg-me-text:#fff;
+  -msg-other-bg: rgba(255,255,255,0.10);
+}

@@ -7,7 +7,8 @@ import javafx.fxml.FXML;
 public class InfoController {
     private final PageNavigator navigator = new PageNavigator(
             "/com/yamyam/messenger/client/gui/fxml/main/welcome.fxml",
-            "/com/yamyam/messenger/client/gui/fxml/auth/email.fxml"
+            "/com/yamyam/messenger/client/gui/fxml/chat/chat.fxml"
+
     );
 
     @FXML
@@ -20,3 +21,5 @@ public class InfoController {
         navigator.goToNext(event);
     }
 }
+
+// "/com/yamyam/messenger/client/gui/fxml/auth/email.fxml"

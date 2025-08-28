@@ -7,6 +7,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import com.yamyam.messenger.client.util.AppSession;
+import com.yamyam.messenger.shared.model.UserProfile;
+
 public class VerifyController {
 
     private final PageNavigator navigator = new PageNavigator(

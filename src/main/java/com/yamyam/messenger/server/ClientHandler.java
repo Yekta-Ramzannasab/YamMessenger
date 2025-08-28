@@ -59,7 +59,15 @@ public class ClientHandler implements Runnable {
                     }
 
                     switch (request.getType()) { // do tasks base on request type
-                        case 5:
+                        case 1:
+                            Users user = handleLogin(request.getSender());
+                            Message loginUser = null;
+                            if (user != null) {
+                                loginUser = new Message(5, "Server", user.toString() );
+                            }
+                            sendJsonMessage(loginUser);
+                            break;
+                        case 2:
                             String email = request.getSender();
                             int verificationCode = generateAndSendVerificationCode(email);
 
@@ -67,14 +75,9 @@ public class ClientHandler implements Runnable {
                             Message codeResponse = new Message(5, "Server", responseContent);
                             sendJsonMessage(codeResponse);
                             break;
-                        case 6:
-                            Users user = handleLogin(request.getSender());
-
-                            Message loginUser = null;
-                            if (user != null) {
-                                loginUser = new Message(5, "Server", user.toString() );
-                            }
-                            sendJsonMessage(loginUser);
+                        case 3:
+                            // TODO: Based on the email sent, we must first convert the email to a user ID
+                            //  then send a list of all active chats to the client through this ID.
                             break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());

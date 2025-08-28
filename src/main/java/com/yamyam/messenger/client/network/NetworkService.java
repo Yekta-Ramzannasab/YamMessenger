@@ -1,5 +1,7 @@
 package com.yamyam.messenger.client.network;
 
+import com.google.gson.reflect.TypeToken;
+import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.shared.model.Users;
@@ -10,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 public class NetworkService {
     private final int PORT = 5001;
@@ -69,58 +73,82 @@ public class NetworkService {
         binaryOut.flush();
     }
 
-    public Users clientHandleLogin (String email ) throws Exception {
-        // create a message and send to server for login request
-        Message loginMessage = new Message( 6 , email , "CHECK_WITH_DATABASE" ) ;
-        sendJsonMessage(loginMessage);
-
-        int length = binaryIn.readInt(); // reading length of response
+    private Message receiveJsonMessage() throws IOException {
+        // reading length of response
+        int length = binaryIn.readInt();
         if (length > 0) {
             byte[] jsonBytes = new byte[length];
-            binaryIn.readFully(jsonBytes, 0, length); // reading response
+            binaryIn.readFully(jsonBytes, 0, length);// reading response
             String jsonResponse = new String(jsonBytes, StandardCharsets.UTF_8);
 
-            // response processing
-            Gson gson = new Gson();
-            Message response = gson.fromJson(jsonResponse, Message.class);
+            return new Gson().fromJson(jsonResponse, Message.class);
+        }
+        return null; // If the message length is zero, return null
+    }
 
+    public Users clientHandleLogin (String email ) throws Exception {
+        // create a message and send to server for login request
+        Message loginMessage = new Message( 1 , email , "CHECK_WITH_DATABASE" ) ;
+        sendJsonMessage(loginMessage);
+
+        loginMessage = receiveJsonMessage();
+
+        if(loginMessage != null){
             // parse content
             Users user ;
-            user = Users.fromString(response.getContent()) ;
+            user = Users.fromString(loginMessage.getContent()) ;
 
             // send user to ui
             return user ;
-        } else
+        }else
             return null;
     }
 
     public Integer requestVerificationCode(String email) {
         try {
-            // Message type 5 to request a verification code
-            Message request = new Message(5, email, "SEND_CODE");
+            // Message type 2 to request a verification code
+            Message request = new Message(2, email, "SEND_CODE");
+
             sendJsonMessage(request);
+            request = receiveJsonMessage();
 
-            // Waiting for a response from the server containing the code
-            int length = binaryIn.readInt();
-            if (length > 0) {
-                byte[] jsonBytes = new byte[length];
-                binaryIn.readFully(jsonBytes, 0, length);
-                String jsonResponse = new String(jsonBytes, StandardCharsets.UTF_8);
-                Message response = new Gson().fromJson(jsonResponse, Message.class);
-
-                // Convert the message content, which is the confirmation code, to an Integer and return it
+            if(request != null){
                 try {
-                    return Integer.parseInt(response.getContent());
+                    return Integer.parseInt(request.getContent());
                 } catch (NumberFormatException e) {
                     // If the server does not return a number (e.g. an error message)
-                    System.err.println("Server did not return a valid code: " + response.getContent());
+                    System.err.println("Server did not return a valid code: " + request.getContent());
                     return null;
                 }
-            }
+            }else
+                return null;
         } catch (IOException e) {
             e.printStackTrace();
         }
         // If any communication problem occurs, return null
         return null;
+    }
+
+    public List<Chat> fetchMyChatList(String email) {
+        try {
+            // Request for chat list
+            Message message = new Message(3 , email, "GET_CHATS");
+            sendJsonMessage(message);
+
+            // Reading response
+            message = receiveJsonMessage() ;
+
+            if(message != null){
+                Gson gson = new Gson();
+                return gson.fromJson(
+                        message.getContent(),
+                        new TypeToken<List<Chat>>() {}.getType()
+                );
+            }else
+                return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 }
