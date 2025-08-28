@@ -1,12 +1,22 @@
 package com.yamyam.messenger.server;
 
+//import com.sun.net.httpserver.Request;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.services.EmailService;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.server.database.UserHandler;
 import com.yamyam.messenger.shared.model.Users;
+import okhttp3.OkHttpClient;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.Request;
 
+
+
+
+import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -79,6 +89,14 @@ public class ClientHandler implements Runnable {
                             // TODO: Based on the email sent, we must first convert the email to a user ID
                             //  then send a list of all active chats to the client through this ID.
                             break;
+                        case 7:
+                            String userPrompt = request.getContent();
+                            String aiResponse = getAIResponse(userPrompt);
+
+                            Message responseMessage = new Message(7, "AI", aiResponse);
+                            sendJsonMessage(responseMessage);
+                            break;
+
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
@@ -147,4 +165,37 @@ public class ClientHandler implements Runnable {
             return -1;
         }
     }
+    private String getAIResponse(String prompt) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        String apiKey = "sk-7G3aFals6gYxmTYHXIBV7EpYhc9JK5jyO8XTgsEaeLeSITWD";
+
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonBody = "{\n" +
+                "  \"model\": \"deepseek-chat\",\n" +
+                "  \"messages\": [\n" +
+                "    {\"role\": \"user\", \"content\": \"" + prompt + "\"}\n" +
+                "  ]\n" +
+                "}";
+
+        RequestBody body = RequestBody.create(jsonBody, MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url("https://api.gapgpt.app/v1/chat/completions")
+                .post(body)
+                .addHeader("Authorization", "Bearer " + apiKey)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                String responseBody = response.body().string();
+                int start = responseBody.indexOf("\"content\":\"") + 10;
+                int end = responseBody.indexOf("\"", start);
+                return responseBody.substring(start, end);
+            } else {
+                return "error";
+            }
+        }
+    }
+
+
 }
