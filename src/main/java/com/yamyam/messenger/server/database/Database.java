@@ -151,20 +151,73 @@ public class Database {
         return -1;
     }
 
-    public static Users checkOrCreateUser(String email) throws SQLException {
-        // TODO: Check if user exists, if not create, then return the Users object
-        return null;
-    }
 
     // ----- Messages -----
-    public static List<MessageEntity> loadMessages(long chatId) throws SQLException {
-        // TODO: Load all messages of a chat
-        return null;
+    public static List<MessageEntity> loadMessages() throws SQLException {
+        List<MessageEntity> messages = new ArrayList<>();
+
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT m.message_id, m.chat_id, m.sender_id, m.message_text, m.message_type, " +
+                    "m.reply, m.forward, m.is_edited, m.is_deleted, m.status, m.sent_at, " +
+                    "u.user_id, u.email, u.is_online, u.is_verified, u.is_deleted, " +
+                    "p.profile_id, p.username, p.profile_image_url " +
+                    "FROM messages m " +
+                    "LEFT JOIN users u ON m.sender_id = u.user_id " +
+                    "LEFT JOIN user_profiles p ON u.user_id = p.user_id";
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                // Build UserProfile
+                UserProfile profile = null;
+                if (rs.getLong("profile_id") != 0) {
+                    profile = new UserProfile(
+                            rs.getLong("profile_id"),
+                            rs.getString("profile_image_url"),
+                            null, // bio
+                            rs.getString("username"),
+                            null, // password
+                            null, // updated_at
+                            null  // profile_name
+                    );
+                }
+
+                // Build Users
+                Users sender = new Users(
+                        rs.getLong("user_id"),
+                        null, // created_at
+                        null, // last_seen
+                        rs.getBoolean("is_verified"),
+                        rs.getBoolean("is_online"),
+                        rs.getBoolean("is_deleted"),
+                        rs.getString("email"),
+                        profile
+                );
+                Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0);
+
+                // Build MessageEntity
+                MessageEntity message = new MessageEntity(
+                        MessageType.valueOf(rs.getString("status")),
+                        rs.getBoolean("is_deleted"),
+                        rs.getBoolean("is_edited"),
+                        rs.getLong("forward"),
+                        rs.getLong("reply"),
+                        MessageType.valueOf(rs.getString("message_type")),
+                        rs.getString("message_text"),
+                        chat,
+                        sender,
+                        rs.getLong("message_id")
+                );
+
+                messages.add(message);
+            }
+        }
+
+        return messages;
     }
 
-    public static void insertMessage(long chatId, long senderId, String message) throws SQLException {
-        // TODO: Insert message into DB
-    }
+
 
     // ----- Chats -----
     public static PrivateChat loadPrivateChat(long chatId) throws SQLException {
