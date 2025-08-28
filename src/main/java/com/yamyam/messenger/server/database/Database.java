@@ -138,7 +138,17 @@ public class Database {
 
     public static long getUserIdByEmail(String email) throws SQLException {
         // TODO: Implement DB query to get userId by email
-        return 0;
+        try (Connection connection = Database.getConnection()){
+            String sql = "SELECT user_id FROM users WHERE email = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1,email);
+            ResultSet rs = statement.executeQuery();
+            if(rs.next()){
+                return rs.getLong("user_id");
+            }
+
+        }
+        return -1;
     }
 
     public static Users checkOrCreateUser(String email) throws SQLException {
