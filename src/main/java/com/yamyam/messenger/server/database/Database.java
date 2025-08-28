@@ -153,7 +153,7 @@ public class Database {
 
 
     // ----- Messages -----
-    public static List<MessageEntity> loadMessages() throws SQLException {
+    public static List<MessageEntity> loadMessages(long chatId) throws SQLException {
         List<MessageEntity> messages = new ArrayList<>();
 
         try (Connection connection = Database.getConnection()) {
@@ -163,9 +163,11 @@ public class Database {
                     "p.profile_id, p.username, p.profile_image_url " +
                     "FROM messages m " +
                     "LEFT JOIN users u ON m.sender_id = u.user_id " +
-                    "LEFT JOIN user_profiles p ON u.user_id = p.user_id";
+                    "LEFT JOIN user_profiles p ON u.user_id = p.user_id " +
+                    "WHERE m.chat_id = ?"; 
 
             PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, chatId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -194,6 +196,7 @@ public class Database {
                         rs.getString("email"),
                         profile
                 );
+
                 Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0);
 
                 // Build MessageEntity
