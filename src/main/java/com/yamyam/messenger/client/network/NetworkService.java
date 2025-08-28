@@ -151,4 +151,16 @@ public class NetworkService {
         }
         return new ArrayList<>();
     }
+    public String sendToAI(String prompt) {
+        try {
+            Message aiRequest = new Message(7, "Client", prompt);
+            sendJsonMessage(aiRequest);
+
+            Message aiResponse = receiveJsonMessage();
+            return (aiResponse != null) ? aiResponse.getContent() : "no response";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "error server";
+        }
+    }
 }
