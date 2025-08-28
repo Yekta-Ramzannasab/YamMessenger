@@ -1,5 +1,7 @@
 package com.yamyam.messenger.client.network;
 
+import com.google.gson.reflect.TypeToken;
+import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.shared.model.Users;
@@ -10,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 public class NetworkService {
     private final int PORT = 5001;
@@ -122,5 +126,32 @@ public class NetworkService {
         }
         // If any communication problem occurs, return null
         return null;
+    }
+
+    public List<Chat> fetchMyChatList(String email) {
+        try {
+            // Request for chat list
+            sendJsonMessage(new Message(10, email, "GET_CHATS"));
+
+            // Reading response
+            int length = binaryIn.readInt();
+            if (length > 0) {
+                byte[] jsonBytes = new byte[length];
+                binaryIn.readFully(jsonBytes, 0, length);
+                String jsonResponse = new String(jsonBytes, StandardCharsets.UTF_8);
+
+                Gson gson = new Gson();
+                Message responseMessage = gson.fromJson(jsonResponse, Message.class);
+
+                // Convert JSON to chat list
+                return gson.fromJson(
+                        responseMessage.getContent(),
+                        new TypeToken<List<Chat>>() {}.getType()
+                );
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 }
