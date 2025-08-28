@@ -13,6 +13,7 @@ public class Database {
     // Static HikariDataSource, acts like a singleton for the whole app
     private static final HikariDataSource dataSource;
 
+
     static {
         // Read environment variables for database credentials
         String url = System.getenv("DB_URL");
@@ -58,9 +59,9 @@ public class Database {
         // profile could be null?
         try (Connection connection = Database.getConnection()) {
 
-            String sqlCheck = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id WHERE u.user_id = ?";
+            String sql = "SELECT u.*, p.* FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id WHERE u.user_id = ?";
 
-            try (PreparedStatement stmt = connection.prepareStatement(sqlCheck)) {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setLong(1, userId);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
@@ -95,8 +96,44 @@ public class Database {
     }
 
     public static List<Users> loadAllUsers() throws SQLException {
-        // TODO: Implement DB query to load all users
-        return null;
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT u.user_id, u.created_at, u.last_seen, u.is_verified, u.is_online, u.is_deleted, u.email, " +
+                    "p.profile_id, p.profile_image_url, p.bio, p.username, p.password, p.updated_at, p.profile_name " +
+                    "FROM users u " +
+                    "LEFT JOIN user_profiles p ON u.user_id = p.user_id;";
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+            List<Users> usersList = new ArrayList<>();
+            while (rs.next()) {
+                UserProfile profile = null;
+                if (rs.getLong("profile_id") != 0) {
+                    profile = new UserProfile(
+                            rs.getLong("profile_id"),
+                            rs.getString("profile_image_url"),
+                            rs.getString("bio"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getTimestamp("updated_at"),
+                            rs.getString("profile_name")
+                    );
+                }
+
+                Users user = new Users(
+                        rs.getLong("user_id"),
+                        rs.getTimestamp("created_at"),
+                        rs.getTimestamp("last_seen"),
+                        rs.getBoolean("is_verified"),
+                        rs.getBoolean("is_online"),
+                        rs.getBoolean("is_deleted"),
+                        rs.getString("email"),
+                        profile
+                );
+
+                usersList.add(user);
+            }
+            return usersList;
+        }
     }
 
     public static long getUserIdByEmail(String email) throws SQLException {
