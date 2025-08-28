@@ -300,5 +300,68 @@ public class Database {
 
         return null; // return null if no channel found with given id
     }
+    public static List<Chat> loadUserChats(long userId) throws SQLException {
+        List<Chat> userChats = new ArrayList<>();
+
+        try (Connection connection = Database.getConnection()) {
+            // --- Load Private Chats ---
+            String sqlPrivate = "SELECT chat_id, user1, user2, created_at FROM private_chats " +
+                    "WHERE user1 = ? OR user2 = ?";
+            PreparedStatement stmtPrivate = connection.prepareStatement(sqlPrivate);
+            stmtPrivate.setLong(1, userId);
+            stmtPrivate.setLong(2, userId);
+            ResultSet rsPrivate = stmtPrivate.executeQuery();
+            while (rsPrivate.next()) {
+                PrivateChat pc = new PrivateChat(
+                        rsPrivate.getLong("chat_id"),
+                        rsPrivate.getLong("user1"),
+                        rsPrivate.getLong("user2")
+                );
+                pc.setCreatedAt(rsPrivate.getTimestamp("created_at"));
+                userChats.add(pc);
+            }
+
+            // --- Load Group Chats ---
+            String sqlGroup = "SELECT gc.group_id, gc.group_name, gc.description, gc.creator_id, gc.is_private, gc.created_at " +
+                    "FROM group_chats gc " +
+                    "JOIN group_members gm ON gc.group_id = gm.group_id " +
+                    "WHERE gm.user_id = ?";
+            PreparedStatement stmtGroup = connection.prepareStatement(sqlGroup);
+            stmtGroup.setLong(1, userId);
+            ResultSet rsGroup = stmtGroup.executeQuery();
+            while (rsGroup.next()) {
+                GroupChat gc = new GroupChat(
+                        rsGroup.getLong("group_id"),
+                        rsGroup.getString("group_name"),
+                        rsGroup.getString("description"),
+                        rsGroup.getLong("creator_id"),
+                        rsGroup.getBoolean("is_private")
+                );
+                gc.setCreatedAt(rsGroup.getTimestamp("created_at"));
+                userChats.add(gc);
+            }
+
+            // --- Load Channels ---
+            String sqlChannel = "SELECT channel_id, channel_name, owner, is_private, description, created_at " +
+                    "FROM channels WHERE owner = ?";
+            PreparedStatement stmtChannel = connection.prepareStatement(sqlChannel);
+            stmtChannel.setLong(1, userId);
+            ResultSet rsChannel = stmtChannel.executeQuery();
+            while (rsChannel.next()) {
+                Channel ch = new Channel(
+                        rsChannel.getLong("channel_id"),
+                        rsChannel.getString("channel_name"),
+                        rsChannel.getLong("owner"),
+                        rsChannel.getBoolean("is_private"),
+                        rsChannel.getString("description")
+                );
+                ch.setCreatedAt(rsChannel.getTimestamp("created_at"));
+                userChats.add(ch);
+            }
+        }
+
+        return userChats;
+    }
+
 
 }
