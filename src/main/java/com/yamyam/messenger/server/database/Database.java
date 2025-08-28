@@ -137,7 +137,6 @@ public class Database {
     }
 
     public static long getUserIdByEmail(String email) throws SQLException {
-        // TODO: Implement DB query to get userId by email
         try (Connection connection = Database.getConnection()){
             String sql = "SELECT user_id FROM users WHERE email = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -164,7 +163,7 @@ public class Database {
                     "FROM messages m " +
                     "LEFT JOIN users u ON m.sender_id = u.user_id " +
                     "LEFT JOIN user_profiles p ON u.user_id = p.user_id " +
-                    "WHERE m.chat_id = ?"; 
+                    "WHERE m.chat_id = ?";
 
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setLong(1, chatId);
@@ -224,8 +223,28 @@ public class Database {
 
     // ----- Chats -----
     public static PrivateChat loadPrivateChat(long chatId) throws SQLException {
-        // TODO: Load private chat by chatId
-        return null;
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT chat_id, user1_id, user2_id, created_at " +
+                    "FROM private_chats " +
+                    "WHERE chat_id = ?";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        PrivateChat chat = new PrivateChat(
+                                rs.getLong("chat_id"),
+                                rs.getLong("user1_id"),
+                                rs.getLong("user2_id")
+                        );
+                        chat.setCreatedAt(rs.getTimestamp("created_at"));
+                        return chat;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
     }
 
     public static GroupChat loadGroupChat(long chatId) throws SQLException {
