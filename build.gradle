@@ -27,6 +27,10 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:2.0.13'
     // Connection Pool
     implementation 'com.zaxxer:HikariCP:5.1.0'
+    //for ai
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
 }
 
 application {

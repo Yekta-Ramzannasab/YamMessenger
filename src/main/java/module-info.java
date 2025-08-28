@@ -2,7 +2,6 @@ module com.yam.messenger {
     // requirement for core JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
-    requires java.prefs;
 
     // requirement of GSON and SQL library to work with JSON and PostgresSQL
     requires com.google.gson;
@@ -13,6 +12,9 @@ module com.yam.messenger {
     requires org.simplejavamail.core;
     requires com.zaxxer.hikari;
     requires java.sql;
+    requires jdk.httpserver;
+    requires java.desktop;
+    requires okhttp3;
 
     // allowing the fxml module to access your controllers deeply
     opens com.yamyam.messenger.client.gui to javafx.fxml;
