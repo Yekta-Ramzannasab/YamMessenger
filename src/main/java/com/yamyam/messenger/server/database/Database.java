@@ -271,12 +271,34 @@ public class Database {
             }
         }
 
-        return null; 
+        return null;
     }
 
 
     public static Channel loadChannel(long chatId) throws SQLException {
-        // TODO: Load channel by chatId
-        return null;
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT channel_id, channel_name, owner, is_private, description, created_at " +
+                    "FROM channels WHERE channel_id = ?";
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, chatId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Channel channel = new Channel(
+                        rs.getLong("channel_id"),
+                        rs.getString("channel_name"),
+                        rs.getLong("owner"),
+                        rs.getBoolean("is_private"),
+                        rs.getString("description")
+                );
+
+                channel.setCreatedAt(rs.getTimestamp("created_at"));
+                return channel;
+            }
+        }
+
+        return null; // return null if no channel found with given id
     }
+
 }
