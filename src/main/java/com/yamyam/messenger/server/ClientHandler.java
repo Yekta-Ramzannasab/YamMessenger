@@ -97,7 +97,7 @@ public class ClientHandler implements Runnable {
             Connection dbConnection = Database.getConnection();
 
             // Create an instance of UserHandler and pass the connection to it
-            UserHandler userHandler = new UserHandler(dbConnection);
+            UserHandler userHandler = new UserHandler();
 
             // Call the checkOrCreateUser method with the user's email
             Users user = userHandler.checkOrCreateUser(email);
