@@ -248,9 +248,32 @@ public class Database {
     }
 
     public static GroupChat loadGroupChat(long chatId) throws SQLException {
-        // TODO: Load group chat by chatId
-        return null;
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT group_id, group_name, description, creator_id, is_private, created_at " +
+                    "FROM group_chats WHERE group_id = ?";
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, chatId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                GroupChat groupChat = new GroupChat(
+                        rs.getLong("group_id"),
+                        rs.getString("group_name"),
+                        rs.getString("description"),
+                        rs.getLong("creator_id"),
+                        rs.getBoolean("is_private")
+                );
+
+                groupChat.setCreatedAt(rs.getTimestamp("created_at"));
+
+                return groupChat;
+            }
+        }
+
+        return null; 
     }
+
 
     public static Channel loadChannel(long chatId) throws SQLException {
         // TODO: Load channel by chatId
