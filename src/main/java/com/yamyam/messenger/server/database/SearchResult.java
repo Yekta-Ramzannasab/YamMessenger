@@ -1,0 +1,33 @@
+package com.yamyam.messenger.server.database;
+
+import com.yamyam.messenger.shared.model.Chat;
+import com.yamyam.messenger.shared.model.MessageEntity;
+import com.yamyam.messenger.shared.model.Users;
+
+public class SearchResult {
+    private Object entity; // Users, Chat یا MessageEntity
+    private double rank;   // رتبه تطبیق / اهمیت برای مرتب سازی
+
+    public SearchResult(Users user, double rank) {
+        this.entity = user;
+        this.rank = rank;
+    }
+
+    public SearchResult(Chat chat, double rank) {
+        this.entity = chat;
+        this.rank = rank;
+    }
+
+    public SearchResult(MessageEntity message, double rank) {
+        this.entity = message;
+        this.rank = rank;
+    }
+
+    public Object getEntity() {
+        return entity;
+    }
+
+    public double getRank() {
+        return rank;
+    }
+}
