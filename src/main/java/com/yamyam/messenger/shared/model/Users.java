@@ -11,6 +11,8 @@ public class Users {
     private boolean isDeleted;
     private String email;
     private UserProfile userProfile;
+    private double searchRank;
+
 
     public Users(){}
 
@@ -87,6 +89,14 @@ public class Users {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public double getSearchRank() {
+        return searchRank;
+    }
+
+    public void setSearchRank(double searchRank) {
+        this.searchRank = searchRank;
     }
 
     @Override

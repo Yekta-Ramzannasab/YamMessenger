@@ -15,6 +15,7 @@ public class MessageEntity {
     private boolean isDeleted;
     private MessageType status;
     private Timestamp sentAt;
+    private double searchRank;
 
     public MessageEntity(MessageType status,
                          boolean isDeleted,
@@ -126,4 +127,12 @@ public class MessageEntity {
     public void setSentAt(Timestamp sentAt) {
         this.sentAt = sentAt;
     }
+    public double getSearchRank() {
+        return searchRank;
+    }
+
+    public void setSearchRank(double searchRank) {
+        this.searchRank = searchRank;
+    }
+
 }
