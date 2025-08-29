@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.lang.reflect.Type;
 
 public class NetworkService {
     private final int PORT = 5001;
@@ -136,14 +137,17 @@ public class NetworkService {
             sendJsonMessage(message);
 
             // Reading response
-            message = receiveJsonMessage() ;
+            Message response = receiveJsonMessage();
 
-            if(message != null){
+            if(response != null){
+                String chatsJson = response.getContent();
                 Gson gson = new Gson();
-                return gson.fromJson(
-                        message.getContent(),
-                        new TypeToken<List<Chat>>() {}.getType()
-                );
+
+                // Use TypeToken to tell Gson to expect a list of type Chat
+                Type chatListType = new TypeToken<ArrayList<Chat>>() {}.getType();
+
+                // Convert json string to a real list
+                return gson.fromJson(chatsJson, chatListType);
             }else
                 return null;
         } catch (IOException e) {

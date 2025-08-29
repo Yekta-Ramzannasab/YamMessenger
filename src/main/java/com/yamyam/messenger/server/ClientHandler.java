@@ -1,8 +1,8 @@
 package com.yamyam.messenger.server;
 
-//import com.sun.net.httpserver.Request;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.services.EmailService;
+import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.server.database.UserHandler;
@@ -14,9 +14,6 @@ import okhttp3.Response;
 import okhttp3.Request;
 
 
-
-
-import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +21,9 @@ import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.yamyam.messenger.server.database.Database.getUserIdByEmail;
+import static com.yamyam.messenger.server.database.Database.loadUserChats;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -88,6 +88,28 @@ public class ClientHandler implements Runnable {
                         case 3:
                             // TODO: Based on the email sent, we must first convert the email to a user ID
                             //  then send a list of all active chats to the client through this ID.
+                            long userId ;
+                            List<Chat> activeChats ;
+                            try {
+                                userId = getUserIdByEmail(request.getSender());
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            try {
+                                activeChats = loadUserChats(userId) ;
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Message activeChatsList;
+
+                            if (activeChats != null) {
+                                String chatsJson = gson.toJson(activeChats);
+                                activeChatsList = new Message(3, "Server", chatsJson );
+                            }else
+                                activeChatsList = new Message(3, "Server", null );
+
+                            sendJsonMessage(activeChatsList);
                             break;
                         case 7:
                             String userPrompt = request.getContent();

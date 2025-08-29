@@ -12,22 +12,26 @@ repositories {
 }
 
 dependencies {
-    // Dependency for GUI ( JavaFX )
+    // GUI ( JavaFX )
     implementation 'org.openjfx:javafx-controls:21.0.2'
     implementation 'org.openjfx:javafx-fxml:21.0.2'
 
-    // Dependency for DATABASE ( postgres )
+    // DATABASE ( postgres )
     implementation 'org.postgresql:postgresql:42.7.3'
 
-    // Dependency for JSON
+    // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
 
-    // Dependency for Sending Emails
-    implementation 'org.simplejavamail:simple-java-mail:8.11.0'
+    // Email
+    implementation('org.simplejavamail:simple-java-mail:8.11.0') {
+        exclude group: 'com.github.bbottema', module: 'jetbrains-runtime-annotations'
+    }
     implementation 'org.slf4j:slf4j-simple:2.0.13'
+
     // Connection Pool
     implementation 'com.zaxxer:HikariCP:5.1.0'
-    //for ai
+
+    // AI ( deepseek )
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
 }
