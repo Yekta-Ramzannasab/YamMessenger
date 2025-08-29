@@ -2,6 +2,7 @@ module com.yam.messenger {
     // requirement for core JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.prefs;
 
     // requirement of GSON and SQL library to work with JSON and PostgresSQL
     requires com.google.gson;
