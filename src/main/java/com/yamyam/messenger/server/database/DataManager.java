@@ -136,7 +136,7 @@ public class DataManager {
         }
 
         List<Users> users = Database.searchUsers(query);
-        userSearchCache.put(query, users); // کش برای جستجوی سریع بعدی
+        userSearchCache.put(query, users);
         return users;
     }
 

@@ -5,8 +5,8 @@ import com.yamyam.messenger.shared.model.MessageEntity;
 import com.yamyam.messenger.shared.model.Users;
 
 public class SearchResult {
-    private Object entity; // Users, Chat یا MessageEntity
-    private double rank;   // رتبه تطبیق / اهمیت برای مرتب سازی
+    private Object entity; // user , chat, message
+    private double rank;   // for sorting
 
     public SearchResult(Users user, double rank) {
         this.entity = user;

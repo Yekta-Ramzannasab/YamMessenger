@@ -395,7 +395,7 @@ public class Database {
             stmt.setString(2, query);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Users user = buildUserFromResultSet(rs); // تابعی که Users را با rank می‌سازد
+                Users user = buildUserFromResultSet(rs);
                 user.setSearchRank(rs.getDouble("rank"));
                 results.add(user);
             }
@@ -501,7 +501,7 @@ public class Database {
     }
 
     public static MessageEntity buildMessageFromResultSet(ResultSet rs) throws SQLException {
-        Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0); // ساده‌سازی
+        Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0);
         Users sender = new Users(rs.getLong("sender_id"), null, null, false, false, false, null, null);
         return new MessageEntity(
                 MessageType.valueOf(rs.getString("status")),
