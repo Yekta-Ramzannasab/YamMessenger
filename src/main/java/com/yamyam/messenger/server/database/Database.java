@@ -380,4 +380,143 @@ public class Database {
             }
         }
     }
+    // ---- User Search ----
+    public static List<Users> searchUsers(String query) throws SQLException {
+        List<Users> results = new ArrayList<>();
+        String sql = "SELECT u.*, p.*, ts_rank_cd(u.search_vector, plainto_tsquery('simple', ?)) AS rank " +
+                "FROM users u " +
+                "LEFT JOIN user_profiles p ON u.user_id = p.user_id " +
+                "WHERE u.search_vector @@ plainto_tsquery('simple', ?) " +
+                "ORDER BY rank DESC LIMIT 20";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, query);
+            stmt.setString(2, query);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Users user = buildUserFromResultSet(rs); // تابعی که Users را با rank می‌سازد
+                user.setSearchRank(rs.getDouble("rank"));
+                results.add(user);
+            }
+        }
+        return results;
+    }
+
+
+    // ---- Chat Search (Group + Channel) ----
+    public static List<MessageEntity> searchMessages(String query, long userId) throws SQLException {
+        List<MessageEntity> results = new ArrayList<>();
+        String sql = "SELECT m.*, ts_rank_cd(m.search_vector, plainto_tsquery('simple', ?)) AS rank " +
+                "FROM messages m " +
+                "JOIN chat c ON m.chat_id = c.chat_id " +
+                "WHERE m.search_vector @@ plainto_tsquery('simple', ?) " +
+                "AND (c.user1 = ? OR c.user2 = ? OR c.chat_id IN " +
+                "(SELECT chat_id FROM channel_subscribers WHERE user_id = ?)) " +
+                "ORDER BY rank DESC LIMIT 30";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, query);
+            stmt.setString(2, query);
+            stmt.setLong(3, userId);
+            stmt.setLong(4, userId);
+            stmt.setLong(5, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                MessageEntity m = buildMessageFromResultSet(rs);
+                m.setSearchRank(rs.getDouble("rank"));
+                results.add(m);
+            }
+        }
+        return results;
+    }
+
+
+    public static List<Chat> searchChats(String query, long userId) throws SQLException {
+        List<Chat> results = new ArrayList<>();
+        String sql = "SELECT c.*, ts_rank_cd(c.search_vector, plainto_tsquery('simple', ?)) AS rank " +
+                "FROM chat c " +
+                "LEFT JOIN channel_subscribers cs ON c.chat_id = cs.chat_id " +
+                "WHERE c.search_vector @@ plainto_tsquery('simple', ?) " +
+                "ORDER BY rank DESC LIMIT 20";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, query);
+            stmt.setString(2, query);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Chat chat = buildChatFromResultSet(rs);
+                chat.setSearchRank(rs.getDouble("rank"));
+                results.add(chat);
+            }
+        }
+        return results;
+    }
+    public static Users buildUserFromResultSet(ResultSet rs) throws SQLException {
+        UserProfile profile = null;
+        if (rs.getLong("profile_id") != 0) {
+            profile = new UserProfile(
+                    rs.getLong("profile_id"),
+                    rs.getString("profile_image_url"),
+                    rs.getString("bio"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getTimestamp("updated_at"),
+                    rs.getString("profile_name")
+            );
+        }
+
+        return new Users(
+                rs.getLong("user_id"),
+                rs.getTimestamp("created_at"),
+                rs.getTimestamp("last_seen"),
+                rs.getBoolean("is_verified"),
+                rs.getBoolean("is_online"),
+                rs.getBoolean("is_deleted"),
+                rs.getString("email"),
+                profile
+        );
+    }
+
+    public static Chat buildChatFromResultSet(ResultSet rs) throws SQLException {
+        Chat chat;
+        if ("PRIVATE_CHAT".equals(rs.getString("chat_type"))) {
+            chat = new PrivateChat(
+                    rs.getLong("chat_id"),
+                    rs.getLong("user1"),
+                    rs.getLong("user2")
+            );
+        } else {
+            chat = new Channel(
+                    rs.getLong("chat_id"),
+                    rs.getString("channel_name"),
+                    rs.getLong("owner"),
+                    rs.getBoolean("is_private"),
+                    rs.getString("description")
+            );
+        }
+        return chat;
+    }
+
+    public static MessageEntity buildMessageFromResultSet(ResultSet rs) throws SQLException {
+        Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0); // ساده‌سازی
+        Users sender = new Users(rs.getLong("sender_id"), null, null, false, false, false, null, null);
+        return new MessageEntity(
+                MessageType.valueOf(rs.getString("status")),
+                rs.getBoolean("is_deleted"),
+                rs.getBoolean("is_edited"),
+                rs.getLong("forward"),
+                rs.getLong("reply"),
+                MessageType.valueOf(rs.getString("message_type")),
+                rs.getString("message_text"),
+                chat,
+                sender,
+                rs.getLong("message_id")
+        );
+    }
+
+
+
 }
