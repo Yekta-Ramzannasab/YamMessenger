@@ -102,11 +102,13 @@ public class ClientHandler implements Runnable {
                                 throw new RuntimeException(e);
                             }
                             Message activeChatsList;
+
                             if (activeChats != null) {
-                                activeChatsList = new Message(3, "Server", activeChats.toString() );
+                                String chatsJson = gson.toJson(activeChats);
+                                activeChatsList = new Message(3, "Server", chatsJson );
                             }else
                                 activeChatsList = new Message(3, "Server", null );
-                            
+
                             sendJsonMessage(activeChatsList);
                             break;
                         case 7:
