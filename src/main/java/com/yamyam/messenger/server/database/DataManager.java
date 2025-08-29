@@ -18,7 +18,9 @@ public class DataManager {
     private final Map<Long, Chat> chatCache = new ConcurrentHashMap<>();
     private final List<DataChangeListener> listeners = new CopyOnWriteArrayList<>();
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
-    private static final Map<String, List<UserProfile>> searchCache = new ConcurrentHashMap<>();
+    private final Map<String, List<Users>> userSearchCache = new ConcurrentHashMap<>();
+    private final Map<String, List<Chat>> chatSearchCache = new ConcurrentHashMap<>();
+    private final Map<String, List<MessageEntity>> messageSearchCache = new ConcurrentHashMap<>();
 
 
     // Private constructor to enforce singleton
@@ -126,58 +128,40 @@ public class DataManager {
             l.onDataChanged(eventType, data);
         }
     }
-    public static List<UserProfile> searchUsers(String query) throws SQLException {
-        // first search in cash
-        if (searchCache.containsKey(query.toLowerCase())) {
-            System.out.println("⚡ Result from cache for: " + query);
-            return searchCache.get(query.toLowerCase());
+    // --------- Users ----------
+    public List<Users> searchUsers(String query) throws SQLException {
+
+        if (userSearchCache.containsKey(query)) {
+            return userSearchCache.get(query);
         }
 
-
-        List<UserProfile> results = new ArrayList<>();
-
-        String sql = """
-            SELECT up.profile_id,
-                   up.user_id,
-                   up.profile_image_url,
-                   up.bio,
-                   up.username,
-                   up.password_hashed,
-                   up.updated_at,
-                   up.profile_name,
-                   ts_rank_cd(u.search_vector, plainto_tsquery('english', ?)) AS rank
-            FROM user_profiles up
-            JOIN users u ON u.id = up.user_id
-            WHERE u.search_vector @@ plainto_tsquery('english', ?)
-            ORDER BY rank DESC
-            LIMIT 20;
-        """;
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, query);
-            stmt.setString(2, query);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    UserProfile profile = new UserProfile(
-                            rs.getLong("profile_id"),
-                            rs.getString("profile_image_url"),
-                            rs.getString("bio"),
-                            rs.getString("username"),
-                            rs.getString("password_hashed"),
-                            rs.getTimestamp("updated_at"),
-                            rs.getString("profile_name")
-                    );
-                    profile.setUserId(rs.getLong("user_id"));
-                    results.add(profile);
-                }
-            }
-        }
-
-        searchCache.put(query.toLowerCase(), results);
-
-        return results;
+        List<Users> users = Database.searchUsers(query);
+        userSearchCache.put(query, users); // کش برای جستجوی سریع بعدی
+        return users;
     }
+
+    // --------- Chats ----------
+    public List<Chat> searchChats(String query, long userId) throws SQLException {
+        if (chatSearchCache.containsKey(query)) {
+            return chatSearchCache.get(query);
+        }
+
+        List<Chat> chats = Database.searchChats(query, userId);
+        chatSearchCache.put(query, chats);
+        return chats;
+    }
+
+    // --------- Messages ----------
+    public List<MessageEntity> searchMessages(String query, long userId) throws SQLException {
+        if (messageSearchCache.containsKey(query)) {
+            return messageSearchCache.get(query);
+        }
+
+        List<MessageEntity> messages = Database.searchMessages(query, userId);
+        messageSearchCache.put(query, messages);
+        return messages;
+    }
+
+
+
 }
