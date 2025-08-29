@@ -8,5 +8,5 @@ public enum MessageType {
     DOCUMENT,
     LOCATION,
     CONTACT,
-    VOICE
+    SENT, VOICE
 }

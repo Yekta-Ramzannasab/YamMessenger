@@ -2,10 +2,17 @@ package com.yamyam.messenger.server;
 
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.services.EmailService;
+import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.server.database.UserHandler;
 import com.yamyam.messenger.shared.model.Users;
+import okhttp3.OkHttpClient;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.Request;
+
 
 import java.io.*;
 import java.net.Socket;
@@ -14,6 +21,9 @@ import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.yamyam.messenger.server.database.Database.getUserIdByEmail;
+import static com.yamyam.messenger.server.database.Database.loadUserChats;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -59,7 +69,15 @@ public class ClientHandler implements Runnable {
                     }
 
                     switch (request.getType()) { // do tasks base on request type
-                        case 5:
+                        case 1:
+                            Users user = handleLogin(request.getSender());
+                            Message loginUser = null;
+                            if (user != null) {
+                                loginUser = new Message(5, "Server", user.toString() );
+                            }
+                            sendJsonMessage(loginUser);
+                            break;
+                        case 2:
                             String email = request.getSender();
                             int verificationCode = generateAndSendVerificationCode(email);
 
@@ -67,15 +85,40 @@ public class ClientHandler implements Runnable {
                             Message codeResponse = new Message(5, "Server", responseContent);
                             sendJsonMessage(codeResponse);
                             break;
-                        case 6:
-                            Users user = handleLogin(request.getSender());
-
-                            Message loginUser = null;
-                            if (user != null) {
-                                loginUser = new Message(5, "Server", user.toString() );
+                        case 3:
+                            // TODO: Based on the email sent, we must first convert the email to a user ID
+                            //  then send a list of all active chats to the client through this ID.
+                            long userId ;
+                            List<Chat> activeChats ;
+                            try {
+                                userId = getUserIdByEmail(request.getSender());
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
                             }
-                            sendJsonMessage(loginUser);
+
+                            try {
+                                activeChats = loadUserChats(userId) ;
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Message activeChatsList;
+
+                            if (activeChats != null) {
+                                String chatsJson = gson.toJson(activeChats);
+                                activeChatsList = new Message(3, "Server", chatsJson );
+                            }else
+                                activeChatsList = new Message(3, "Server", null );
+
+                            sendJsonMessage(activeChatsList);
                             break;
+                        case 7:
+                            String userPrompt = request.getContent();
+                            String aiResponse = getAIResponse(userPrompt);
+
+                            Message responseMessage = new Message(7, "AI", aiResponse);
+                            sendJsonMessage(responseMessage);
+                            break;
+
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
@@ -144,4 +187,37 @@ public class ClientHandler implements Runnable {
             return -1;
         }
     }
+    private String getAIResponse(String prompt) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        String apiKey = "sk-7G3aFals6gYxmTYHXIBV7EpYhc9JK5jyO8XTgsEaeLeSITWD";
+
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonBody = "{\n" +
+                "  \"model\": \"deepseek-chat\",\n" +
+                "  \"messages\": [\n" +
+                "    {\"role\": \"user\", \"content\": \"" + prompt + "\"}\n" +
+                "  ]\n" +
+                "}";
+
+        RequestBody body = RequestBody.create(jsonBody, MediaType.get("application/json"));
+        Request request = new Request.Builder()
+                .url("https://api.gapgpt.app/v1/chat/completions")
+                .post(body)
+                .addHeader("Authorization", "Bearer " + apiKey)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+                String responseBody = response.body().string();
+                int start = responseBody.indexOf("\"content\":\"") + 10;
+                int end = responseBody.indexOf("\"", start);
+                return responseBody.substring(start, end);
+            } else {
+                return "error";
+            }
+        }
+    }
+
+
 }
