@@ -127,13 +127,13 @@ public class DataManager {
         }
     }
     public static List<UserProfile> searchUsers(String query) throws SQLException {
-        // 1. اول توی کش بگرد
+        // first search in cash
         if (searchCache.containsKey(query.toLowerCase())) {
             System.out.println("⚡ Result from cache for: " + query);
             return searchCache.get(query.toLowerCase());
         }
 
-        // 2. اگر نبود برو سراغ دیتابیس
+
         List<UserProfile> results = new ArrayList<>();
 
         String sql = """
