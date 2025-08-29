@@ -43,7 +43,8 @@ public class Database {
     }
 
     // Private constructor to prevent instantiation (singleton-like)
-    private Database() {}
+    private Database() {
+    }
 
     /**
      * Get a connection from the pool.
@@ -55,6 +56,7 @@ public class Database {
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
+
     public static Users loadUser(long userId) throws SQLException {
         // profile could be null?
         try (Connection connection = Database.getConnection()) {
@@ -89,8 +91,9 @@ public class Database {
                     );
 
                     return user;
+                } else {
+                    return null;
                 }
-                else{return null;}
             }
         }
     }
@@ -137,12 +140,12 @@ public class Database {
     }
 
     public static long getUserIdByEmail(String email) throws SQLException {
-        try (Connection connection = Database.getConnection()){
+        try (Connection connection = Database.getConnection()) {
             String sql = "SELECT user_id FROM users WHERE email = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1,email);
+            statement.setString(1, email);
             ResultSet rs = statement.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 return rs.getLong("user_id");
             }
 
@@ -218,7 +221,6 @@ public class Database {
 
         return messages;
     }
-
 
 
     // ----- Chats -----
@@ -300,9 +302,10 @@ public class Database {
 
         return null; // return null if no channel found with given id
     }
+
     public static List<Chat> loadUserChats(long userId) throws SQLException {
         List<Chat> userChats = new ArrayList<>();
-
+        int counter = 0;
         try (Connection connection = Database.getConnection()) {
             // --- Load Private Chats ---
             String sqlPrivate = "SELECT chat_id, user1, user2, created_at FROM private_chats " +
@@ -311,14 +314,18 @@ public class Database {
             stmtPrivate.setLong(1, userId);
             stmtPrivate.setLong(2, userId);
             ResultSet rsPrivate = stmtPrivate.executeQuery();
-            while (rsPrivate.next()) {
-                PrivateChat pc = new PrivateChat(
-                        rsPrivate.getLong("chat_id"),
-                        rsPrivate.getLong("user1"),
-                        rsPrivate.getLong("user2")
-                );
-                pc.setCreatedAt(rsPrivate.getTimestamp("created_at"));
-                userChats.add(pc);
+            if (rsPrivate.next()) {
+                while (rsPrivate.next()) {
+                    PrivateChat pc = new PrivateChat(
+                            rsPrivate.getLong("chat_id"),
+                            rsPrivate.getLong("user1"),
+                            rsPrivate.getLong("user2")
+                    );
+                    pc.setCreatedAt(rsPrivate.getTimestamp("created_at"));
+                    userChats.add(pc);
+                }
+            } else {
+                counter++;
             }
 
             // --- Load Group Chats ---
@@ -329,16 +336,20 @@ public class Database {
             PreparedStatement stmtGroup = connection.prepareStatement(sqlGroup);
             stmtGroup.setLong(1, userId);
             ResultSet rsGroup = stmtGroup.executeQuery();
-            while (rsGroup.next()) {
-                GroupChat gc = new GroupChat(
-                        rsGroup.getLong("group_id"),
-                        rsGroup.getString("group_name"),
-                        rsGroup.getString("description"),
-                        rsGroup.getLong("creator_id"),
-                        rsGroup.getBoolean("is_private")
-                );
-                gc.setCreatedAt(rsGroup.getTimestamp("created_at"));
-                userChats.add(gc);
+            if (rsGroup.next()) {
+                while (rsGroup.next()) {
+                    GroupChat gc = new GroupChat(
+                            rsGroup.getLong("group_id"),
+                            rsGroup.getString("group_name"),
+                            rsGroup.getString("description"),
+                            rsGroup.getLong("creator_id"),
+                            rsGroup.getBoolean("is_private")
+                    );
+                    gc.setCreatedAt(rsGroup.getTimestamp("created_at"));
+                    userChats.add(gc);
+                }
+            } else {
+                counter++;
             }
 
             // --- Load Channels ---
@@ -347,21 +358,26 @@ public class Database {
             PreparedStatement stmtChannel = connection.prepareStatement(sqlChannel);
             stmtChannel.setLong(1, userId);
             ResultSet rsChannel = stmtChannel.executeQuery();
-            while (rsChannel.next()) {
-                Channel ch = new Channel(
-                        rsChannel.getLong("channel_id"),
-                        rsChannel.getString("channel_name"),
-                        rsChannel.getLong("owner"),
-                        rsChannel.getBoolean("is_private"),
-                        rsChannel.getString("description")
-                );
-                ch.setCreatedAt(rsChannel.getTimestamp("created_at"));
-                userChats.add(ch);
+            if (rsChannel.next()) {
+                while (rsChannel.next()) {
+                    Channel ch = new Channel(
+                            rsChannel.getLong("channel_id"),
+                            rsChannel.getString("channel_name"),
+                            rsChannel.getLong("owner"),
+                            rsChannel.getBoolean("is_private"),
+                            rsChannel.getString("description")
+                    );
+                    ch.setCreatedAt(rsChannel.getTimestamp("created_at"));
+                    userChats.add(ch);
+                }
+            } else {
+                counter++;
+            }
+            if (counter == 3) {
+                return null;
+            } else {
+                return userChats;
             }
         }
-
-        return userChats;
     }
-
-
 }
