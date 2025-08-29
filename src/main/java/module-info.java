@@ -17,13 +17,10 @@ module com.yam.messenger {
     requires java.desktop;
     requires okhttp3;
 
-    // allowing the fxml module to access your controllers deeply
+
+
+
     opens com.yamyam.messenger.client.gui to javafx.fxml;
-    opens com.yamyam.messenger.client.gui.controller to javafx.fxml;
-
-
-
-    // making the main program package and shared classes available for execution
 
     opens com.yamyam.messenger.client.gui.controller.main to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.auth to javafx.fxml;
