@@ -21,6 +21,8 @@ public class DataManager {
     private final Map<String, List<Users>> userSearchCache = new ConcurrentHashMap<>();
     private final Map<String, List<Chat>> chatSearchCache = new ConcurrentHashMap<>();
     private final Map<String, List<MessageEntity>> messageSearchCache = new ConcurrentHashMap<>();
+    private final Map<Long, List<Contact>> contactCache = new HashMap<>();
+
 
 
     // Private constructor to enforce singleton
@@ -63,6 +65,16 @@ public class DataManager {
         }
         return users;
     }
+    public List<Contact> getContacts(long userId) throws SQLException {
+        if (contactCache.containsKey(userId)) {
+            return contactCache.get(userId);
+        }
+
+        List<Contact> contacts = new ContactHandler().getContacts(userId);
+        contactCache.put(userId, contacts);
+        return contacts;
+    }
+
 
     // ---------------- Messages ----------------
     public List<MessageEntity> getMessages(long chatId) throws SQLException {
@@ -157,6 +169,7 @@ public class DataManager {
         System.out.println("[DataManager] Loaded " + result.size() + " group/channel chats for user " + userId);
         return result;
     }
+
 
 
     // ---------------- Observer Pattern ----------------
