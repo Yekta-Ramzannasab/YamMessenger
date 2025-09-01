@@ -105,6 +105,7 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(response);
                             break;
                         }
+
                         case 7:
                             String userPrompt = request.getContent();
                             String aiResponse = getAIResponse(userPrompt);
@@ -112,6 +113,24 @@ public class ClientHandler implements Runnable {
                             Message responseMessage = new Message(7, "AI", aiResponse);
                             sendJsonMessage(responseMessage);
                             break;
+                        case 8: {
+                            long userId;
+                            List<Chat> groupAndChannelChats;
+
+                            try {
+                                userId = getUserIdByEmail(request.getSender());
+                                groupAndChannelChats = DataManager.getInstance().getGroupAndChannelChatsForUser(userId);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(8, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(groupAndChannelChats);
+                            Message response = new Message(8, "Server", json);
+                            sendJsonMessage(response);
+                            break;
+                        }
 
                         default:
                             System.err.println("Unknown request type: " + request.getType());
