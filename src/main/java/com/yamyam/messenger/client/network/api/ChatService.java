@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ChatService {
     void openChat(long meUserId, long targetUserId);
-    List<PrivateChat> getChatsForUser(long userId);
+    List<PrivateChat> getChatsForUser(String email);
 
     //List<Message> getHistory(long meUserId, long targetUserId, int limit);
     //void send(long meUserId, long targetUserId, String text);
