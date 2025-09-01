@@ -135,6 +135,20 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(new Message(10, "Server", json));
                             break;
                         }
+                        case 11: {
+                            List<Users> allUsers;
+                            try {
+                                allUsers = DataManager.getInstance().getAllUsers();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(11, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(allUsers);
+                            sendJsonMessage(new Message(11, "Server", json));
+                            break;
+                        }
 
                         default:
                             System.err.println("Unknown request type: " + request.getType());
