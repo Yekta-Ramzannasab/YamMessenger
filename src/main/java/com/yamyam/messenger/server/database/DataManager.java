@@ -136,7 +136,7 @@ public class DataManager {
     public List<Chat> getGroupAndChannelChatsForUser(long userId) throws SQLException {
         List<Chat> result = new ArrayList<>();
         Set<Long> seen = new HashSet<>();
-        
+
         List<Chat> rawChats = Database.getUserGroupsAndChannels(userId);
 
         for (Chat chat : rawChats) {

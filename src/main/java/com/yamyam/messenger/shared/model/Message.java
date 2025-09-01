@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
 
-    public int type; // e.g., 0 = login, 1 = chat message, 2 = file upload, 5 = verification code, etc.
+    public int type; // e.g., 0 = login, 1 = chat message, 2 = file upload, 5 = verification code, etc. 3 = getPrivate chats
     public String sender;
     public String content;    // chat text, filename, password, etc.
 
