@@ -1,6 +1,7 @@
 package com.yamyam.messenger.client.network.api;
 
 
+import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.PrivateChat;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public interface ChatService {
     void openChat(long meUserId, long targetUserId);
     List<PrivateChat> getChatsForUser(String email);
+    List<Chat> getGroupAndChannelChatsForUser(String email);
 
     //List<Message> getHistory(long meUserId, long targetUserId, int limit);
     //void send(long meUserId, long targetUserId, String text);
