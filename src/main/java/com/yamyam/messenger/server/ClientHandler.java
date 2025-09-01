@@ -92,7 +92,7 @@ public class ClientHandler implements Runnable {
                             List<PrivateChat> privateChats;
 
                             try {
-                                userId = getUserIdByEmail(request.getSender()); 
+                                userId = getUserIdByEmail(request.getSender());
                                 privateChats = DataManager.getInstance().getPrivateChatsForUser(userId);
                             } catch (SQLException e) {
                                 e.printStackTrace();
