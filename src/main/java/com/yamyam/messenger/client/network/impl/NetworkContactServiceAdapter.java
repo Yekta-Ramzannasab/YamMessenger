@@ -2,7 +2,9 @@ package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.api.ContactService;
-import com.yamyam.messenger.client.network.dto.Contact;
+import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.shared.model.Contact;
+import com.yamyam.messenger.shared.model.Users;
 
 import java.util.List;
 
@@ -12,12 +14,14 @@ public class NetworkContactServiceAdapter implements ContactService {
 
     @Override
     public List<Contact> getContacts(long meUserId) {
-        // TODO: when back ready
-        // temporary for now to go through UI
-        return List.of(
-                new Contact(2L, "Caroline Gray", null, true),
-                new Contact(3L, "Presley Martin", null, false),
-                new Contact(4L, "Matthew Brown", null, true)
-        );
+        try {
+            Users me = Database.loadUser(meUserId);
+
+            return net.fetchContacts(me.getEmail());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
     }
 }
