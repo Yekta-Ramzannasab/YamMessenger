@@ -201,4 +201,16 @@ public class NetworkService {
 
         return List.of();
     }
+    public List<Users> fetchAllUsers() throws IOException {
+        Message request = new Message(11, "system", "GET_ALL_USERS");
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            Type listType = new TypeToken<List<Users>>() {}.getType();
+            return new Gson().fromJson(response.getContent(), listType);
+        }
+
+        return List.of();
+    }
 }
