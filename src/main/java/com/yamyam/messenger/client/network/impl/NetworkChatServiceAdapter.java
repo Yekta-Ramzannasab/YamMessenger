@@ -28,6 +28,15 @@ public class NetworkChatServiceAdapter implements ChatService {
             return List.of();
         }
     }
+    @Override
+    public List<Chat> getGroupAndChannelChatsForUser(String email) {
+        try {
+            return net.fetchGroupAndChannelChatsForUser(email);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
 
     
 }
