@@ -1,11 +1,8 @@
 package com.yamyam.messenger.client.network;
 
 import com.google.gson.reflect.TypeToken;
-import com.yamyam.messenger.shared.model.Chat;
-import com.yamyam.messenger.shared.model.Message;
+import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
-import com.yamyam.messenger.shared.model.PrivateChat;
-import com.yamyam.messenger.shared.model.Users;
 
 import java.io.*;
 import java.net.Socket;
@@ -187,6 +184,18 @@ public class NetworkService {
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
             Type listType = new TypeToken<List<Chat>>() {}.getType();
+            return new Gson().fromJson(response.getContent(), listType);
+        }
+
+        return List.of();
+    }
+    public List<Contact> fetchContacts(String email) throws IOException {
+        Message request = new Message(10, email, "GET_CONTACTS");
+        sendJsonMessage(request);
+        Message response = receiveJsonMessage();
+
+        if (response != null && response.getContent() != null) {
+            Type listType = new TypeToken<List<Contact>>() {}.getType();
             return new Gson().fromJson(response.getContent(), listType);
         }
 
