@@ -1,11 +1,13 @@
 package com.yamyam.messenger.server;
 
+import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.services.EmailService;
 import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
 import com.yamyam.messenger.server.database.UserHandler;
+import com.yamyam.messenger.shared.model.PrivateChat;
 import com.yamyam.messenger.shared.model.Users;
 import okhttp3.OkHttpClient;
 import okhttp3.MediaType;
@@ -85,32 +87,24 @@ public class ClientHandler implements Runnable {
                             Message codeResponse = new Message(5, "Server", responseContent);
                             sendJsonMessage(codeResponse);
                             break;
-                        case 3:
-                            // TODO: Based on the email sent, we must first convert the email to a user ID
-                            //  then send a list of all active chats to the client through this ID.
-                            long userId ;
-                            List<Chat> activeChats ;
-                            try {
-                                userId = getUserIdByEmail(request.getSender());
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                            }
+                        case 3: {
+                            long userId;
+                            List<PrivateChat> privateChats;
 
                             try {
-                                activeChats = loadUserChats(userId) ;
+                                userId = getUserIdByEmail(request.getSender()); 
+                                privateChats = DataManager.getInstance().getPrivateChatsForUser(userId);
                             } catch (SQLException e) {
-                                throw new RuntimeException(e);
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(3, "Server", null));
+                                break;
                             }
-                            Message activeChatsList;
 
-                            if (activeChats != null) {
-                                String chatsJson = gson.toJson(activeChats);
-                                activeChatsList = new Message(3, "Server", chatsJson );
-                            }else
-                                activeChatsList = new Message(3, "Server", null );
-
-                            sendJsonMessage(activeChatsList);
+                            String json = gson.toJson(privateChats);
+                            Message response = new Message(3, "Server", json);
+                            sendJsonMessage(response);
                             break;
+                        }
                         case 7:
                             String userPrompt = request.getContent();
                             String aiResponse = getAIResponse(userPrompt);
