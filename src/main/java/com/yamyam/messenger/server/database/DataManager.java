@@ -117,6 +117,23 @@ public class DataManager {
             }
         });
     }
+    public List<PrivateChat> getPrivateChatsForUser(long userId) throws SQLException {
+        List<PrivateChat> allChats = Database.getPrivateChatsByUserId(userId);
+        List<PrivateChat> privateChats = new ArrayList<>();
+        Set<Long> seen = new HashSet<>();
+
+        for (PrivateChat chat : allChats) {
+            long chatId = chat.getChatId();
+            if (seen.add(chatId)) {
+                chatCache.putIfAbsent(chatId, chat); 
+                privateChats.add(chat);
+            }
+        }
+
+        System.out.println("[DataManager] Loaded " + privateChats.size() + " private chats for user " + userId);
+        return privateChats;
+    }
+
 
     // ---------------- Observer Pattern ----------------
     public void addListener(DataChangeListener listener) {
