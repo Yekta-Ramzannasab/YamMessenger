@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.Message;
 import com.google.gson.Gson;
+import com.yamyam.messenger.shared.model.PrivateChat;
 import com.yamyam.messenger.shared.model.Users;
 
 import java.io.*;
@@ -166,5 +167,17 @@ public class NetworkService {
             e.printStackTrace();
             return "error server";
         }
+    }
+    public List<PrivateChat> fetchPrivateChatsForUser(String email) throws IOException {
+        Message request = new Message(3, email, "GET_PRIVATE_CHATS");
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            Type listType = new TypeToken<List<PrivateChat>>() {}.getType();
+            return new Gson().fromJson(response.getContent(), listType);
+        }
+
+        return List.of(); 
     }
 }
