@@ -178,6 +178,18 @@ public class NetworkService {
             return new Gson().fromJson(response.getContent(), listType);
         }
 
-        return List.of(); 
+        return List.of();
+    }
+    public List<Chat> fetchGroupAndChannelChatsForUser(String email) throws IOException {
+        Message request = new Message(8, email, "GET_GROUP_CHANNEL_CHATS");
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            Type listType = new TypeToken<List<Chat>>() {}.getType();
+            return new Gson().fromJson(response.getContent(), listType);
+        }
+
+        return List.of();
     }
 }
