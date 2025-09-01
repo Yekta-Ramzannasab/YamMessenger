@@ -454,7 +454,7 @@ public class Database {
         }
         return results;
     }
-    public List<PrivateChat> getPrivateChatsByUserId(long userId) throws SQLException {
+    public static List<PrivateChat> getPrivateChatsByUserId(long userId) throws SQLException {
         List<PrivateChat> privateChats = new ArrayList<>();
 
         String sql = "SELECT chat_id, user1_id, user2_id FROM private_chat " +
