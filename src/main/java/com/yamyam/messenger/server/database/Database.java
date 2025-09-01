@@ -454,6 +454,34 @@ public class Database {
         }
         return results;
     }
+    public List<PrivateChat> getPrivateChatsByUserId(long userId) throws SQLException {
+        List<PrivateChat> privateChats = new ArrayList<>();
+
+        String sql = "SELECT chat_id, user1_id, user2_id FROM private_chat " +
+                "WHERE user1_id = ? OR user2_id = ?";
+        try (Connection connection = Database.getConnection()) {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setLong(1, userId);
+                stmt.setLong(2, userId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        long chatId = rs.getLong("chat_id");
+                        long user1 = rs.getLong("user1_id");
+                        long user2 = rs.getLong("user2_id");
+
+                        // create PrivateChat
+                        PrivateChat privateChat = new PrivateChat(chatId, user1, user2);
+                        privateChats.add(privateChat);
+                    }
+                }
+            }
+        }
+
+        return privateChats;
+    }
+
+
     public static Users buildUserFromResultSet(ResultSet rs) throws SQLException {
         UserProfile profile = null;
         if (rs.getLong("profile_id") != 0) {
@@ -516,6 +544,7 @@ public class Database {
                 rs.getLong("message_id")
         );
     }
+
 
 
 
