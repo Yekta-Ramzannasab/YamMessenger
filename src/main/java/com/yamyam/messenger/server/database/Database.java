@@ -480,7 +480,7 @@ public class Database {
 
         return privateChats;
     }
-    public List<Chat> getUserGroupsAndChannels(long userId) throws SQLException {
+    public static List<Chat> getUserGroupsAndChannels(long userId) throws SQLException {
         List<Chat> chats = new ArrayList<>();
 
         String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private " +
