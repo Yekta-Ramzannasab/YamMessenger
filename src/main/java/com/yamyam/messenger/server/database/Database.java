@@ -480,6 +480,56 @@ public class Database {
 
         return privateChats;
     }
+    public List<Chat> getUserGroupsAndChannels(long userId) throws SQLException {
+        List<Chat> chats = new ArrayList<>();
+
+        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private " +
+                "FROM group_chat g " +
+                "JOIN group_member gm ON g.chat_id = gm.group_id " +
+                "WHERE gm.user_id = ?";
+        try(Connection connection = Database.getConnection()) {
+            try (PreparedStatement stmt = connection.prepareStatement(groupSql)) {
+                stmt.setLong(1, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        GroupChat groupChat = new GroupChat(
+                                rs.getLong("chat_id"),
+                                rs.getString("group_name"),
+                                rs.getString("description"),
+                                rs.getLong("creator_id"),
+                                rs.getBoolean("is_private")
+                        );
+                        chats.add(groupChat);
+                    }
+                }
+            }
+        }
+
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.owner, c.is_private, c.description " +
+                "FROM channel c " +
+                "JOIN channel_subscribers cs ON c.chat_id = cs.channel_id " +
+                "WHERE cs.user_id = ?";
+        try(Connection connection = Database.getConnection()) {
+            try (PreparedStatement stmt = connection.prepareStatement(channelSql)) {
+                stmt.setLong(1, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Channel channel = new Channel(
+                                rs.getLong("chat_id"),
+                                rs.getString("channel_name"),
+                                rs.getLong("owner"),
+                                rs.getBoolean("is_private"),
+                                rs.getString("description")
+                        );
+                        chats.add(channel);
+                    }
+                }
+            }
+        }
+
+        return chats;
+    }
+
 
 
     public static Users buildUserFromResultSet(ResultSet rs) throws SQLException {
