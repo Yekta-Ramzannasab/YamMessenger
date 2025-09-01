@@ -3,12 +3,9 @@ package com.yamyam.messenger.server;
 import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.services.EmailService;
-import com.yamyam.messenger.shared.model.Chat;
-import com.yamyam.messenger.shared.model.Message;
+import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
 import com.yamyam.messenger.server.database.UserHandler;
-import com.yamyam.messenger.shared.model.PrivateChat;
-import com.yamyam.messenger.shared.model.Users;
 import okhttp3.OkHttpClient;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -131,6 +128,13 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(response);
                             break;
                         }
+                        case 10: {
+                            long userId = getUserIdByEmail(request.getSender());
+                            List<Contact> contacts = DataManager.getInstance().getContacts(userId);
+                            String json = gson.toJson(contacts);
+                            sendJsonMessage(new Message(10, "Server", json));
+                            break;
+                        }
 
                         default:
                             System.err.println("Unknown request type: " + request.getType());
@@ -142,6 +146,8 @@ public class ClientHandler implements Runnable {
             System.out.println("Client " + socket.getInetAddress() + " disconnected.");
         } catch (IOException e) {
             System.err.println("Error with client " + socket.getInetAddress() + ": " + e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         } finally {
             System.out.println("finally error");
         }
