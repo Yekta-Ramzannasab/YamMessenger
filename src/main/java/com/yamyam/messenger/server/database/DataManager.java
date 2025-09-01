@@ -125,13 +125,37 @@ public class DataManager {
         for (PrivateChat chat : allChats) {
             long chatId = chat.getChatId();
             if (seen.add(chatId)) {
-                chatCache.putIfAbsent(chatId, chat); 
+                chatCache.putIfAbsent(chatId, chat);
                 privateChats.add(chat);
             }
         }
 
         System.out.println("[DataManager] Loaded " + privateChats.size() + " private chats for user " + userId);
         return privateChats;
+    }
+    public List<Chat> getGroupAndChannelChatsForUser(long userId) throws SQLException {
+        List<Chat> result = new ArrayList<>();
+        Set<Long> seen = new HashSet<>();
+        
+        List<Chat> rawChats = Database.getUserGroupsAndChannels(userId);
+
+        for (Chat chat : rawChats) {
+            long chatId = chat.getChatId();
+
+            if (seen.add(chatId)) {
+                Chat cached = chatCache.get(chatId);
+
+                if (cached != null) {
+                    result.add(cached);
+                } else {
+                    chatCache.put(chatId, chat);
+                    result.add(chat);
+                }
+            }
+        }
+
+        System.out.println("[DataManager] Loaded " + result.size() + " group/channel chats for user " + userId);
+        return result;
     }
 
 
