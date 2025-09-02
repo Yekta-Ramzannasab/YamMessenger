@@ -4,6 +4,7 @@ import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
+import com.yamyam.messenger.shared.model.ContactRelation;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -382,7 +383,7 @@ public class ChatController implements Initializable {
        -----* *------ */
     private void loadContactsFromService() {
         long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L; // TEMP until login gets wired
-        List<Contact> contacts = ServiceLocator.contacts().getContacts(meUserId);
+        List<ContactRelation> contacts = ServiceLocator.contacts().getContacts(meUserId);
         loadChats(contacts);
     }
 

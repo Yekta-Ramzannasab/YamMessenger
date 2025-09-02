@@ -2,9 +2,6 @@ package com.yamyam.messenger.server.database;
 
 import com.yamyam.messenger.shared.model.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -21,7 +18,7 @@ public class DataManager {
     private final Map<String, List<Users>> userSearchCache = new ConcurrentHashMap<>();
     private final Map<String, List<Chat>> chatSearchCache = new ConcurrentHashMap<>();
     private final Map<String, List<MessageEntity>> messageSearchCache = new ConcurrentHashMap<>();
-    private final Map<Long, List<Contact>> contactCache = new HashMap<>();
+    private final Map<Long, List<ContactRelation>> contactCache = new HashMap<>();
     private final Map<String, PrivateChat> privateChatCache = new HashMap<>();
     private final Map<Long, Channel> channelCache = new HashMap<>();
     private final Map<String, ChannelSubscribers> subscriptionCache = new HashMap<>();
@@ -68,14 +65,14 @@ public class DataManager {
         }
         return users;
     }
-    public List<Contact> getContacts(long userId) throws SQLException {
+    public List<ContactRelation> getContacts(long userId) throws SQLException {
         if (contactCache.containsKey(userId)) {
             return contactCache.get(userId);
         }
 
-        List<Contact> contacts = new ContactHandler().getContacts(userId);
-        contactCache.put(userId, contacts);
-        return contacts;
+        List<ContactRelation> contactRelations = new ContactHandler().getContacts(userId);
+        contactCache.put(userId, contactRelations);
+        return contactRelations;
     }
 
 

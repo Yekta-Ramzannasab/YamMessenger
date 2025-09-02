@@ -1,6 +1,6 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.Contact;
+import com.yamyam.messenger.shared.model.ContactRelation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,23 +21,23 @@ public class ContactHandler {
         }
     }
 
-    public List<Contact> getContacts(long ownerId) throws SQLException {
-        List<Contact> contacts = new ArrayList<>();
+    public List<ContactRelation> getContacts(long ownerId) throws SQLException {
+        List<ContactRelation> contactRelations = new ArrayList<>();
         String sql = "SELECT * FROM contacts WHERE owner_id = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, ownerId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Contact contact = new Contact(
+                    ContactRelation contactRelation = new ContactRelation(
                             rs.getLong("owner_id"),
                             rs.getLong("contact_id"),
                             rs.getTimestamp("added_at").toLocalDateTime()
                     );
-                    contacts.add(contact);
+                    contactRelations.add(contactRelation);
                 }
             }
         }
-        return contacts;
+        return contactRelations;
     }
 }
