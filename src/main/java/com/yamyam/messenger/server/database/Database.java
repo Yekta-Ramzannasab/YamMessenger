@@ -380,6 +380,42 @@ public class Database {
         }
         throw new SQLException("Failed to insert channel");
     }
+    public static ChannelSubscribers loadSubscription(long chatId, long userId, Channel channel) throws SQLException {
+        try (Connection con = Database.getConnection()) {
+            String sql = "SELECT role, is_approved FROM channel_subscribers WHERE user_id = ? AND chat_id = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, userId);
+                stmt.setLong(2, chatId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    Role role = Role.valueOf(rs.getString("role").toUpperCase());
+                    boolean approved = rs.getBoolean("is_approved");
+                    return new ChannelSubscribers(channel, role, userId, approved);
+                }
+            }
+        }
+        return null;
+    }
+    public static ChannelSubscribers insertSubscription(long chatId, long userId, Channel channel) throws SQLException {
+        try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO channel_subscribers(chat_id, user_id, role, joined_at, is_approved) " +
+                    "VALUES (?, ?, 'member', now(), true) RETURNING role, is_approved";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                stmt.setLong(2, userId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    Role role = Role.valueOf(rs.getString("role").toUpperCase());
+                    boolean approved = rs.getBoolean("is_approved");
+                    return new ChannelSubscribers(channel, role, userId, approved);
+                }
+            }
+        }
+        throw new SQLException("Failed to insert subscription");
+    }
     public static long createChat(String chatType) throws SQLException {
         try (Connection con = Database.getConnection()) {
             String sql = "INSERT INTO chat(chat_type) VALUES (?) RETURNING chat_id";
