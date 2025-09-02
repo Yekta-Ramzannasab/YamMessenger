@@ -1,9 +1,9 @@
 package com.yamyam.messenger.client.network.api;
 
-import com.yamyam.messenger.shared.model.ContactRelation;
+import com.yamyam.messenger.client.network.dto.Contact;
 
 import java.util.List;
 
 public interface ContactService {
-    List<ContactRelation> getContacts(long meUserId);
+    List<Contact> getContacts(long meUserId);
 }

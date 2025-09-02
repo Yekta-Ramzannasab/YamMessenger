@@ -2,10 +2,10 @@ package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.api.ContactService;
-import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.shared.model.ContactRelation;
-import com.yamyam.messenger.shared.model.Users;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkContactServiceAdapter implements ContactService {
@@ -13,15 +13,20 @@ public class NetworkContactServiceAdapter implements ContactService {
     public NetworkContactServiceAdapter(NetworkService net) { this.net = net; }
 
     @Override
-    public List<ContactRelation> getContacts(long meUserId) {
-        try {
-            Users me = Database.loadUser(meUserId);
+    public List<Contact> getContacts(long meUserId) {
+        // Getting raw data from the server
+        List<ContactRelation> relations = NetworkService.fetchMyContactRelations(meUserId);
 
-            return net.fetchContacts(me.getEmail());
+        // Translating raw data into displayable data (DTO)
+        List<Contact> contactDtos = new ArrayList<>();
+        for (ContactRelation relation : relations) {
+            // For each relationship, we need to get the complete profile information of the contact
+            Contact contactDetails = NetworkService.fetchContactDetailsById(relation.getContactId());
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
+            if (contactDetails != null) {
+                contactDtos.add(contactDetails);
+            }
         }
+        return contactDtos;
     }
 }
