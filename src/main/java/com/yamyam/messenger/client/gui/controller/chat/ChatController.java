@@ -22,34 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/* -----* *------
-   ChatController (Stage-1 Ready)
-
-   What this controller solves:
-   - Provides a SAFE, public entry point to load chats into the UI from ANY data source.
-     -> loadChats(List<Contact>)  : works with current DTO and DIRECT chats
-     -> loadChatsGeneric(List<ChatRef>) : future-proof for DIRECT/GROUP/CHANNEL
-   - Keeps the UI and rendering EXACTLY as before (no FXML/CSS changes needed).
-   - Preserves previous selection when refreshing the chat list.
-   - Keeps message list bound to the selected chat item.
-   - Leaves sending/receiving logic as-is; only simulates an auto-reply to keep the UI alive.
-
-   How the backend (or Data Manager) will integrate later:
-   - STEP 1 (this file): call controller.loadChats(fetchedContacts) after your fetch completes.
-   - STEP 2: wire your network service to actually fetch contacts / chats.
-   - STEP 3: if you add groups/channels in your API, call loadChatsGeneric(...) with ChatRef items.
-
-   Naming & types:
-   - We DO NOT rename or break existing classes/fields.
-   - ChatItem still holds UI-facing data for the list and message pane.
-   - Contact (DTO) remains the same; we map it to ChatItem via ChatItem.fromContact(...).
-
-   Notes:
-   - Presence ("Online") is shown only for DIRECT chats.
-   - Group/Channel titles show a small suffix in the list ("• Group", "• Channel").
-   - All comments in English. Custom comment delimiter used as requested.
-   -----* *------ */
-
 public class ChatController implements Initializable {
 
     /* -----* *------
