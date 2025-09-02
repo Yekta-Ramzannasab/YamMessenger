@@ -26,13 +26,7 @@ public class DataManager {
     private final Map<Long, Channel> channelCache = new HashMap<>();
     private final Map<String, ChannelSubscribers> subscriptionCache = new HashMap<>();
     private final Map<Long, GroupChat> groupChatCache = new HashMap<>();
-
-
-
-
-
-
-
+    private final Map<String, GroupMembers> groupMemberCache = new HashMap<>();
 
     // Private constructor to enforce singleton
     private DataManager() {}
@@ -272,6 +266,18 @@ public class DataManager {
         GroupChat groupChat = GroupChatHandler.getInstance().createGroupChat(name, description, creatorId, isPrivate);
         groupChatCache.put(groupChat.getChatId(), groupChat);
         return groupChat;
+    }
+
+    public GroupMembers getOrJoinGroupMember(GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
+        String key = groupChat.getChatId() + "_" + member.getId();
+
+        if (groupMemberCache.containsKey(key)) {
+            return groupMemberCache.get(key);
+        }
+
+        GroupMembers groupMember = GroupMembersHandler.getInstance().checkOrJoinUser(groupChat, member, invitedBy);
+        groupMemberCache.put(key, groupMember);
+        return groupMember;
     }
 
 
