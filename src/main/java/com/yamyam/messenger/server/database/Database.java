@@ -721,8 +721,31 @@ public class Database {
                 rs.getLong("message_id")
         );
     }
+    public static GroupChat insertGroupChat(String name, String description, long creatorId, boolean isPrivate) throws SQLException {
+        long chatId = createChat("GROUP_CHAT");
 
+        try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO groups(chat_id, group_name, description, creator_id, created_at, is_private) " +
+                    "VALUES (?, ?, ?, ?, now(), ?) RETURNING created_at";
 
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);         // chat_id
+                stmt.setString(2, name);         // group_name
+                stmt.setString(3, description);  // description
+                stmt.setLong(4, creatorId);      // creator_id
+                stmt.setBoolean(5, isPrivate);   // is_private
+
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate);
+                    group.setCreatedAt(rs.getTimestamp("created_at"));
+                    return group;
+                }
+            }
+        }
+
+        throw new SQLException("Failed to insert group chat");
+    }
 
 
 }
