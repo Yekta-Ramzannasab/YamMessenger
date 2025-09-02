@@ -1,6 +1,7 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
+import com.yamyam.messenger.client.network.api.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
@@ -381,10 +382,40 @@ public class ChatController implements Initializable {
        - Reads contacts via ServiceLocator and injects them using the public API.
        - Keeps behavior identical to previous implementation.
        -----* *------ */
+
+    // Fetch contacts via the real ContactService and fill the chat list
     private void loadContactsFromService() {
-        long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L; // TEMP until login gets wired
-        List<ContactRelation> contacts = ServiceLocator.contacts().getContacts(meUserId);
-        loadChats(contacts);
+        // get the call service from ServiceLocator. Now this is our actual adapter
+        ContactService contactService = ServiceLocator.contacts();
+
+        // All network work should be done in a background thread so that the UI doesn't lock up
+        new Thread(() -> {
+            try {
+                // We read the logged-in user ID from the Session
+                // We need to make sure that this ID is stored in the AppSession after login
+                long meUserId = AppSession.requireUserId();
+
+                // The UI requests the contact list from the service layer
+                final List<Contact> contacts = contactService.getContacts(meUserId);
+
+                // After receiving the response from the server, we need to update the UI in the main JavaFX thread
+                Platform.runLater(() -> {
+                    allChats.clear();
+                    for (Contact c : contacts) {
+                        Image av = (c.avatarUrl() != null && !c.avatarUrl().isBlank())
+                                ? new Image(c.avatarUrl(), true) : null;
+                        allChats.add(ChatItem.fromContact(c, av));
+                    }
+                    // The ListView is updated automatically because it is connected to allChats
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    new Alert(Alert.AlertType.ERROR, "Failed to load contacts.").showAndWait();
+                });
+            }
+        }).start();
     }
 
     private static LocalDateTime now(int m){ return LocalDateTime.now().minusMinutes(m); }
