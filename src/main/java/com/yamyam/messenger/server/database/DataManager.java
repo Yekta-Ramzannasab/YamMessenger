@@ -23,6 +23,8 @@ public class DataManager {
     private final Map<String, List<MessageEntity>> messageSearchCache = new ConcurrentHashMap<>();
     private final Map<Long, List<Contact>> contactCache = new HashMap<>();
     private final Map<String, PrivateChat> privateChatCache = new HashMap<>();
+    private final Map<Long, Channel> channelCache = new HashMap<>();
+
 
 
 
@@ -232,4 +234,17 @@ public class DataManager {
         privateChatCache.put(key, chat);
         return chat;
     }
+    public Channel getChannelById(long chatId) throws SQLException {
+        if (channelCache.containsKey(chatId)) {
+            return channelCache.get(chatId);
+        }
+
+        Channel channel = ChannelHandler.getInstance().loadChannel(chatId);
+        if (channel != null) {
+            channelCache.put(chatId, channel);
+        }
+
+        return channel;
+    }
+
 }
