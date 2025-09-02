@@ -25,6 +25,8 @@ public class DataManager {
     private final Map<String, PrivateChat> privateChatCache = new HashMap<>();
     private final Map<Long, Channel> channelCache = new HashMap<>();
     private final Map<String, ChannelSubscribers> subscriptionCache = new HashMap<>();
+    private final Map<Long, GroupChat> groupChatCache = new HashMap<>();
+
 
 
 
@@ -259,6 +261,17 @@ public class DataManager {
         ChannelSubscribers subscriber = ChannelSubscribersHandler.getInstance().checkOrSubscribeUser(channel, userId);
         subscriptionCache.put(key, subscriber);
         return subscriber;
+    }
+    public GroupChat getOrCreateGroupChat(String name, String description, long creatorId, boolean isPrivate) throws SQLException {
+        for (GroupChat cached : groupChatCache.values()) {
+            if (cached.getGroupName().equals(name) && cached.getCreatorId() == creatorId) {
+                return cached;
+            }
+        }
+
+        GroupChat groupChat = GroupChatHandler.getInstance().createGroupChat(name, description, creatorId, isPrivate);
+        groupChatCache.put(groupChat.getChatId(), groupChat);
+        return groupChat;
     }
 
 }
