@@ -238,6 +238,26 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(new Message(16, "Server", json));
                             break;
                         }
+                        case 17: {
+                            JsonObject payload = JsonParser.parseString(request.getContent()).getAsJsonObject();
+                            String name = payload.get("name").getAsString();
+                            String description = payload.get("description").getAsString();
+                            long creatorId = payload.get("creatorId").getAsLong();
+                            boolean isPrivate = payload.get("isPrivate").getAsBoolean();
+
+                            GroupChat groupChat;
+                            try {
+                                groupChat = DataManager.getInstance().getOrCreateGroupChat(name, description, creatorId, isPrivate);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(17, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(groupChat);
+                            sendJsonMessage(new Message(17, "Server", json));
+                            break;
+                        }
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
