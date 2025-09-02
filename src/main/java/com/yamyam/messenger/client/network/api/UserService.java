@@ -1,8 +1,7 @@
 package com.yamyam.messenger.client.network.api;
 
-import com.yamyam.messenger.shared.model.Channel;
-import com.yamyam.messenger.shared.model.ChannelSubscribers;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.*;
+
 import java.util.List;
 
 public interface UserService {
@@ -10,4 +9,5 @@ public interface UserService {
     Users getUserById(long userId);
     ChannelSubscribers subscribeToChannel(Channel channel, long userId);
     ChannelSubscribers getSubscription(Channel channel, long userId);
+    GroupMembers joinGroupChat(GroupChat groupChat, Users member, Users invitedBy);
 }
