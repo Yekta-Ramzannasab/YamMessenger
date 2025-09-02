@@ -2,6 +2,7 @@ package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.api.ChatService;
+import com.yamyam.messenger.shared.model.Channel;
 import com.yamyam.messenger.shared.model.Chat;
 import com.yamyam.messenger.shared.model.PrivateChat;
 
@@ -47,5 +48,15 @@ public class NetworkChatServiceAdapter implements ChatService {
         }
     }
 
-    
+    @Override
+    public Channel getChannelByChatId(long chatId) {
+        try {
+            return net.fetchChannelById(chatId);
+        }catch (IOException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }
