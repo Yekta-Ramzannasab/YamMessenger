@@ -98,6 +98,9 @@ public class Users {
     public void setSearchRank(double searchRank) {
         this.searchRank = searchRank;
     }
+    public String getName() {
+        return userProfile != null ? userProfile.getProfileName() : "Unknown";
+    }
 
     @Override
     public String toString (){
