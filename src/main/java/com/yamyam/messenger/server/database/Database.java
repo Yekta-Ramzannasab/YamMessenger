@@ -248,6 +248,61 @@ public class Database {
             }
         }
     }
+    public static PrivateChat loadPrivateChat(long userA, long userB) throws SQLException {
+        long user1 = Math.min(userA, userB);
+        long user2 = Math.max(userA, userB);
+
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT chat_id, user1_id, user2_id, created_at " +
+                    "FROM private_chats " +
+                    "WHERE user1_id = ? AND user2_id = ?";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setLong(1, user1);
+                stmt.setLong(2, user2);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        PrivateChat chat = new PrivateChat(
+                                rs.getLong("chat_id"),
+                                rs.getLong("user1_id"),
+                                rs.getLong("user2_id")
+                        );
+                        chat.setCreatedAt(rs.getTimestamp("created_at"));
+                        return chat;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+    }
+    public static PrivateChat createPrivateChat(long userA, long userB) throws SQLException {
+        long user1 = Math.min(userA, userB);
+        long user2 = Math.max(userA, userB);
+
+        try (Connection connection = Database.getConnection()) {
+            String sql = "INSERT INTO private_chats(user1_id, user2_id) VALUES (?, ?) RETURNING chat_id, created_at";
+
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setLong(1, user1);
+                stmt.setLong(2, user2);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        long chatId = rs.getLong("chat_id");
+                        Timestamp createdAt = rs.getTimestamp("created_at");
+
+                        PrivateChat chat = new PrivateChat(chatId, user1, user2);
+                        chat.setCreatedAt(createdAt);
+                        return chat;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+    }
 
     public static GroupChat loadGroupChat(long chatId) throws SQLException {
         try (Connection connection = Database.getConnection()) {
