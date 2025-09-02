@@ -9,11 +9,9 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.lang.reflect.Type;
 
@@ -191,13 +189,13 @@ public class NetworkService {
 
         return List.of();
     }
-    public List<Contact> fetchContacts(String email) throws IOException {
+    public List<ContactRelation> fetchContacts(String email) throws IOException {
         Message request = new Message(10, email, "GET_CONTACTS");
         sendJsonMessage(request);
         Message response = receiveJsonMessage();
 
         if (response != null && response.getContent() != null) {
-            Type listType = new TypeToken<List<Contact>>() {}.getType();
+            Type listType = new TypeToken<List<ContactRelation>>() {}.getType();
             return new Gson().fromJson(response.getContent(), listType);
         }
 

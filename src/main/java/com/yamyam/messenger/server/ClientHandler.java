@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.yamyam.messenger.server.database.Database.getUserIdByEmail;
-import static com.yamyam.messenger.server.database.Database.loadUserChats;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -130,8 +129,8 @@ public class ClientHandler implements Runnable {
                         }
                         case 10: {
                             long userId = getUserIdByEmail(request.getSender());
-                            List<Contact> contacts = DataManager.getInstance().getContacts(userId);
-                            String json = gson.toJson(contacts);
+                            List<ContactRelation> contactRelations = DataManager.getInstance().getContacts(userId);
+                            String json = gson.toJson(contactRelations);
                             sendJsonMessage(new Message(10, "Server", json));
                             break;
                         }

@@ -1,9 +1,11 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
+import com.yamyam.messenger.client.network.api.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
+import com.yamyam.messenger.shared.model.ContactRelation;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -21,34 +23,6 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-/* -----* *------
-   ChatController (Stage-1 Ready)
-
-   What this controller solves:
-   - Provides a SAFE, public entry point to load chats into the UI from ANY data source.
-     -> loadChats(List<Contact>)  : works with current DTO and DIRECT chats
-     -> loadChatsGeneric(List<ChatRef>) : future-proof for DIRECT/GROUP/CHANNEL
-   - Keeps the UI and rendering EXACTLY as before (no FXML/CSS changes needed).
-   - Preserves previous selection when refreshing the chat list.
-   - Keeps message list bound to the selected chat item.
-   - Leaves sending/receiving logic as-is; only simulates an auto-reply to keep the UI alive.
-
-   How the backend (or Data Manager) will integrate later:
-   - STEP 1 (this file): call controller.loadChats(fetchedContacts) after your fetch completes.
-   - STEP 2: wire your network service to actually fetch contacts / chats.
-   - STEP 3: if you add groups/channels in your API, call loadChatsGeneric(...) with ChatRef items.
-
-   Naming & types:
-   - We DO NOT rename or break existing classes/fields.
-   - ChatItem still holds UI-facing data for the list and message pane.
-   - Contact (DTO) remains the same; we map it to ChatItem via ChatItem.fromContact(...).
-
-   Notes:
-   - Presence ("Online") is shown only for DIRECT chats.
-   - Group/Channel titles show a small suffix in the list ("• Group", "• Channel").
-   - All comments in English. Custom comment delimiter used as requested.
-   -----* *------ */
 
 public class ChatController implements Initializable {
 
@@ -408,10 +382,40 @@ public class ChatController implements Initializable {
        - Reads contacts via ServiceLocator and injects them using the public API.
        - Keeps behavior identical to previous implementation.
        -----* *------ */
+
+    // Fetch contacts via the real ContactService and fill the chat list
     private void loadContactsFromService() {
-        long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L; // TEMP until login gets wired
-        List<Contact> contacts = ServiceLocator.contacts().getContacts(meUserId);
-        loadChats(contacts);
+        // get the call service from ServiceLocator. Now this is our actual adapter
+        ContactService contactService = ServiceLocator.contacts();
+
+        // All network work should be done in a background thread so that the UI doesn't lock up
+        new Thread(() -> {
+            try {
+                // We read the logged-in user ID from the Session
+                // We need to make sure that this ID is stored in the AppSession after login
+                long meUserId = AppSession.requireUserId();
+
+                // The UI requests the contact list from the service layer
+                final List<Contact> contacts = contactService.getContacts(meUserId);
+
+                // After receiving the response from the server, we need to update the UI in the main JavaFX thread
+                Platform.runLater(() -> {
+                    allChats.clear();
+                    for (Contact c : contacts) {
+                        Image av = (c.avatarUrl() != null && !c.avatarUrl().isBlank())
+                                ? new Image(c.avatarUrl(), true) : null;
+                        allChats.add(ChatItem.fromContact(c, av));
+                    }
+                    // The ListView is updated automatically because it is connected to allChats
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    new Alert(Alert.AlertType.ERROR, "Failed to load contacts.").showAndWait();
+                });
+            }
+        }).start();
     }
 
     private static LocalDateTime now(int m){ return LocalDateTime.now().minusMinutes(m); }

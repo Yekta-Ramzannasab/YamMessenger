@@ -1,6 +1,6 @@
 package com.yamyam.messenger.client.network.api;
 
-import com.yamyam.messenger.shared.model.Contact;
+import com.yamyam.messenger.client.network.dto.Contact;
 
 import java.util.List;
 
