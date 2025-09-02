@@ -20,6 +20,16 @@ public class Database {
         String user = System.getenv("DB_USER");
         String password = System.getenv("DB_PASSWORD");
 
+// مقدار پیش‌فرض برای تست لوکال
+        if (url == null || url.isBlank()) {
+            url = "jdbc:postgresql://localhost:5432/YAM";
+        }
+        if (user == null || user.isBlank()) {
+            user = "postgres";
+        }
+        if (password == null || password.isBlank()) {
+            password = "mobin1234";
+        }
         // Check if any required environment variable is missing
         if (url == null || user == null || password == null) {
             throw new RuntimeException("Database environment variables (DB_URL, DB_USER, DB_PASSWORD) are not set!");
@@ -545,10 +555,10 @@ public class Database {
     // ---- User Search ----
     public static List<Users> searchUsers(String query) throws SQLException {
         List<Users> results = new ArrayList<>();
-        String sql = "SELECT u.*, p.*, ts_rank_cd(u.search_vector, plainto_tsquery('simple', ?)) AS rank " +
+        String sql = "SELECT u.*, p.*, ts_rank_cd(p.search_vector, plainto_tsquery('simple', ?)) AS rank " +
                 "FROM users u " +
                 "LEFT JOIN user_profiles p ON u.user_id = p.user_id " +
-                "WHERE u.search_vector @@ plainto_tsquery('simple', ?) " +
+                "WHERE p.search_vector @@ plainto_tsquery('simple', ?) " +
                 "ORDER BY rank DESC LIMIT 20";
 
         try (Connection conn = getConnection();
@@ -569,13 +579,21 @@ public class Database {
     // ---- Chat Search (Group + Channel) ----
     public static List<MessageEntity> searchMessages(String query, long userId) throws SQLException {
         List<MessageEntity> results = new ArrayList<>();
-        String sql = "SELECT m.*, ts_rank_cd(m.search_vector, plainto_tsquery('simple', ?)) AS rank " +
-                "FROM messages m " +
-                "JOIN chat c ON m.chat_id = c.chat_id " +
-                "WHERE m.search_vector @@ plainto_tsquery('simple', ?) " +
-                "AND (c.user1 = ? OR c.user2 = ? OR c.chat_id IN " +
-                "(SELECT chat_id FROM channel_subscribers WHERE user_id = ?)) " +
-                "ORDER BY rank DESC LIMIT 30";
+        String sql = "SELECT m.*, ts_rank_cd(m.search_vector, plainto_tsquery('simple', ?)) AS rank\n" +
+                "FROM messages m\n" +
+                "JOIN chat c ON m.chat_id = c.chat_id\n" +
+                "LEFT JOIN private_chat pc ON c.chat_id = pc.chat_id\n" +
+                "LEFT JOIN group_chat gc ON c.chat_id = gc.chat_id\n" +
+                "LEFT JOIN channel ch ON c.chat_id = ch.chat_id\n" +
+                "LEFT JOIN channel_subscribers cs ON c.chat_id = cs.chat_id\n" +
+                "WHERE m.search_vector @@ plainto_tsquery('simple', ?)\n" +
+                "AND (\n" +
+                "    pc.user1_id = ? OR pc.user2_id = ?\n" +
+                "    OR gc.creator_id = ?\n" +
+                "    OR cs.user_id = ?\n" +
+                ")\n" +
+                "ORDER BY rank DESC\n" +
+                "LIMIT 30";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -584,6 +602,7 @@ public class Database {
             stmt.setLong(3, userId);
             stmt.setLong(4, userId);
             stmt.setLong(5, userId);
+            stmt.setLong(6, userId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 MessageEntity m = buildMessageFromResultSet(rs);
