@@ -1,5 +1,6 @@
 package com.yamyam.messenger.client.network;
 
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
@@ -255,6 +256,21 @@ public class NetworkService {
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
             return new Gson().fromJson(response.getContent(), Channel.class);
+        }
+
+        return null;
+    }
+    public ChannelSubscribers subscribeToChannel(Channel channel, long userId) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("chatId", channel.getChatId());
+        payload.addProperty("userId", userId);
+
+        Message request = new Message(16, "system", payload.toString());
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), ChannelSubscribers.class);
         }
 
         return null;
