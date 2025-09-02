@@ -4,6 +4,7 @@ import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.api.ChatService;
 import com.yamyam.messenger.shared.model.Channel;
 import com.yamyam.messenger.shared.model.Chat;
+import com.yamyam.messenger.shared.model.GroupChat;
 import com.yamyam.messenger.shared.model.PrivateChat;
 
 import java.io.IOException;
@@ -55,6 +56,14 @@ public class NetworkChatServiceAdapter implements ChatService {
         }catch (IOException e){
             e.printStackTrace();
             return null;
+        }
+    }
+    @Override
+    public GroupChat getOrCreateGroupChat(String name, String description, long creatorId, boolean isPrivate) {
+        try {
+            return NetworkService.getInstance().getOrCreateGroupChat(name, description, creatorId, isPrivate);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get or create group chat", e);
         }
     }
 
