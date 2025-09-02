@@ -7,10 +7,10 @@ import com.yamyam.messenger.shared.model.Users;
 import java.io.IOException;
 import java.util.List;
 
-public class AllUsersServiceAdapter implements UserService {
+public class UsersServiceAdapter implements UserService {
     private final NetworkService net;
 
-    public AllUsersServiceAdapter(NetworkService net) {
+    public UsersServiceAdapter(NetworkService net) {
         this.net = net;
     }
 
@@ -21,6 +21,15 @@ public class AllUsersServiceAdapter implements UserService {
         } catch (IOException e) {
             e.printStackTrace();
             return List.of();
+        }
+    }
+    @Override
+    public Users getUserById(long userId) {
+        try {
+            return net.fetchUserById(userId);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
