@@ -181,7 +181,24 @@ public class ClientHandler implements Runnable {
                             break;
 
                         }
+                        case 14: {
+                            String[] ids = request.getContent().split(",");
+                            long senderId = Long.parseLong(ids[0]);
+                            long receiverId = Long.parseLong(ids[1]);
 
+                            PrivateChat chat;
+                            try {
+                                chat = DataManager.getInstance().getOrCreatePrivateChat(senderId, receiverId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(14, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(chat);
+                            sendJsonMessage(new Message(14, "Server", json));
+                            break;
+                        }
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
