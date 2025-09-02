@@ -1,9 +1,15 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
-import com.yamyam.messenger.client.network.dto.Contact;
+
+import com.yamyam.messenger.client.network.api.UserService;
+
+import com.yamyam.messenger.shared.model.Contact;
+import com.yamyam.messenger.shared.model.Users;
+
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -16,6 +22,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Callback;
+
+import javafx.concurrent.Task; // for background fetch to avoid UI freeze
+
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -316,26 +325,71 @@ public class ChatController implements Initializable {
        - Converts Contact -> ChatRef(DIRECT) internally and delegates to loadChatsGeneric(...).
        - Backend/DataManager should call this after fetching user's chats by userId.
        -----* *------ */
+
     public void loadChats(List<Contact> contacts) {
-        if (contacts == null) {
+        // 0) Null/empty safe: show empty state if there are no contacts.
+        if (contacts == null || contacts.isEmpty()) {
             loadChatsGeneric(Collections.emptyList());
             return;
         }
+
+        // 1) Try to obtain UserService once. If it's not wired yet, keep UI alive with fallbacks.
+        UserService userSvc = null;
+        try { userSvc = ServiceLocator.users(); } catch (Exception ignore) { /* not set yet */ }
+
+        // 2) Pull all users once to avoid calling getUserById N times.
+        List<Users> allUsers = Collections.emptyList();
+        if (userSvc != null) {
+            try { allUsers = userSvc.getAllUsers(); }
+            catch (Exception ignore) { allUsers = Collections.emptyList(); }
+        }
+
+        // 3) Build a fast lookup: userId -> Users.
+        Map<Long, Users> usersById = new HashMap<>(allUsers.size());
+        for (Users u : allUsers) {
+            try { usersById.put(u.getId(), u); } catch (Exception ignore) {}
+        }
+
+        // 4) Map Contact -> ChatRef(DIRECT). Title prefers email; falls back to "User {id}".
         List<ChatRef> refs = new ArrayList<>(contacts.size());
         for (Contact c : contacts) {
+            long peerId = c.getContactId();   // the peer userId
+
+            String title = "User " + peerId;  // fallback title
+            boolean online = false;
+            String avatarUrl = null;          // placeholder for now
+
+            Users u = usersById.get(peerId);
+            if (u != null) {
+                try {
+                    if (u.getEmail() != null && !u.getEmail().isBlank()) {
+                        title = u.getEmail();
+                    }
+                } catch (Exception ignore) {}
+
+                try { online = u.isOnline(); } catch (Exception ignore) {}
+
+                // If Users exposes profile/avatar later, set avatarUrl here.
+            }
+
             refs.add(new ChatRef(
-                    c.id(),
+                    peerId,              // id = peer userId
                     ChatKind.DIRECT,
-                    c.title(),
-                    c.avatarUrl(),
-                    c.online(),
-                    null,      // memberCount (not used for DIRECT)
-                    false,     // muted (reserved)
-                    0          // unreadCount (reserved)
+                    title,
+                    avatarUrl,
+                    online,
+                    null,                // memberCount (N/A for DIRECT)
+                    false,               // muted (reserved)
+                    0                    // unreadCount (reserved)
             ));
         }
+
+        // 5) Inject into UI (keeps previous selection if any).
         loadChatsGeneric(refs);
     }
+
+
+
 
     /* -----* *------
        loadChatsGeneric(List<ChatRef> refs)
@@ -408,11 +462,28 @@ public class ChatController implements Initializable {
        - Reads contacts via ServiceLocator and injects them using the public API.
        - Keeps behavior identical to previous implementation.
        -----* *------ */
+    // Runs contact fetch off the FX thread so UI stays responsive
     private void loadContactsFromService() {
-        long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L; // TEMP until login gets wired
-        List<Contact> contacts = ServiceLocator.contacts().getContacts(meUserId);
-        loadChats(contacts);
+        long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L;
+
+        Task<List<Contact>> task = new Task<>() {
+            @Override protected List<Contact> call() {
+                try {
+                    return ServiceLocator.contacts().getContacts(meUserId);
+                } catch (Exception e) {
+                    return List.of(); // keep UI alive on failure
+                }
+            }
+        };
+
+        task.setOnSucceeded(e -> loadChats(task.getValue()));
+        task.setOnFailed(e -> loadChats(Collections.emptyList()));
+
+        Thread t = new Thread(task, "fetch-contacts");
+        t.setDaemon(true);
+        t.start();
     }
+
 
     private static LocalDateTime now(int m){ return LocalDateTime.now().minusMinutes(m); }
 
@@ -469,8 +540,10 @@ public class ChatController implements Initializable {
         }
 
         public static ChatItem fromContact(Contact c, Image avatar) {
-            return new ChatItem(c.id(), c.title(), c.online(), avatar, ChatKind.DIRECT, null, false);
+            long id = c.getContactId();
+            return new ChatItem(id, "User " + id, false, avatar, ChatKind.DIRECT, null, false);
         }
+
 
         public static ChatItem fromRef(ChatRef r, Image avatar) {
             boolean online = (r.kind == ChatKind.DIRECT) && r.online;

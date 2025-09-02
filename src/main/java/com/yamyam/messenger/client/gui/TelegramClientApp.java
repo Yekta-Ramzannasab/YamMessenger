@@ -18,15 +18,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-// ===== wiring (DEV: use mocks) =====
+// ===== wiring (real backend) =====
 import com.yamyam.messenger.client.util.ServiceLocator;
-// --- اگر خواستی به بک واقعی وصل شوی، این سه خط را از کامنت دربیار و پایین موک‌ها را کامنت کن ---
-// import com.yamyam.messenger.client.network.NetworkService;
-// import com.yamyam.messenger.client.network.impl.NetworkContactServiceAdapter;
-// import com.yamyam.messenger.client.network.impl.NetworkChatServiceAdapter;
 
-import com.yamyam.messenger.client.network.impl.MockContactService;
-import com.yamyam.messenger.client.network.impl.MockChatService;
+import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.client.network.impl.NetworkContactServiceAdapter;
+import com.yamyam.messenger.client.network.impl.NetworkChatServiceAdapter;
+import com.yamyam.messenger.client.network.impl.UsersServiceAdapter;
+
+
+
 
 public class TelegramClientApp extends Application {
 
@@ -51,14 +52,10 @@ public class TelegramClientApp extends Application {
         ThemeManager.apply(scene, ThemeManager.current());
 
         // 4.5) WIRE services (DEV → mocks)
-        // --- واقعی (وقتی بک حاضر شد) ---
-//        var net = NetworkService.getInstance();
-//        ServiceLocator.set(new NetworkContactServiceAdapter(net));
-//        ServiceLocator.set(new NetworkChatServiceAdapter(net));
-
-        // --- موک برای توسعه‌ی فرانت ---
-        ServiceLocator.set(new MockContactService());
-        ServiceLocator.set(new MockChatService());
+        var net = NetworkService.getInstance();
+        ServiceLocator.set(new NetworkContactServiceAdapter(net));
+        ServiceLocator.set(new NetworkChatServiceAdapter(net));
+        ServiceLocator.set(new UsersServiceAdapter(net));
 
         // 5) stage
         stage.getIcons().add(new Image("/com/yamyam/messenger/client/gui/images/icon.png"));
