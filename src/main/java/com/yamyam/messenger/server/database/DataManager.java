@@ -24,6 +24,7 @@ public class DataManager {
     private final Map<Long, List<Contact>> contactCache = new HashMap<>();
     private final Map<String, PrivateChat> privateChatCache = new HashMap<>();
     private final Map<Long, Channel> channelCache = new HashMap<>();
+    private final Map<String, ChannelSubscribers> subscriptionCache = new HashMap<>();
 
 
 
@@ -245,6 +246,19 @@ public class DataManager {
         }
 
         return channel;
+    }
+
+
+    public ChannelSubscribers getOrSubscribeUser(Channel channel, long userId) throws SQLException {
+        String key = channel.getChatId() + "_" + userId;
+
+        if (subscriptionCache.containsKey(key)) {
+            return subscriptionCache.get(key);
+        }
+
+        ChannelSubscribers subscriber = ChannelSubscribersHandler.getInstance().checkOrSubscribeUser(channel, userId);
+        subscriptionCache.put(key, subscriber);
+        return subscriber;
     }
 
 }
