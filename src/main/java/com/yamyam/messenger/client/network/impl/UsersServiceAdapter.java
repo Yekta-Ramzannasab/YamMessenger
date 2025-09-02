@@ -2,9 +2,13 @@ package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.api.UserService;
+import com.yamyam.messenger.server.database.DataManager;
+import com.yamyam.messenger.shared.model.Channel;
+import com.yamyam.messenger.shared.model.ChannelSubscribers;
 import com.yamyam.messenger.shared.model.Users;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 public class UsersServiceAdapter implements UserService {
@@ -32,4 +36,21 @@ public class UsersServiceAdapter implements UserService {
             return null;
         }
     }
+    @Override
+    public ChannelSubscribers subscribeToChannel(Channel channel, long userId) {
+        try {
+            return NetworkService.getInstance().subscribeToChannel(channel, userId);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to subscribe user to channel", e);
+        }
+    }
+    @Override
+    public ChannelSubscribers getSubscription(Channel channel, long userId) {
+        try {
+            return DataManager.getInstance().getOrSubscribeUser(channel, userId);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to load subscription", e);
+        }
+    }
+
 }
