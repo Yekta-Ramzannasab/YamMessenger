@@ -1,11 +1,9 @@
 package com.yamyam.messenger.server;
 
-import com.yamyam.messenger.server.database.DataManager;
-import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.server.database.*;
 import com.yamyam.messenger.server.services.EmailService;
 import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
-import com.yamyam.messenger.server.database.UserHandler;
 import okhttp3.OkHttpClient;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -147,6 +145,24 @@ public class ClientHandler implements Runnable {
 
                             String json = gson.toJson(allUsers);
                             sendJsonMessage(new Message(11, "Server", json));
+                            break;
+                        }
+                        case 12: {
+                            String query = request.getContent();
+                            long userId = getUserIdByEmail(request.getSender());
+
+                            List<SearchResult> results;
+                            try {
+                                Search searchEngine = new Search(DataManager.getInstance());
+                                results = searchEngine.search(query, userId);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(12, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(results);
+                            sendJsonMessage(new Message(12, "Server", json));
                             break;
                         }
 
