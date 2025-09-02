@@ -1,5 +1,7 @@
 package com.yamyam.messenger.server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.yamyam.messenger.server.database.*;
 import com.yamyam.messenger.server.services.EmailService;
 import com.yamyam.messenger.shared.model.*;
@@ -213,6 +215,27 @@ public class ClientHandler implements Runnable {
 
                             String json = gson.toJson(channel);
                             sendJsonMessage(new Message(15, "Server", json));
+                            break;
+                        }
+                        case 16: {
+                            JsonObject payload = JsonParser.parseString(request.getContent()).getAsJsonObject();
+                            long chatId = payload.get("chatId").getAsLong();
+                            long userId = payload.get("userId").getAsLong();
+
+                            Channel channel;
+                            ChannelSubscribers subscriber;
+
+                            try {
+                                channel = DataManager.getInstance().getChannelById(chatId);
+                                subscriber = DataManager.getInstance().getOrSubscribeUser(channel, userId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(16, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(subscriber);
+                            sendJsonMessage(new Message(16, "Server", json));
                             break;
                         }
                         default:
