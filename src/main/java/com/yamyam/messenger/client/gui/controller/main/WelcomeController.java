@@ -15,12 +15,14 @@ public class WelcomeController {
     @FXML
     private void handleStartMessagingClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/main/info.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/yamyam/messenger/client/gui/fxml/auth/email.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
             stage.show();
+
+            System.out.println("✅ Navigated to EmailController");
         } catch (IOException e) {
             e.printStackTrace();
         }
