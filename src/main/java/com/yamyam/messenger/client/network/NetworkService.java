@@ -226,4 +226,14 @@ public class NetworkService {
 
         return List.of();
     }
+    public Users fetchUserById(long userId) throws IOException {
+        Message request = new Message(13,"system",String.valueOf(userId));
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if(response != null && response.getContent() != null){
+            return new Gson().fromJson(response.getContent(),Users.class);
+        }
+        return null;
+    }
 }
