@@ -275,4 +275,21 @@ public class NetworkService {
 
         return null;
     }
+    public GroupChat getOrCreateGroupChat(String name, String description, long creatorId, boolean isPrivate) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("name", name);
+        payload.addProperty("description", description);
+        payload.addProperty("creatorId", creatorId);
+        payload.addProperty("isPrivate", isPrivate);
+
+        Message request = new Message(17, "system", payload.toString());
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), GroupChat.class);
+        }
+
+        return null;
+    }
 }
