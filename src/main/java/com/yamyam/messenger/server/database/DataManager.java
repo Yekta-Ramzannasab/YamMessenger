@@ -22,6 +22,10 @@ public class DataManager {
     private final Map<String, List<Chat>> chatSearchCache = new ConcurrentHashMap<>();
     private final Map<String, List<MessageEntity>> messageSearchCache = new ConcurrentHashMap<>();
     private final Map<Long, List<Contact>> contactCache = new HashMap<>();
+    private final Map<String, PrivateChat> privateChatCache = new HashMap<>();
+
+
+
 
 
 
@@ -215,7 +219,17 @@ public class DataManager {
         messageSearchCache.put(query, messages);
         return messages;
     }
+    public PrivateChat getOrCreatePrivateChat(long userA, long userB) throws SQLException {
+        long user1 = Math.min(userA, userB);
+        long user2 = Math.max(userA, userB);
+        String key = user1 + "_" + user2;
 
+        if (privateChatCache.containsKey(key)) {
+            return privateChatCache.get(key);
+        }
 
-
+        PrivateChat chat = PrivateChatHandler.getInstance().checkOrCreateChat(user1, user2);
+        privateChatCache.put(key, chat);
+        return chat;
+    }
 }
