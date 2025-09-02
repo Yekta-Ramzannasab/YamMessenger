@@ -330,6 +330,41 @@ public class Database {
 
         return null;
     }
+    public static GroupMembers loadGroupMember(long chatId, long userId, GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
+        try (Connection con = Database.getConnection()) {
+            String sql = "SELECT role FROM group_members WHERE chat_id = ? AND user_id = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                stmt.setLong(2, userId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    Role role = Role.valueOf(rs.getString("role").toUpperCase());
+                    return new GroupMembers(groupChat, role, member, invitedBy);
+                }
+            }
+        }
+        return null;
+    }
+    public static GroupMembers insertGroupMember(long chatId, long userId, GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
+        try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO group_members(chat_id, user_id, role, joined_at, invited_by) " +
+                    "VALUES (?, ?, 'member', now(), ?) RETURNING role";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                stmt.setLong(2, userId);
+                stmt.setLong(3, invitedBy.getId());
+
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    Role role = Role.valueOf(rs.getString("role").toUpperCase());
+                    return new GroupMembers(groupChat, role, member, invitedBy);
+                }
+            }
+        }
+        throw new SQLException("Failed to insert group member");
+    }
 
 
     public static Channel loadChannel(long chatId) throws SQLException {
