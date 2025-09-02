@@ -292,4 +292,20 @@ public class NetworkService {
 
         return null;
     }
+    public GroupMembers joinGroupChat(GroupChat groupChat, Users member, Users invitedBy) throws IOException {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("chatId", groupChat.getChatId());
+        payload.addProperty("memberId", member.getId());
+        payload.addProperty("invitedById", invitedBy.getId());
+
+        Message request = new Message(18, "system", payload.toString());
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), GroupMembers.class);
+        }
+
+        return null;
+    }
 }
