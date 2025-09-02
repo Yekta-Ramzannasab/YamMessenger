@@ -1,6 +1,7 @@
 package com.yamyam.messenger.client.network;
 
 import com.google.gson.reflect.TypeToken;
+import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
 
@@ -208,6 +209,18 @@ public class NetworkService {
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
             Type listType = new TypeToken<List<Users>>() {}.getType();
+            return new Gson().fromJson(response.getContent(), listType);
+        }
+
+        return List.of();
+    }
+    public List<SearchResult> fetchSearchResults(String query, String email) throws IOException {
+        Message request = new Message(12, email, query);
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            Type listType = new TypeToken<List<SearchResult>>() {}.getType();
             return new Gson().fromJson(response.getContent(), listType);
         }
 
