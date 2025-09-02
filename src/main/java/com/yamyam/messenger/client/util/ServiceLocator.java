@@ -2,24 +2,40 @@ package com.yamyam.messenger.client.util;
 
 import com.yamyam.messenger.client.network.api.ChatService;
 import com.yamyam.messenger.client.network.api.ContactService;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class ServiceLocator {
-    private static ContactService contacts;
-    private static ChatService chat;
+    private static final AtomicReference<ContactService> contacts = new AtomicReference<>();
+    private static final AtomicReference<ChatService> chat = new AtomicReference<>();
 
     private ServiceLocator() {}
 
-    public static void set(ContactService c) { contacts = c; }
-    public static void set(ChatService c)    { chat = c; }
+    public static void set(ContactService c) {
+        contacts.set(c);
+    }
+
+    public static void set(ChatService c) {
+        chat.set(c);
+    }
 
     public static ContactService contacts() {
-        if (contacts == null) throw new IllegalStateException("ContactService not set");
-        return contacts;
-    }
-    public static ChatService chat() {
-        if (chat == null) throw new IllegalStateException("ChatService not set");
-        return chat;
+        ContactService service = contacts.get();
+        if (service == null) {
+            throw new IllegalStateException("ContactService not set or initialized yet.");
+        }
+        return service;
     }
 
-    public static void clear() { contacts = null; chat = null; }
+    public static ChatService chat() {
+        ChatService service = chat.get();
+        if (service == null) {
+            throw new IllegalStateException("ChatService not set or initialized yet.");
+        }
+        return service;
+    }
+
+    public static void clear() {
+        contacts.set(null);
+        chat.set(null);
+    }
 }
