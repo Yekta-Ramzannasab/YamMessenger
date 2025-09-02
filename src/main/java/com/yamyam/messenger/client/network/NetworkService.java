@@ -236,4 +236,16 @@ public class NetworkService {
         }
         return null;
     }
+    public PrivateChat fetchOrCreatePrivateChat(long senderId, long receiverId) throws IOException {
+        String content = senderId + "," + receiverId;
+        Message request = new Message(14, "system", content);
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), PrivateChat.class);
+        }
+
+        return null;
+    }
 }
