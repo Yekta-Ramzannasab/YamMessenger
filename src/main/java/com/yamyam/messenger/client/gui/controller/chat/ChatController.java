@@ -1,11 +1,10 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
-import com.yamyam.messenger.client.network.api.ContactService;
+import com.yamyam.messenger.client.network.service.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
-import com.yamyam.messenger.shared.model.ContactRelation;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;

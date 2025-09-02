@@ -1,4 +1,4 @@
-package com.yamyam.messenger.client.network.api;
+package com.yamyam.messenger.client.network.service;
 
 
 import com.yamyam.messenger.shared.model.Channel;

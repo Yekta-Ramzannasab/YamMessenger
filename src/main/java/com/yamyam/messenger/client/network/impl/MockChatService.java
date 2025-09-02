@@ -1,6 +1,5 @@
 package com.yamyam.messenger.client.network.impl;
 
-import com.yamyam.messenger.client.network.api.ChatService;
 /*
 public final class MockChatService implements ChatService {
     @Override

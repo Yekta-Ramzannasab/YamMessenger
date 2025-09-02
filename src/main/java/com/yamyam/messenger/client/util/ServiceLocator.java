@@ -1,7 +1,7 @@
 package com.yamyam.messenger.client.util;
 
-import com.yamyam.messenger.client.network.api.ChatService;
-import com.yamyam.messenger.client.network.api.ContactService;
+import com.yamyam.messenger.client.network.service.ChatService;
+import com.yamyam.messenger.client.network.service.ContactService;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class ServiceLocator {

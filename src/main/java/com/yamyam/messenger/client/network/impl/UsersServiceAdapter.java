@@ -1,7 +1,7 @@
 package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
-import com.yamyam.messenger.client.network.api.UserService;
+import com.yamyam.messenger.client.network.service.UserService;
 import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.shared.model.*;
 

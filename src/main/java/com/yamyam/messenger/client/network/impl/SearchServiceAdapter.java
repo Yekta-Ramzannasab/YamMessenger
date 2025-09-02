@@ -1,7 +1,7 @@
 package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
-import com.yamyam.messenger.client.network.api.SearchService;
+import com.yamyam.messenger.client.network.service.SearchService;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.Users;
