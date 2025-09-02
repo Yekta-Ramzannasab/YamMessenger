@@ -248,4 +248,15 @@ public class NetworkService {
 
         return null;
     }
+    public Channel fetchChannelById(long chatId) throws IOException {
+        Message request = new Message(15, "system", String.valueOf(chatId));
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), Channel.class);
+        }
+
+        return null;
+    }
 }
