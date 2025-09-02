@@ -37,6 +37,15 @@ public class NetworkChatServiceAdapter implements ChatService {
             return List.of();
         }
     }
+    @Override
+    public PrivateChat getOrCreatePrivateChat(long meUserId, long otherUserId) {
+        try {
+            return net.fetchOrCreatePrivateChat(meUserId, otherUserId);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     
 }
