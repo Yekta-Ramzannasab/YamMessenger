@@ -10,6 +10,7 @@ public interface ChatService {
     void openChat(long meUserId, long targetUserId);
     List<PrivateChat> getChatsForUser(String email);
     List<Chat> getGroupAndChannelChatsForUser(String email);
+    PrivateChat getOrCreatePrivateChat(long meUserId, long otherUserId);
 
     //List<Message> getHistory(long meUserId, long targetUserId, int limit);
     //void send(long meUserId, long targetUserId, String text);
