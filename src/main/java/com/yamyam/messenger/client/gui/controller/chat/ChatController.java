@@ -235,16 +235,28 @@ public class ChatController implements Initializable {
        - Clears the input field.
        - Simulates a tiny auto-reply to keep the UI alive (until real backend is wired).
        -----* *------ */
-    @FXML private void sendMessage() {
+    @FXML
+    private void sendMessage() {
+        // Text is read from the input field
         String text = Optional.ofNullable(inputField.getText()).orElse("").trim();
-        if (text.isEmpty()) return;
-        ChatItem sel = chatList.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
+        if (text.isEmpty()) {
+            return;
+        }
 
-        sel.messages.add(new Msg(true, text, LocalDateTime.now()));
+        // The currently active chat is selected
+        ChatItem selectedChat = chatList.getSelectionModel().getSelectedItem();
+        if (selectedChat == null) {
+            return;
+        }
+
+        // The sending command is delegated to the service layer
+        try {
+            ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         inputField.clear();
-
-        Platform.runLater(() -> sel.messages.add(new Msg(false, "Got it ✅", LocalDateTime.now())));
     }
 
     /* ================== Theme ================== */
