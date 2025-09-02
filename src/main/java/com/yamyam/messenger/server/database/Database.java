@@ -333,29 +333,65 @@ public class Database {
 
 
     public static Channel loadChannel(long chatId) throws SQLException {
-        try (Connection connection = Database.getConnection()) {
-            String sql = "SELECT channel_id, channel_name, owner, is_private, description, created_at " +
-                    "FROM channels WHERE channel_id = ?";
+        try (Connection con = Database.getConnection()) {
+            String sql = "SELECT chat_id, channel_name, owner_id, is_private, description, created_at " +
+                    "FROM channels WHERE chat_id = ?";
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setLong(1, chatId);
-            ResultSet rs = stmt.executeQuery();
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                Channel channel = new Channel(
-                        rs.getLong("channel_id"),
-                        rs.getString("channel_name"),
-                        rs.getLong("owner"),
-                        rs.getBoolean("is_private"),
-                        rs.getString("description")
-                );
-
-                channel.setCreatedAt(rs.getTimestamp("created_at"));
-                return channel;
+                if (rs.next()) {
+                    Channel channel = new Channel(
+                            rs.getLong("chat_id"),
+                            rs.getString("channel_name"),
+                            rs.getLong("owner_id"),
+                            rs.getBoolean("is_private"),
+                            rs.getString("description")
+                    );
+                    channel.setCreatedAt(rs.getTimestamp("created_at"));
+                    return channel;
+                }
             }
         }
+        return null;
+    }
+    public static Channel insertChannel(String name, long ownerId, boolean isPrivate, String description) throws SQLException {
+        long chatId = createChat("CHANNEL");
 
-        return null; // return null if no channel found with given id
+        try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO channels(chat_id, channel_name, owner_id, is_private, description) " +
+                    "VALUES (?, ?, ?, ?, ?) RETURNING created_at";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setLong(1, chatId);
+                stmt.setString(2, name);
+                stmt.setLong(3, ownerId);
+                stmt.setBoolean(4, isPrivate);
+                stmt.setString(5, description);
+
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    Channel channel = new Channel(chatId, name, ownerId, isPrivate, description);
+                    channel.setCreatedAt(rs.getTimestamp("created_at"));
+                    return channel;
+                }
+            }
+        }
+        throw new SQLException("Failed to insert channel");
+    }
+    public static long createChat(String chatType) throws SQLException {
+        try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO chat(chat_type) VALUES (?) RETURNING chat_id";
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setString(1, chatType);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getLong("chat_id");
+                }
+            }
+        }
+        throw new SQLException("Failed to create chat");
     }
 
     public static List<Chat> loadUserChats(long userId) throws SQLException {
