@@ -72,7 +72,7 @@ public class ClientHandler implements Runnable {
                             Users user = handleLogin(request.getSender());
                             Message loginUser = null;
                             if (user != null) {
-                                loginUser = new Message(5, "Server", user.toString() );
+                                loginUser = new Message(1, "Server", user.toString() );
                             }
                             sendJsonMessage(loginUser);
                             break;
@@ -81,7 +81,7 @@ public class ClientHandler implements Runnable {
                             int verificationCode = generateAndSendVerificationCode(email);
 
                             String responseContent = (verificationCode != -1) ? String.valueOf(verificationCode) : "EMAIL_FAILED";
-                            Message codeResponse = new Message(5, "Server", responseContent);
+                            Message codeResponse = new Message(2, "Server", responseContent);
                             sendJsonMessage(codeResponse);
                             break;
                         case 3: {
@@ -316,8 +316,6 @@ public class ClientHandler implements Runnable {
 
     private Users handleLogin(String email) throws IOException {
         try {
-            // Establish a connection to the database.
-            Connection dbConnection = Database.getConnection();
 
             // Create an instance of UserHandler and pass the connection to it
             UserHandler userHandler = new UserHandler();
@@ -331,9 +329,6 @@ public class ClientHandler implements Runnable {
             } else {
                 System.err.println("FAILURE: Could not check or create user for email: " + email);
             }
-
-            // Close the database connection
-            dbConnection.close();
             return user ;
         } catch (SQLException e) {
             System.err.println("Database error during checkOrCreateUser: " + e.getMessage());

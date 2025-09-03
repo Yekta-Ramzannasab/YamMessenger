@@ -5,6 +5,7 @@ import com.yamyam.messenger.client.network.service.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
+import com.yamyam.messenger.shared.model.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -65,20 +66,29 @@ public class ChatController implements Initializable {
        -----* *------ */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        if (!AppSession.isLoggedIn()) {
+            System.err.println("❌ No user in session — redirecting or blocking UI");
+            return;
+        }
+
+        Users me = AppSession.getCurrentUser();
+        System.out.println("✅ Logged in as: " + me.getEmail());
+
+
         setupChatList();
         setupMessageList();
         setupComposer();
 
-        // Stage-1: keep current behavior (load from service) and then feed the UI via public API.
+
         loadContactsFromService();
 
-        // Select the first chat (if any) to avoid an empty middle pane.
         if (!allChats.isEmpty()) {
             chatList.getSelectionModel().select(0);
             openChat(chatList.getSelectionModel().getSelectedItem());
+        } else {
+            System.out.println("ℹ️ No chats available for user: " + me.getEmail());
         }
 
-        // Ensure CSS & root style classes, then re-apply current theme
         Platform.runLater(() -> {
             Scene scene = headerName.getScene();
             if (scene == null) return;
@@ -86,8 +96,11 @@ public class ChatController implements Initializable {
             var urlCss = getClass().getResource("/com/yamyam/messenger/client/gui/styles/chat.css");
             if (urlCss != null) {
                 String chatCss = urlCss.toExternalForm();
-                if (!scene.getStylesheets().contains(chatCss)) scene.getStylesheets().add(chatCss);
+                if (!scene.getStylesheets().contains(chatCss)) {
+                    scene.getStylesheets().add(chatCss);
+                }
             }
+
             var root = scene.getRoot();
             var classes = root.getStyleClass();
             if (!classes.contains("themed")) classes.add("themed");

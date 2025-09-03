@@ -14,7 +14,7 @@ public class ProfileController {
 
     private final PageNavigator navigator = new PageNavigator(
             "/com/yamyam/messenger/client/gui/fxml/auth/verify.fxml",
-            "/com/yamyam/messenger/client/gui/fxml/main/main-view.fxml"
+            "/com/yamyam/messenger/client/gui/fxml/chat/chat.fxml"
     );
 
     private String email ;

@@ -55,16 +55,19 @@ public class VerifyController {
 
                 errorLabel.setText("Verification Successful!");
 
-                Users user ;
+                Users user  ;
                 try {
                     user = networkService.clientHandleLogin(email);
+
                     AppSession.setCurrentUser(user);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+                if(user == null)
+                {System.out.println("null hasttt");}
 
-                if(user.isVerified()){
-                    navigator.navigateTo(event, "/com/yamyam/messenger/client/gui/fxml/main/main-view.fxml");
+                else if(user.isVerified()){
+                    navigator.navigateTo(event, "/com/yamyam/messenger/client/gui/fxml/chat/chat.fxml");
                 } else {
                     ProfileController profileController = navigator.goToNextAndGetController(event);
 

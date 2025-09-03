@@ -79,7 +79,7 @@ public class UserHandler {
 
                     // Insert default user profile
                     String sqlProfile = "INSERT INTO user_profiles(user_id, profile_image_url, bio, updated_at, username, password, profile_name) " +
-                            "VALUES (?, null, null, now(), null, null, 'username')";
+                            "VALUES (?, null, null, now(), null, null, null)";
                     try (PreparedStatement profileStmt = connection.prepareStatement(sqlProfile)) {
                         profileStmt.setLong(1, newUserId);
                         profileStmt.executeUpdate();
@@ -93,7 +93,7 @@ public class UserHandler {
                             null,
                             null,
                             null,
-                            "username"
+                            null
                     );
 
                     Users newUser = new Users(
