@@ -122,7 +122,7 @@ public class Users {
         }
 
         // Split string into parts based on commas
-        String[] parts = userDataString.split(",", 8);
+        String[] parts = userDataString.split(",", 9);
 
         if (parts.length < 9) {
             return null; // if number of parts less than 8 return null
