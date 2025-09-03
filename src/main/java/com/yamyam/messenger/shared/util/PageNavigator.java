@@ -46,4 +46,18 @@ public class PageNavigator {
 
         return loader.getController();
     }
+
+    public void navigateTo(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+
+        } catch (IOException e) {
+            System.err.println("Failed to navigate to: " + fxmlPath);
+            e.printStackTrace();
+        }
+    }
 }

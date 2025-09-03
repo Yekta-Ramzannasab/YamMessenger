@@ -897,7 +897,7 @@ public class Database {
                     "bio = ?, " +
                     "updated_at = ?, " +
                     "username = ?, " +
-                    "password = ?, " +
+                    "password_hashed = ?, " +
                     "profile_name = ? " +
                     "WHERE user_id = ?";
 
@@ -908,7 +908,7 @@ public class Database {
                 stmt.setString(4, profile.getUsername());
                 stmt.setString(5, profile.getPasswordHashed());
                 stmt.setString(6, profile.getProfileName());
-                stmt.setLong(7, userId);
+                stmt.setLong(7, userId); 
 
                 stmt.executeUpdate();
             }
