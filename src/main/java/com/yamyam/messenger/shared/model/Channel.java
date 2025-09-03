@@ -12,13 +12,15 @@ public class Channel extends Chat{
     private int subscriberCount;
 
 
-    public Channel(long id,String channelName,long owner,boolean isPrivate,String description){
-        super(id,new Timestamp(System.currentTimeMillis()),ChatType.CHANNEL);
+    public Channel(long id, String channelName, long owner, boolean isPrivate, String description, String avatarUrl) {
+        super(id, new Timestamp(System.currentTimeMillis()), ChatType.CHANNEL);
         this.channelName = channelName;
         this.description = description;
         this.isPrivate = isPrivate;
         this.owner = owner;
+        this.channelAvatarUrl = avatarUrl;
     }
+
 
     public String getChannelName() {
         return channelName;
