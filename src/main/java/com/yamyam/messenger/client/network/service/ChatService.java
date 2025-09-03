@@ -15,6 +15,7 @@ public interface ChatService {
     PrivateChat getOrCreatePrivateChat(long meUserId, long otherUserId);
     Channel getChannelByChatId(long chatId);
     GroupChat getOrCreateGroupChat(String name, String description, long creatorId, boolean isPrivate);
+    void sendMessage(long chatId, String text);
 
     //List<Message> getHistory(long meUserId, long targetUserId, int limit);
     //void send(long meUserId, long targetUserId, String text);

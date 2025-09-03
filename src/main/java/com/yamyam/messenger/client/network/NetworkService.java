@@ -306,4 +306,17 @@ public class NetworkService {
 
         return null;
     }
+//    public void sendChatMessage(long chatId, String text) throws IOException {
+//        // یک پیام برای ارسال به سرور می‌سازیم
+//        // فرض می‌کنیم نوع پیام ۱ برای پیام‌های چت است
+//        // در محتوا، می‌توانیم ID چت را هم قرار دهیم تا سرور بداند پیام برای کجاست
+//        // یا می‌توانیم از فیلد sender برای ارسال ID چت استفاده کنیم.
+//        // فعلاً یک راه ساده را انتخاب می‌کنیم:
+//        String payload = chatId + ":" + text;
+//        Message chatMessage = new Message(1, "me", payload); // "me" باید با ID کاربر لاگین کرده جایگزین شود
+//
+//        // از متد کمکی که از قبل داشتیم برای ارسال استفاده می‌کنیم
+//        sendJsonMessage(chatMessage);
+//    }
+
 }

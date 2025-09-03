@@ -250,11 +250,11 @@ public class ChatController implements Initializable {
         }
 
         // The sending command is delegated to the service layer
-        try {
-            ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         inputField.clear();
     }
