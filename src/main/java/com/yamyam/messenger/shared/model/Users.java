@@ -10,8 +10,9 @@ public class Users {
     private boolean isOnline;
     private boolean isDeleted;
     private String email;
-    private UserProfile userProfile;
     private double searchRank;
+    private UserProfile userProfile;
+
 
 
     public Users(){}
@@ -112,7 +113,7 @@ public class Users {
     @Override
     public String toString (){
         return ( id + "," + createAt + "," + lastSeen + "," + isVerified + "," +
-                isOnline + "," + isDeleted + "," + email + "," + userProfile ) ;
+                isOnline + "," + isDeleted + "," + email + "," + searchRank + "," + userProfile ) ;
     }
 
     public static Users fromString(String userDataString) {
@@ -123,12 +124,21 @@ public class Users {
         // Split string into parts based on commas
         String[] parts = userDataString.split(",", 8);
 
-        if (parts.length < 8) {
+        if (parts.length < 9) {
             return null; // if number of parts less than 8 return null
         }
 
         try {
             // Convert each part to the corresponding data type
+            //    private long id;
+//    private Timestamp createAt;
+//    private Timestamp lastSeen;
+//    private boolean isVerified;
+//    private boolean isOnline;
+//    private boolean isDeleted;
+//    private String email;
+//    private UserProfile userProfile;
+//    private double searchRank;
             long id = Long.parseLong(parts[0]);
             Timestamp createAt = Timestamp.valueOf(parts[1]);
             Timestamp lastSeen = parts[2].equals("null") ? null : Timestamp.valueOf(parts[2]);
@@ -136,9 +146,10 @@ public class Users {
             boolean isOnline = Boolean.parseBoolean(parts[4]);
             boolean isDeleted = Boolean.parseBoolean(parts[5]);
             String email = parts[6];
+            double searchRank = Double.parseDouble(parts[7]);
 
             // The last part of the string is related to the profile, which we will also reconstruct with fromString itself
-            UserProfile userProfile = UserProfile.fromString(parts[7]);
+            UserProfile userProfile = UserProfile.fromString(parts[8]);
 
             // Create and return a new object with the extracted values
             return new Users(id, createAt, lastSeen, isVerified, isOnline, isDeleted, email, userProfile);

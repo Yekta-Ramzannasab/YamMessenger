@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 public class UserProfile {
     private long profileId;
-    private long userId;
     private String profileImageUrl;
     private String bio;
     private LocalDateTime createdAt;
@@ -24,7 +23,6 @@ public class UserProfile {
                        Timestamp updatedAt,
                        String profileName) {
         this.profileId = profileId;
-        this.userId = userId;
         this.profileImageUrl = profileImageUrl;
         this.bio = bio;
         this.username = username;
@@ -48,13 +46,6 @@ public class UserProfile {
         this.profileId = profileId;
     }
 
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
 
     public String getProfileImageUrl() {
         return profileImageUrl;
@@ -90,8 +81,7 @@ public class UserProfile {
 
     @Override
     public String toString (){
-        return ( profileId + "," + userId + "," + profileImageUrl + "," + bio + "," +
-                createdAt + "," + updatedAt + "," + username + "," + passwordHashed + "," + profileName );
+        return ( profileId + ","  + profileImageUrl + "," + bio + "," + updatedAt + "," + username + "," + passwordHashed + "," + profileName );
     }
 
     public static UserProfile fromString(String profileDataString) {
@@ -108,13 +98,14 @@ public class UserProfile {
             long profileId = Long.parseLong(parts[0]);
             String profileImageUrl = parts[1].equals("null") ? null : parts[1];
             String bio = parts[2].equals("null") ? null : parts[2];
-            String username = parts[3].equals("null") ? null : parts[3];
-            String password = parts[4].equals("null") ? null : parts[4];
-            Timestamp updatedAt = parts[5].equals("null") ? null : Timestamp.valueOf(parts[5]);
+            Timestamp updatedAt = parts[3].equals("null") ? null : Timestamp.valueOf(parts[3]);
+            String username = parts[4].equals("null") ? null : parts[4];
+            String passwordHashed = parts[5].equals("null") ? null : parts[5];
             String profileName = parts[6].equals("null") ? null : parts[6];
 
+
             // Create and return a new object with the extracted values.
-            return new UserProfile(profileId, profileImageUrl, bio, username, password, updatedAt, profileName);
+            return new UserProfile(profileId, profileImageUrl, bio, username, passwordHashed, updatedAt, profileName);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
