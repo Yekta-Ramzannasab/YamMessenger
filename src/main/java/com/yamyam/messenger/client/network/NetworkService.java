@@ -2,6 +2,9 @@ package com.yamyam.messenger.client.network;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import com.yamyam.messenger.client.network.dto.Contact;
+import com.yamyam.messenger.client.network.dto.ContactType;
+import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
@@ -11,7 +14,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.lang.reflect.Type;
 
@@ -306,6 +311,34 @@ public class NetworkService {
 
         return null;
     }
+    public static List<Chat> fetchAllChatsForUser(long userId) {
+        try {
+            return DataManager.getInstance().getAllChatsForUser(userId);
+        } catch (SQLException e) {
+            System.err.println("[NetworkService] Failed to fetch chats for user " + userId + ": " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+    public static Contact fetchContactDetailsById(long userId) {
+        try {
+            Users user = DataManager.getInstance().getUser(userId);
+            if (user == null) return null;
+
+            UserProfile profile = user.getUserProfile();
+            return new Contact(
+                    user.getId(),
+                    profile.getProfileName(),
+                    profile.getProfileImageUrl(),
+                    user.isOnline(),
+                    ContactType.DIRECT,
+                    null
+            );
+        } catch (SQLException e) {
+            System.err.println("[NetworkService] Failed to fetch contact for user " + userId + ": " + e.getMessage());
+            return null;
+        }
+    }
+
 //    public void sendChatMessage(long chatId, String text) throws IOException {
 //        // یک پیام برای ارسال به سرور می‌سازیم
 //        // فرض می‌کنیم نوع پیام ۱ برای پیام‌های چت است
