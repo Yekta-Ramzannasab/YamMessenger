@@ -49,11 +49,13 @@ public class VerifyController {
 
             // compare the code entered by the user with the correct code
             if (correctCode.equals(userCode)) {
+
                 errorLabel.setText("Verification Successful!");
 
                 Users user ;
                 try {
                     user = networkService.clientHandleLogin(email);
+                    AppSession.setCurrentUser(user);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
