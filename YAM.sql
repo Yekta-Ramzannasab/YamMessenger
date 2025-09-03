@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.5
 
--- Started on 2025-09-02 01:58:03
+-- Started on 2025-09-03 14:54:08
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -78,7 +78,8 @@ CREATE TABLE public.channel (
     channel_name character varying(100) NOT NULL,
     description text,
     owner_id bigint NOT NULL,
-    is_private boolean DEFAULT false
+    is_private boolean DEFAULT false,
+    avatar_url text
 );
 
 
@@ -165,7 +166,8 @@ CREATE TABLE public.group_chat (
     description text,
     creator_id bigint NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    is_private boolean DEFAULT false
+    is_private boolean DEFAULT false,
+    group_avatar_url text
 );
 
 
@@ -374,7 +376,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Data for Name: channel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.channel (chat_id, channel_name, description, owner_id, is_private) FROM stdin;
+COPY public.channel (chat_id, channel_name, description, owner_id, is_private, avatar_url) FROM stdin;
 \.
 
 
@@ -414,7 +416,7 @@ COPY public.contacts (owner_id, contact_id, added_at) FROM stdin;
 -- Data for Name: group_chat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.group_chat (chat_id, group_name, description, creator_id, created_at, is_private) FROM stdin;
+COPY public.group_chat (chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) FROM stdin;
 \.
 
 
@@ -456,6 +458,8 @@ COPY public.private_chat (chat_id, user1_id, user2_id) FROM stdin;
 
 COPY public.user_profiles (profile_id, user_id, profile_image_url, bio, updated_at, username, password, profile_name, search_vector) FROM stdin;
 1	5	\N	\N	2025-08-13 01:23:42.354081	\N	\N	username	'username':1
+2	6	\N	\N	2025-09-03 02:08:54.852628	\N	\N	username	'username':1
+3	7	\N	\N	2025-09-03 14:09:47.603423	\N	\N	username	'username':1
 \.
 
 
@@ -468,6 +472,8 @@ COPY public.user_profiles (profile_id, user_id, profile_image_url, bio, updated_
 COPY public.users (user_id, created_at, last_seen, is_verified, is_online, is_deleted, email) FROM stdin;
 3	2025-07-24 12:31:54.952129+03:30	\N	t	f	f	mobin@email
 5	2025-08-13 01:23:42.348183+03:30	\N	f	f	f	amir@email
+6	2025-09-03 02:08:54.845412+03:30	\N	f	f	f	mobin@example.com
+7	2025-09-03 14:09:47.596716+03:30	\N	f	f	f	fermow.fermow85@gmail.com
 \.
 
 
@@ -495,7 +501,7 @@ SELECT pg_catalog.setval('public.messages_message_id_seq', 1, false);
 -- Name: user_profiles_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 1, true);
+SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 3, true);
 
 
 --
@@ -504,7 +510,7 @@ SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 1, true);
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 5, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 7, true);
 
 
 --
@@ -816,7 +822,7 @@ ALTER TABLE ONLY public.user_profiles
     ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
--- Completed on 2025-09-02 01:58:03
+-- Completed on 2025-09-03 14:54:08
 
 --
 -- PostgreSQL database dump complete

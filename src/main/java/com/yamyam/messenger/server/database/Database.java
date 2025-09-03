@@ -329,7 +329,8 @@ public class Database {
                         rs.getString("group_name"),
                         rs.getString("description"),
                         rs.getLong("creator_id"),
-                        rs.getBoolean("is_private")
+                        rs.getBoolean("is_private"),
+                        rs.getString("group_avatar_url")
                 );
 
                 groupChat.setCreatedAt(rs.getTimestamp("created_at"));
@@ -392,7 +393,8 @@ public class Database {
                             rs.getString("channel_name"),
                             rs.getLong("owner_id"),
                             rs.getBoolean("is_private"),
-                            rs.getString("description")
+                            rs.getString("description"),
+                            rs.getString("avatar_url")
                     );
                     channel.setCreatedAt(rs.getTimestamp("created_at"));
                     return channel;
@@ -405,8 +407,8 @@ public class Database {
         long chatId = createChat("CHANNEL");
 
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO channels(chat_id, channel_name, owner_id, is_private, description) " +
-                    "VALUES (?, ?, ?, ?, ?) RETURNING created_at";
+            String sql = "INSERT INTO channels(chat_id, channel_name, owner_id, is_private, description, avatar_url) " +
+                    "VALUES (?, ?, ?, ?, ?, ?) RETURNING created_at";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
@@ -414,15 +416,17 @@ public class Database {
                 stmt.setLong(3, ownerId);
                 stmt.setBoolean(4, isPrivate);
                 stmt.setString(5, description);
+                stmt.setString(6, null); // default avatar is null
 
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    Channel channel = new Channel(chatId, name, ownerId, isPrivate, description);
+                    Channel channel = new Channel(chatId, name, ownerId, isPrivate, description, null);
                     channel.setCreatedAt(rs.getTimestamp("created_at"));
                     return channel;
                 }
             }
         }
+
         throw new SQLException("Failed to insert channel");
     }
     public static ChannelSubscribers loadSubscription(long chatId, long userId, Channel channel) throws SQLException {
@@ -515,7 +519,8 @@ public class Database {
                             rsGroup.getString("group_name"),
                             rsGroup.getString("description"),
                             rsGroup.getLong("creator_id"),
-                            rsGroup.getBoolean("is_private")
+                            rsGroup.getBoolean("is_private"),
+                            rsGroup.getString("group_avatar_url")
                     );
                     gc.setCreatedAt(rsGroup.getTimestamp("created_at"));
                     userChats.add(gc);
@@ -537,7 +542,8 @@ public class Database {
                             rsChannel.getString("channel_name"),
                             rsChannel.getLong("owner"),
                             rsChannel.getBoolean("is_private"),
-                            rsChannel.getString("description")
+                            rsChannel.getString("description"),
+                            rsChannel.getString("avatar_url")
                     );
                     ch.setCreatedAt(rsChannel.getTimestamp("created_at"));
                     userChats.add(ch);
@@ -678,7 +684,8 @@ public class Database {
                                 rs.getString("group_name"),
                                 rs.getString("description"),
                                 rs.getLong("creator_id"),
-                                rs.getBoolean("is_private")
+                                rs.getBoolean("is_private"),
+                                rs.getString("group_avatar_url")
                         );
                         chats.add(groupChat);
                     }
@@ -700,7 +707,8 @@ public class Database {
                                 rs.getString("channel_name"),
                                 rs.getLong("owner"),
                                 rs.getBoolean("is_private"),
-                                rs.getString("description")
+                                rs.getString("description"),
+                                rs.getString("avatar_url")
                         );
                         chats.add(channel);
                     }
@@ -709,6 +717,80 @@ public class Database {
         }
 
         return chats;
+    }
+    public static List<Chat> getAllChatsByUserId(long userId) throws SQLException {
+        List<Chat> allChats = new ArrayList<>();
+
+        // --- Private Chats ---
+        String privateSql = "SELECT chat_id, user1_id, user2_id FROM private_chat WHERE user1_id = ? OR user2_id = ?";
+        try (Connection connection = Database.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(privateSql)) {
+
+            stmt.setLong(1, userId);
+            stmt.setLong(2, userId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    long chatId = rs.getLong("chat_id");
+                    long user1 = rs.getLong("user1_id");
+                    long user2 = rs.getLong("user2_id");
+
+                    allChats.add(new PrivateChat(chatId, user1, user2));
+                }
+            }
+        }
+
+        // --- Group Chats ---
+        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private " +
+                "FROM group_chat g " +
+                "JOIN group_member gm ON g.chat_id = gm.group_id " +
+                "WHERE gm.user_id = ?";
+        try (Connection connection = Database.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(groupSql)) {
+
+            stmt.setLong(1, userId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    GroupChat groupChat = new GroupChat(
+                            rs.getLong("chat_id"),
+                            rs.getString("group_name"),
+                            rs.getString("description"),
+                            rs.getLong("creator_id"),
+                            rs.getBoolean("is_private"),
+                            rs.getString("group_avatar_url")
+                    );
+                    allChats.add(groupChat);
+                }
+            }
+        }
+
+        // --- Channels ---
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.owner, c.is_private, c.description " +
+                "FROM channel c " +
+                "JOIN channel_subscribers cs ON c.chat_id = cs.channel_id " +
+                "WHERE cs.user_id = ?";
+        try (Connection connection = Database.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(channelSql)) {
+
+            stmt.setLong(1, userId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Channel channel = new Channel(
+                            rs.getLong("chat_id"),
+                            rs.getString("channel_name"),
+                            rs.getLong("owner"),
+                            rs.getBoolean("is_private"),
+                            rs.getString("description"),
+                            rs.getString(" avatar_url ")
+                    );
+                    allChats.add(channel);
+                }
+            }
+        }
+
+        return allChats;
     }
 
 
@@ -753,7 +835,8 @@ public class Database {
                     rs.getString("channel_name"),
                     rs.getLong("owner"),
                     rs.getBoolean("is_private"),
-                    rs.getString("description")
+                    rs.getString("description"),
+                    rs.getString("avatar_url")
             );
         }
         return chat;
@@ -779,19 +862,20 @@ public class Database {
         long chatId = createChat("GROUP_CHAT");
 
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO groups(chat_id, group_name, description, creator_id, created_at, is_private) " +
-                    "VALUES (?, ?, ?, ?, now(), ?) RETURNING created_at";
+            String sql = "INSERT INTO groups(chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) " +
+                    "VALUES (?, ?, ?, ?, now(), ?, ?) RETURNING created_at";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setLong(1, chatId);         // chat_id
-                stmt.setString(2, name);         // group_name
-                stmt.setString(3, description);  // description
-                stmt.setLong(4, creatorId);      // creator_id
-                stmt.setBoolean(5, isPrivate);   // is_private
+                stmt.setLong(1, chatId);
+                stmt.setString(2, name);
+                stmt.setString(3, description);
+                stmt.setLong(4, creatorId);
+                stmt.setBoolean(5, isPrivate);
+                stmt.setString(6, null); // default avatar is null
 
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate);
+                    GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate, null);
                     group.setCreatedAt(rs.getTimestamp("created_at"));
                     return group;
                 }
@@ -800,6 +884,5 @@ public class Database {
 
         throw new SQLException("Failed to insert group chat");
     }
-
 
 }
