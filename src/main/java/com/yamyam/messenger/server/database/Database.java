@@ -19,17 +19,7 @@ public class Database {
         String url = System.getenv("DB_URL");
         String user = System.getenv("DB_USER");
         String password = System.getenv("DB_PASSWORD");
-
-// مقدار پیش‌فرض برای تست لوکال
-        if (url == null || url.isBlank()) {
-            url = "jdbc:postgresql://localhost:5432/YAM";
-        }
-        if (user == null || user.isBlank()) {
-            user = "postgres";
-        }
-        if (password == null || password.isBlank()) {
-            password = "mobin1234";
-        }
+        
         // Check if any required environment variable is missing
         if (url == null || user == null || password == null) {
             throw new RuntimeException("Database environment variables (DB_URL, DB_USER, DB_PASSWORD) are not set!");
