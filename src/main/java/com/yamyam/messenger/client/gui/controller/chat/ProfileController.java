@@ -8,6 +8,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.io.IOException;
+
 public class ProfileController {
 
     private final PageNavigator navigator = new PageNavigator(
@@ -41,7 +43,7 @@ public class ProfileController {
     }
 
     @FXML
-    private void handleContinue(ActionEvent event) {
+    private void handleContinue(ActionEvent event) throws IOException {
         String fullName = fullNameField.getText().trim();
         String username = usernameField.getText().trim();
         String bio = bioField.getText().trim();

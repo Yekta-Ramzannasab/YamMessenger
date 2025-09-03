@@ -884,8 +884,7 @@ public class Database {
 
         throw new SQLException("Failed to insert group chat");
     }
-    public static void updateUserProfile(long userId, Users user) throws SQLException {
-        UserProfile profile = user.getUserProfile();
+    public static void updateUserProfile(long userId, UserProfile profile) throws SQLException {
 
         if (profile == null) {
             throw new IllegalArgumentException("User profile cannot be null for update.");
@@ -897,7 +896,7 @@ public class Database {
                     "bio = ?, " +
                     "updated_at = ?, " +
                     "username = ?, " +
-                    "password_hashed = ?, " +
+                    "password = ?, " +
                     "profile_name = ? " +
                     "WHERE user_id = ?";
 
@@ -908,7 +907,7 @@ public class Database {
                 stmt.setString(4, profile.getUsername());
                 stmt.setString(5, profile.getPasswordHashed());
                 stmt.setString(6, profile.getProfileName());
-                stmt.setLong(7, userId); 
+                stmt.setLong(7, userId);
 
                 stmt.executeUpdate();
             }

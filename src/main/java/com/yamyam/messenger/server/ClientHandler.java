@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static com.yamyam.messenger.server.database.Database.getUserIdByEmail;
+import static com.yamyam.messenger.server.database.Database.updateUserProfile;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
