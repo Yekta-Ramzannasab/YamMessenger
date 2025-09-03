@@ -302,23 +302,31 @@ public class ChatController implements Initializable {
        - Backend/DataManager should call this after fetching user's chats by userId.
        -----* *------ */
     public void loadChats(List<Contact> contacts) {
-        if (contacts == null) {
+        if (contacts == null || contacts.isEmpty()) {
             loadChatsGeneric(Collections.emptyList());
             return;
         }
+
         List<ChatRef> refs = new ArrayList<>(contacts.size());
         for (Contact c : contacts) {
+            ChatKind kind = switch (c.type()) {
+                case DIRECT -> ChatKind.DIRECT;
+                case GROUP -> ChatKind.GROUP;
+                case CHANNEL -> ChatKind.CHANNEL;
+            };
+
             refs.add(new ChatRef(
                     c.id(),
-                    ChatKind.DIRECT,
+                    kind,
                     c.title(),
                     c.avatarUrl(),
                     c.online(),
-                    null,      // memberCount (not used for DIRECT)
-                    false,     // muted (reserved)
-                    0          // unreadCount (reserved)
+                    c.memberCount(),
+                    false,
+                    0
             ));
         }
+
         loadChatsGeneric(refs);
     }
 
