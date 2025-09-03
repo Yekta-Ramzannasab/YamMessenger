@@ -1,5 +1,6 @@
 package com.yamyam.messenger.client.gui.controller.auth;
 
+import com.yamyam.messenger.client.gui.controller.chat.ProfileController;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.util.PageNavigator;
 import com.yamyam.messenger.shared.model.Users;
@@ -9,6 +10,8 @@ import javafx.scene.control.*;
 
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.shared.model.UserProfile;
+
+import java.io.IOException;
 
 public class VerifyController {
 
@@ -41,7 +44,7 @@ public class VerifyController {
     }
 
     @FXML
-    private void handleVerify(ActionEvent event) {
+    private void handleVerify(ActionEvent event) throws IOException {
         String userInput = codeField.getText().trim();
 
         try {
@@ -63,7 +66,10 @@ public class VerifyController {
                 if(user.isVerified()){
                     navigator.navigateTo(event, "/com/yamyam/messenger/client/gui/fxml/main/main-view.fxml");
                 } else {
-                    navigator.goToNext(event);
+                    ProfileController profileController = navigator.goToNextAndGetController(event);
+
+                    // pass the data to the new controller
+                    profileController.initData(email);
                 }
             } else {
                 errorLabel.setText("Incorrect code. Please try again.");
