@@ -61,7 +61,7 @@ public class VerifyController {
                 }
 
                 if(user.isVerified()){
-                    navigator.goToNext(event);
+                    navigator.navigateTo(event, "/com/yamyam/messenger/client/gui/fxml/main/main-view.fxml");
                 } else {
                     navigator.goToNext(event);
                 }

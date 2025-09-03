@@ -19,7 +19,7 @@ public class Database {
         String url = System.getenv("DB_URL");
         String user = System.getenv("DB_USER");
         String password = System.getenv("DB_PASSWORD");
-        
+
         // Check if any required environment variable is missing
         if (url == null || user == null || password == null) {
             throw new RuntimeException("Database environment variables (DB_URL, DB_USER, DB_PASSWORD) are not set!");
