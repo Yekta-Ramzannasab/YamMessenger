@@ -98,6 +98,9 @@ public class NetworkService {
         loginMessage = receiveJsonMessage();
 
         if(loginMessage != null){
+            System.out.println(loginMessage.getType());
+
+
             // parse content
             Users user ;
             user = Users.fromString(loginMessage.getContent()) ;
@@ -105,6 +108,7 @@ public class NetworkService {
             // send user to ui
             return user ;
         }else
+
             return null;
     }
 
