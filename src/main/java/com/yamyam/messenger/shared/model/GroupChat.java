@@ -9,14 +9,19 @@ public class GroupChat extends Chat {
     private String description;
     private long creatorId;
     private boolean isPrivate;
+    private String groupAvatarUrl;
+    private int memberCount;
 
-    public GroupChat(long id,String group,String description,long creatorId,boolean isPrivate){
-        super(id,new Timestamp(System.currentTimeMillis()),ChatType.GROUP_CHAT);
+
+    public GroupChat(long id, String name, String description, long creatorId, boolean isPrivate, String avatarUrl) {
+        super(id, new Timestamp(System.currentTimeMillis()), ChatType.GROUP_CHAT);
+        this.groupName = name;
+        this.description = description;
         this.creatorId = creatorId;
         this.isPrivate = isPrivate;
-        this.groupName = group;
-        this.description = description;
+        this.groupAvatarUrl = avatarUrl;
     }
+
 
     public boolean isPrivate() {
         return isPrivate;
@@ -48,5 +53,13 @@ public class GroupChat extends Chat {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public String getGroupAvatarUrl() {
+        return groupAvatarUrl;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
     }
 }
