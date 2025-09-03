@@ -34,6 +34,13 @@ public class Users {
         this.userProfile = userProfile;
     }
 
+    public UserProfile getUserProfile() {
+        return userProfile;
+    }
+
+    public void setUserProfile(UserProfile userProfile) {
+        this.userProfile = userProfile;
+    }
 
     public long getId() {
         return id;
