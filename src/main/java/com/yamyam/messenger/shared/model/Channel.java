@@ -8,6 +8,9 @@ public class Channel extends Chat{
     private long owner;
     private String description;
     private boolean isPrivate;
+    private String channelAvatarUrl;
+    private int subscriberCount;
+
 
     public Channel(long id,String channelName,long owner,boolean isPrivate,String description){
         super(id,new Timestamp(System.currentTimeMillis()),ChatType.CHANNEL);
@@ -47,5 +50,13 @@ public class Channel extends Chat{
 
     public void setOwner(long owner) {
         this.owner = owner;
+    }
+
+    public String getChannelAvatarUrl() {
+        return channelAvatarUrl;
+    }
+
+    public int getSubscriberCount() {
+        return subscriberCount;
     }
 }
