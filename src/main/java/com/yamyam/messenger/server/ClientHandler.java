@@ -101,7 +101,13 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(response);
                             break;
                         }
-
+                        case 4:
+                            UserProfile userProfile = new UserProfile() ;
+                            userProfile = UserProfile.fromString(request.getContent()) ;
+                            long id = getUserIdByEmail(request.getSender());
+                            updateUserProfile (id , userProfile);
+                        
+                            break;
                         case 7:
                             String userPrompt = request.getContent();
                             String aiResponse = getAIResponse(userPrompt);

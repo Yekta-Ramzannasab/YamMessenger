@@ -339,6 +339,17 @@ public class NetworkService {
         }
     }
 
+    public void fillUserFirstProfile (String email,String fullName,String username,String bio) throws IOException {
+        UserProfile userProfile = new UserProfile();
+
+        userProfile.setBio(bio);
+        userProfile.setProfileName(fullName);
+        userProfile.setUsername(username);
+
+        Message message = new Message(4,email,userProfile.toString());
+        sendJsonMessage(message);
+    }
+
 //    public void sendChatMessage(long chatId, String text) throws IOException {
 //        // یک پیام برای ارسال به سرور می‌سازیم
 //        // فرض می‌کنیم نوع پیام ۱ برای پیام‌های چت است
