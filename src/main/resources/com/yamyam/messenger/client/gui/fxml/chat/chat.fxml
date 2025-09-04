@@ -76,6 +76,9 @@
         <VBox fx:id="infoPane" spacing="12" prefWidth="300" styleClass="chat-info" visible="true" managed="true">
             <ImageView fx:id="infoAvatar" fitWidth="96" fitHeight="96" preserveRatio="true"/>
             <Label fx:id="infoName"     styleClass="chat-info__name"/>
+            <Label fx:id="infoBio"      styleClass="chat-info__bio"/>
+            <Label fx:id="infoUsername" styleClass="chat-info__username"/>
+            <Label fx:id="infoEmail"    styleClass="chat-info__email"/>
             <Label fx:id="infoPresence" styleClass="chat-info__presence"/>
             <Separator/>
             <Label text="Media" styleClass="chat-section"/>
