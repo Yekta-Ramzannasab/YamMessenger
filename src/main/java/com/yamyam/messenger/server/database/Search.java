@@ -19,6 +19,7 @@ public class Search {
         // users
         dataManager.searchUsers(query).forEach(u -> {
             results.add(new SearchResult(u, u.getSearchRank()));
+
         });
 
         // chats
