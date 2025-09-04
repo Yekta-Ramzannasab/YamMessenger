@@ -1,27 +1,33 @@
 package com.yamyam.messenger.server.database;
 
+import com.yamyam.messenger.shared.model.ChatType;
 import com.yamyam.messenger.shared.model.PrivateChat;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Locale;
 
 public class PrivateChatHandler {
 
-    private static final PrivateChatHandler instance = new PrivateChatHandler();
-
-    public static PrivateChatHandler getInstance() {
-        return instance;
-    }
 
     public PrivateChat checkOrCreateChat(long senderId, long receiverId) throws SQLException {
         long user1 = Math.min(senderId, receiverId);
         long user2 = Math.max(senderId, receiverId);
 
         PrivateChat existing = Database.loadPrivateChat(user1, user2);
-        if (existing != null) return existing;
+        if (existing != null) {
+            System.out.println("✅ Existing private chat found: chatId=" + existing.getChatId());
+            return existing;
+        }
+        else{
+            System.out.println("not exit");
+        }
 
-        return Database.createPrivateChat(user1, user2);
+        long chatId = Database.createChat();
+        System.out.println("🆕 Creating new private chat with chatId=" + chatId);
+
+        return Database.createPrivateChat(chatId, user1, user2);
     }
 }
