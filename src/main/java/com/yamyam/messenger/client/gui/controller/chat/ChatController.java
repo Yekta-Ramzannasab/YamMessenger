@@ -258,16 +258,61 @@ public class ChatController implements Initializable {
 
             mediaGrid.getChildren().clear();
 
-          
+            long meUserId = AppSession.requireUserId();
+            ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
+
+            try {
+                PrivateChat chat = net.getOrCreatePrivateChat(meUserId, u.getId());
+                if (chat != null) {
+                    String avatarUrl = u.getUserProfile().getProfileImageUrl();
+                    Image avatar = (avatarUrl != null && !avatarUrl.isBlank())
+                            ? new Image(avatarUrl)
+                            : placeholder;
+                    ChatItem item = ChatItem.fromContact(chat.toContact(u), avatar);
+                    item.setRawEntity(DataManager.getInstance().getUser(u.getId()));
+                    openChat(item);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
-            if (sel == null) return;
+            if (sel == null) {
+                System.out.println("⚠️ No chat item selected");
+                return;
+            }
+
+            System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
             openChat(sel);
 
             long meUserId = AppSession.requireUserId();
+            long chatId = sel.contactId;
+
+            try {
+                System.out.println("📡 Fetching messages for chatId=" + chatId);
+                List<MessageEntity> messages = NetworkService.getInstance().fetchMessages(chatId);
+                System.out.println("📥 Received " + messages.size() + " messages");
+
+                for (MessageEntity m : messages) {
+                    System.out.println("🔄 Converting message: " + m.getText() + " | sender=" + m.getSender().getEmail());
+                    Msg msg = new Msg(
+                            m.getSender().getId() == meUserId,
+                            m.getText(),
+                            m.getSentAt().toLocalDateTime()
+                    );
+                    sel.messages.add(msg);
+                }
+
+                System.out.println("✅ Messages added to chat item: " + sel.messages.size());
+                openChat(sel);
+            } catch (IOException ex) {
+                System.err.println("❌ Failed to load messages: " + ex.getMessage());
+            }
+
             try {
                 ServiceLocator.chat().openChat(meUserId, sel.contactId);
+                System.out.println("📨 Notified server: chat opened");
             } catch (Exception ex) {
                 System.err.println("[chat] openChat failed: " + ex.getMessage());
             }
@@ -488,11 +533,12 @@ public class ChatController implements Initializable {
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
     private void openChat(ChatItem c) {
+
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
         String status = switch (c.kind) {
-            case DIRECT  -> (c.online ? "Online" : "Last seen recently");
+            case DIRECT  -> (c.online ? "🟢 Online" : "⚫ Last seen recently");
             case GROUP   -> (c.memberCount != null ? c.memberCount + " members" : "Group");
             case CHANNEL -> "Channel";
         };
@@ -502,7 +548,13 @@ public class ChatController implements Initializable {
         infoName.setText(c.title);
         infoPresence.setText(status);
 
-        messageList.setItems(c.messages);
+        messageList.setItems(FXCollections.observableArrayList());
+        System.out.println("🧩 openChat called for: " + c.title);
+        System.out.println("🖼️ Avatar is " + (c.avatar != null ? "set" : "null"));
+        System.out.println("📛 Name: " + c.title);
+        System.out.println("📶 Status: " + headerStatus.getText());
+
+        System.out.println("✅ Chat UI updated for: " + c.title + " | Status: " + status);
     }
 
     /* -----* *------
@@ -590,7 +642,7 @@ public class ChatController implements Initializable {
         public final Integer memberCount;    // for GROUP
         public final boolean muted;          // reserved
         public final ObservableList<Msg> messages = FXCollections.observableArrayList();
-        public Objects rawEntity;
+        public Object rawEntity;
 
         private ChatItem(long id, String t, boolean o, Image a, ChatKind k, Integer memberCount, boolean muted) {
             contactId=id; title=t; online=o; avatar=a; kind=k; this.memberCount = memberCount; this.muted = muted;
@@ -605,11 +657,11 @@ public class ChatController implements Initializable {
             return new ChatItem(r.id, r.title, online, avatar, r.kind, r.memberCount, r.muted);
         }
 
-        public Objects getRawEntity() {
+        public Object getRawEntity() {
             return rawEntity;
         }
 
-        public void setRawEntity(Objects rawEntity) {
+        public void setRawEntity(Object rawEntity) {
             this.rawEntity = rawEntity;
         }
 
