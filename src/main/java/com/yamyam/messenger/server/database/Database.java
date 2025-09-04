@@ -170,7 +170,7 @@ public class Database {
 
         try (Connection connection = Database.getConnection()) {
             String sql = "SELECT m.message_id, m.chat_id, m.sender_id, m.message_text, m.message_type, " +
-                    "m.reply, m.forward, m.is_edited, m.is_deleted, m.status, m.sent_at, " +
+                    "m.reply_to_message_id, m.forwarded_from_message_id, m.is_edited, m.is_deleted, m.status, m.sent_at, " +
                     "u.user_id, u.email, u.is_online, u.is_verified, u.is_deleted, " +
                     "p.profile_id, p.username, p.profile_image_url " +
                     "FROM messages m " +
@@ -213,11 +213,11 @@ public class Database {
 
                 // Build MessageEntity
                 MessageEntity message = new MessageEntity(
-                        MessageType.valueOf(rs.getString("status")),
+                        MessageStatus.valueOf(rs.getString("status")),
                         rs.getBoolean("is_deleted"),
                         rs.getBoolean("is_edited"),
-                        rs.getLong("forward"),
-                        rs.getLong("reply"),
+                        rs.getLong("forwarded_from_message_id"),
+                        rs.getLong("reply_to_message_id"),
                         MessageType.valueOf(rs.getString("message_type")),
                         rs.getString("message_text"),
                         chat,
@@ -287,7 +287,7 @@ public class Database {
             }
         }
     }
-    public static PrivateChat createPrivateChat(long userA, long userB) throws SQLException {
+    public static PrivateChat createPrivateChat(long chatId,long userA, long userB) throws SQLException {
         long user1 = Math.min(userA, userB);
         long user2 = Math.max(userA, userB);
 
@@ -295,14 +295,12 @@ public class Database {
             String sql = "INSERT INTO private_chat(user1_id, user2_id) VALUES (?, ?) RETURNING chat_id";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
                 stmt.setLong(1, user1);
                 stmt.setLong(2, user2);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        long chatId = rs.getLong("chat_id");
-
-
                         PrivateChat chat = new PrivateChat(chatId, user1, user2);
                         return chat;
                     } else {
@@ -403,7 +401,7 @@ public class Database {
         return null;
     }
     public static Channel insertChannel(String name, long ownerId, boolean isPrivate, String description) throws SQLException {
-        long chatId = createChat("CHANNEL");
+        long chatId = createChat();
 
         try (Connection con = Database.getConnection()) {
             String sql = "INSERT INTO channels(chat_id, channel_name, owner_id, is_private, description, avatar_url) " +
@@ -464,18 +462,21 @@ public class Database {
         }
         throw new SQLException("Failed to insert subscription");
     }
-    public static long createChat(String chatType) throws SQLException {
+    public static long createChat() {
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO chat(chat_type) VALUES (?) RETURNING chat_id";
+            String sql = "INSERT INTO chat(chat_type) VALUES ('private') RETURNING chat_id";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setString(1, chatType);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     return rs.getLong("chat_id");
                 }
+                else {return 0;}
             }
+        } catch (SQLException e) {
+            System.out.println("nayomad");
+
+            throw new RuntimeException(e);
         }
-        throw new SQLException("Failed to create chat");
     }
 
     public static List<Chat> loadUserChats(long userId) throws SQLException {
@@ -847,7 +848,7 @@ public class Database {
         Chat chat = new PrivateChat(rs.getLong("chat_id"), 0, 0);
         Users sender = new Users(rs.getLong("sender_id"), null, null, false, false, false, null, null);
         return new MessageEntity(
-                MessageType.valueOf(rs.getString("status")),
+                MessageStatus.valueOf(rs.getString("status")),
                 rs.getBoolean("is_deleted"),
                 rs.getBoolean("is_edited"),
                 rs.getLong("forward"),
@@ -860,7 +861,7 @@ public class Database {
         );
     }
     public static GroupChat insertGroupChat(String name, String description, long creatorId, boolean isPrivate) throws SQLException {
-        long chatId = createChat("GROUP_CHAT");
+        long chatId = createChat();
 
         try (Connection con = Database.getConnection()) {
             String sql = "INSERT INTO groups(chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) " +
