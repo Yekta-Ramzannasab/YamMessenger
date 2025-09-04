@@ -25,6 +25,7 @@ public class DataManager {
     private final Map<Long, GroupChat> groupChatCache = new HashMap<>();
     private final Map<String, GroupMembers> groupMemberCache = new HashMap<>();
 
+
     // Private constructor to enforce singleton
     private DataManager() {}
 
@@ -78,38 +79,36 @@ public class DataManager {
 
     // ---------------- Messages ----------------
     public List<MessageEntity> getMessages(long chatId) throws SQLException {
-        return messageCache.computeIfAbsent(chatId, id -> {
-            try {
-                return Database.loadMessages(chatId);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+        List<MessageEntity> cached = messageCache.get(chatId);
+        if (cached != null) {
+            System.out.println("📦 Messages loaded from cache for chatId=" + chatId);
+            return cached;
+        }
 
+        System.out.println("🔄 Messages loading from DB for chatId=" + chatId);
+        List<MessageEntity> messages = Database.loadMessages(chatId);
+        messageCache.put(chatId, messages);
+        return messages;
+    }
     public void addMessage(long chatId, long senderId, String text) {
         executor.submit(() -> {
             try {
-                // TODO: Use the appropriate handler to insert message into DB
-                // Example: MessageHandler.insertMessage(chatId, senderId, text);
+                MessageDatabaseHandler messageDatabaseHandler = new MessageDatabaseHandler();
+                MessageEntity message = messageDatabaseHandler.insertMessage(chatId, senderId, text);
 
-                MessageEntity message = new MessageEntity(
-                        MessageType.SENT,
-                        false,
-                        false,
-                        0,
-                        0,
-                        MessageType.TEXT,
-                        text,
-                        chatCache.get(chatId),
-                        getUser(senderId),
-                        System.currentTimeMillis() // temporary id
-                );
+                if (message != null) {
+                    synchronized (messageCache) {
+                        messageCache.computeIfAbsent(chatId, k -> new ArrayList<>()).add(message);
+                    }
 
-                messageCache.computeIfAbsent(chatId, k -> new ArrayList<>()).add(message);
-                notifyListeners("message_added", message);
+                    notifyListeners("message_added", message);
+                    System.out.println("✅ Message inserted and cached: " + message.getText());
+                } else {
+                    System.err.println("⚠️ Message insertion returned null");
+                }
 
             } catch (SQLException e) {
+                System.err.println("❌ Error inserting message: " + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -255,8 +254,8 @@ public class DataManager {
         if (privateChatCache.containsKey(key)) {
             return privateChatCache.get(key);
         }
-
-        PrivateChat chat = PrivateChatHandler.getInstance().checkOrCreateChat(user1, user2);
+        PrivateChatHandler privateChatHandler = new PrivateChatHandler();
+        PrivateChat chat = privateChatHandler.checkOrCreateChat(user1, user2);
         privateChatCache.put(key, chat);
         return chat;
     }
