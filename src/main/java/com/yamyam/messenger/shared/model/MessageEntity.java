@@ -13,11 +13,11 @@ public class MessageEntity {
     private long forward;
     private boolean isEdited;
     private boolean isDeleted;
-    private MessageType status;
+    private MessageStatus status;
     private Timestamp sentAt;
     private double searchRank;
 
-    public MessageEntity(MessageType status,
+    public MessageEntity(MessageStatus status,
                          boolean isDeleted,
                          boolean isEdited,
                          long forward,
@@ -112,11 +112,11 @@ public class MessageEntity {
         isDeleted = deleted;
     }
 
-    public MessageType getStatus() {
+    public MessageStatus getStatus() {
         return status;
     }
 
-    public void setStatus(MessageType status) {
+    public void setStatus(MessageStatus status) {
         this.status = status;
     }
 

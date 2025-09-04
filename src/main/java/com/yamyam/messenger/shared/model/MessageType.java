@@ -1,7 +1,7 @@
 package com.yamyam.messenger.shared.model;
 
 public enum MessageType {
-    TEXT,
+    text,
     PHOTO,
     VIDEO,
     AUDIO,
