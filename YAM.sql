@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.5
 
--- Started on 2025-09-03 14:54:08
+-- Started on 2025-09-04 15:45:16
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -20,7 +20,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 887 (class 1247 OID 16731)
+-- TOC entry 885 (class 1247 OID 16731)
 -- Name: message_status; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -34,7 +34,7 @@ CREATE TYPE public.message_status AS ENUM (
 ALTER TYPE public.message_status OWNER TO postgres;
 
 --
--- TOC entry 875 (class 1247 OID 16664)
+-- TOC entry 873 (class 1247 OID 16664)
 -- Name: role_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -48,7 +48,7 @@ CREATE TYPE public.role_type AS ENUM (
 ALTER TYPE public.role_type OWNER TO postgres;
 
 --
--- TOC entry 231 (class 1255 OID 16780)
+-- TOC entry 232 (class 1255 OID 16780)
 -- Name: messages_tsvector_trigger(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -69,7 +69,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 226 (class 1259 OID 16693)
+-- TOC entry 225 (class 1259 OID 16693)
 -- Name: channel; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -86,7 +86,7 @@ CREATE TABLE public.channel (
 ALTER TABLE public.channel OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1259 OID 16712)
+-- TOC entry 226 (class 1259 OID 16712)
 -- Name: channel_subscribers; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -133,7 +133,7 @@ CREATE SEQUENCE public.chat_chat_id_seq
 ALTER SEQUENCE public.chat_chat_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5024 (class 0 OID 0)
+-- TOC entry 5022 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: chat_chat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -142,7 +142,7 @@ ALTER SEQUENCE public.chat_chat_id_seq OWNED BY public.chat.chat_id;
 
 
 --
--- TOC entry 230 (class 1259 OID 16788)
+-- TOC entry 229 (class 1259 OID 16788)
 -- Name: contacts; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -156,7 +156,7 @@ CREATE TABLE public.contacts (
 ALTER TABLE public.contacts OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1259 OID 16644)
+-- TOC entry 223 (class 1259 OID 16644)
 -- Name: group_chat; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -174,7 +174,7 @@ CREATE TABLE public.group_chat (
 ALTER TABLE public.group_chat OWNER TO postgres;
 
 --
--- TOC entry 225 (class 1259 OID 16671)
+-- TOC entry 224 (class 1259 OID 16671)
 -- Name: group_members; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -190,7 +190,7 @@ CREATE TABLE public.group_members (
 ALTER TABLE public.group_members OWNER TO postgres;
 
 --
--- TOC entry 229 (class 1259 OID 16738)
+-- TOC entry 228 (class 1259 OID 16738)
 -- Name: messages; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -214,7 +214,7 @@ CREATE TABLE public.messages (
 ALTER TABLE public.messages OWNER TO postgres;
 
 --
--- TOC entry 228 (class 1259 OID 16737)
+-- TOC entry 227 (class 1259 OID 16737)
 -- Name: messages_message_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -229,8 +229,8 @@ CREATE SEQUENCE public.messages_message_id_seq
 ALTER SEQUENCE public.messages_message_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5025 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 5023 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: messages_message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -238,19 +238,42 @@ ALTER SEQUENCE public.messages_message_id_seq OWNED BY public.messages.message_i
 
 
 --
--- TOC entry 223 (class 1259 OID 16622)
+-- TOC entry 231 (class 1259 OID 24976)
 -- Name: private_chat; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.private_chat (
     chat_id bigint NOT NULL,
     user1_id bigint NOT NULL,
-    user2_id bigint NOT NULL,
-    CONSTRAINT no_self_chat CHECK ((user1_id <> user2_id))
+    user2_id bigint NOT NULL
 );
 
 
 ALTER TABLE public.private_chat OWNER TO postgres;
+
+--
+-- TOC entry 230 (class 1259 OID 24975)
+-- Name: private_chat_chat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.private_chat_chat_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.private_chat_chat_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5024 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: private_chat_chat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.private_chat_chat_id_seq OWNED BY public.private_chat.chat_id;
+
 
 --
 -- TOC entry 220 (class 1259 OID 16596)
@@ -265,7 +288,7 @@ CREATE TABLE public.user_profiles (
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     username character varying(25),
     password text,
-    profile_name character varying(25) NOT NULL,
+    profile_name character varying(25),
     search_vector tsvector
 );
 
@@ -288,7 +311,7 @@ CREATE SEQUENCE public.user_profiles_profile_id_seq
 ALTER SEQUENCE public.user_profiles_profile_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5026 (class 0 OID 0)
+-- TOC entry 5025 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: user_profiles_profile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -330,7 +353,7 @@ CREATE SEQUENCE public.users_user_id_seq
 ALTER SEQUENCE public.users_user_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5027 (class 0 OID 0)
+-- TOC entry 5026 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -339,7 +362,7 @@ ALTER SEQUENCE public.users_user_id_seq OWNED BY public.users.user_id;
 
 
 --
--- TOC entry 4795 (class 2604 OID 16616)
+-- TOC entry 4796 (class 2604 OID 16616)
 -- Name: chat chat_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -347,7 +370,7 @@ ALTER TABLE ONLY public.chat ALTER COLUMN chat_id SET DEFAULT nextval('public.ch
 
 
 --
--- TOC entry 4805 (class 2604 OID 16741)
+-- TOC entry 4806 (class 2604 OID 16741)
 -- Name: messages message_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -355,7 +378,15 @@ ALTER TABLE ONLY public.messages ALTER COLUMN message_id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 4793 (class 2604 OID 16599)
+-- TOC entry 4813 (class 2604 OID 24979)
+-- Name: private_chat chat_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.private_chat ALTER COLUMN chat_id SET DEFAULT nextval('public.private_chat_chat_id_seq'::regclass);
+
+
+--
+-- TOC entry 4794 (class 2604 OID 16599)
 -- Name: user_profiles profile_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -363,7 +394,7 @@ ALTER TABLE ONLY public.user_profiles ALTER COLUMN profile_id SET DEFAULT nextva
 
 
 --
--- TOC entry 4788 (class 2604 OID 16563)
+-- TOC entry 4789 (class 2604 OID 16563)
 -- Name: users user_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -371,8 +402,8 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 
 
 --
--- TOC entry 5014 (class 0 OID 16693)
--- Dependencies: 226
+-- TOC entry 5010 (class 0 OID 16693)
+-- Dependencies: 225
 -- Data for Name: channel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -381,8 +412,8 @@ COPY public.channel (chat_id, channel_name, description, owner_id, is_private, a
 
 
 --
--- TOC entry 5015 (class 0 OID 16712)
--- Dependencies: 227
+-- TOC entry 5011 (class 0 OID 16712)
+-- Dependencies: 226
 -- Data for Name: channel_subscribers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -391,7 +422,7 @@ COPY public.channel_subscribers (chat_id, user_id, role, joined_at, approved) FR
 
 
 --
--- TOC entry 5010 (class 0 OID 16613)
+-- TOC entry 5007 (class 0 OID 16613)
 -- Dependencies: 222
 -- Data for Name: chat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -401,8 +432,8 @@ COPY public.chat (chat_id, chat_type, created_at, search_vector) FROM stdin;
 
 
 --
--- TOC entry 5018 (class 0 OID 16788)
--- Dependencies: 230
+-- TOC entry 5014 (class 0 OID 16788)
+-- Dependencies: 229
 -- Data for Name: contacts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -411,8 +442,8 @@ COPY public.contacts (owner_id, contact_id, added_at) FROM stdin;
 
 
 --
--- TOC entry 5012 (class 0 OID 16644)
--- Dependencies: 224
+-- TOC entry 5008 (class 0 OID 16644)
+-- Dependencies: 223
 -- Data for Name: group_chat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -421,8 +452,8 @@ COPY public.group_chat (chat_id, group_name, description, creator_id, created_at
 
 
 --
--- TOC entry 5013 (class 0 OID 16671)
--- Dependencies: 225
+-- TOC entry 5009 (class 0 OID 16671)
+-- Dependencies: 224
 -- Data for Name: group_members; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -431,8 +462,8 @@ COPY public.group_members (chat_id, user_id, role, joined_at, invited_by) FROM s
 
 
 --
--- TOC entry 5017 (class 0 OID 16738)
--- Dependencies: 229
+-- TOC entry 5013 (class 0 OID 16738)
+-- Dependencies: 228
 -- Data for Name: messages; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -441,30 +472,35 @@ COPY public.messages (message_id, chat_id, sender_id, message_text, message_type
 
 
 --
--- TOC entry 5011 (class 0 OID 16622)
--- Dependencies: 223
+-- TOC entry 5016 (class 0 OID 24976)
+-- Dependencies: 231
 -- Data for Name: private_chat; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.private_chat (chat_id, user1_id, user2_id) FROM stdin;
+1	12	13
+2	12	12
+3	12	14
 \.
 
 
 --
--- TOC entry 5008 (class 0 OID 16596)
+-- TOC entry 5005 (class 0 OID 16596)
 -- Dependencies: 220
 -- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.user_profiles (profile_id, user_id, profile_image_url, bio, updated_at, username, password, profile_name, search_vector) FROM stdin;
-1	5	\N	\N	2025-08-13 01:23:42.354081	\N	\N	username	'username':1
-2	6	\N	\N	2025-09-03 02:08:54.852628	\N	\N	username	'username':1
-3	7	\N	\N	2025-09-03 14:09:47.603423	\N	\N	username	'username':1
+1	5	\N	\N	2025-08-13 01:23:42.354081	\N	\N	username	'username':1B
+2	6	\N	\N	2025-09-03 02:08:54.852628	\N	\N	username	'username':1B
+8	12	\N	mori zer nazan	2025-09-03 19:36:22.431	fermow	\N	mobin	'fermow':1A 'mobin':2B 'mori':3C 'nazan':5C 'zer':4C
+9	13	\N	hoho	2025-09-03 23:49:25.437	seyed	\N	ali	'ali':2B 'hoho':3C 'seyed':1A
+10	14	\N	ha ha ha	2025-09-04 11:27:32.102	alireza	\N	amir	'alireza':1 'amir':2
 \.
 
 
 --
--- TOC entry 5006 (class 0 OID 16560)
+-- TOC entry 5003 (class 0 OID 16560)
 -- Dependencies: 218
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -473,12 +509,14 @@ COPY public.users (user_id, created_at, last_seen, is_verified, is_online, is_de
 3	2025-07-24 12:31:54.952129+03:30	\N	t	f	f	mobin@email
 5	2025-08-13 01:23:42.348183+03:30	\N	f	f	f	amir@email
 6	2025-09-03 02:08:54.845412+03:30	\N	f	f	f	mobin@example.com
-7	2025-09-03 14:09:47.596716+03:30	\N	f	f	f	fermow.fermow85@gmail.com
+12	2025-09-03 19:36:08.125112+03:30	\N	t	f	f	fermow.fermow85@gmail.com
+13	2025-09-03 23:49:18.340947+03:30	\N	t	f	f	batman132ali@gmail.com
+14	2025-09-04 11:27:12.309142+03:30	\N	t	f	f	mesterdidi13831383@gmail.com
 \.
 
 
 --
--- TOC entry 5028 (class 0 OID 0)
+-- TOC entry 5027 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: chat_chat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -487,12 +525,21 @@ SELECT pg_catalog.setval('public.chat_chat_id_seq', 1, false);
 
 
 --
--- TOC entry 5029 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 5028 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: messages_message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.messages_message_id_seq', 1, false);
+
+
+--
+-- TOC entry 5029 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: private_chat_chat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.private_chat_chat_id_seq', 3, true);
 
 
 --
@@ -501,7 +548,7 @@ SELECT pg_catalog.setval('public.messages_message_id_seq', 1, false);
 -- Name: user_profiles_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 3, true);
+SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 10, true);
 
 
 --
@@ -510,11 +557,11 @@ SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 3, true);
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 7, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 14, true);
 
 
 --
--- TOC entry 4830 (class 2606 OID 16701)
+-- TOC entry 4828 (class 2606 OID 16701)
 -- Name: channel channel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -523,7 +570,7 @@ ALTER TABLE ONLY public.channel
 
 
 --
--- TOC entry 4832 (class 2606 OID 16719)
+-- TOC entry 4830 (class 2606 OID 16719)
 -- Name: channel_subscribers channel_subscribers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -532,7 +579,7 @@ ALTER TABLE ONLY public.channel_subscribers
 
 
 --
--- TOC entry 4821 (class 2606 OID 16621)
+-- TOC entry 4822 (class 2606 OID 16621)
 -- Name: chat chat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -541,7 +588,7 @@ ALTER TABLE ONLY public.chat
 
 
 --
--- TOC entry 4837 (class 2606 OID 16793)
+-- TOC entry 4835 (class 2606 OID 16793)
 -- Name: contacts contacts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -550,7 +597,7 @@ ALTER TABLE ONLY public.contacts
 
 
 --
--- TOC entry 4826 (class 2606 OID 16652)
+-- TOC entry 4824 (class 2606 OID 16652)
 -- Name: group_chat group_chat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -559,7 +606,7 @@ ALTER TABLE ONLY public.group_chat
 
 
 --
--- TOC entry 4828 (class 2606 OID 16677)
+-- TOC entry 4826 (class 2606 OID 16677)
 -- Name: group_members group_members_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -568,7 +615,7 @@ ALTER TABLE ONLY public.group_members
 
 
 --
--- TOC entry 4835 (class 2606 OID 16751)
+-- TOC entry 4833 (class 2606 OID 16751)
 -- Name: messages messages_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -577,7 +624,7 @@ ALTER TABLE ONLY public.messages
 
 
 --
--- TOC entry 4823 (class 2606 OID 16627)
+-- TOC entry 4837 (class 2606 OID 24981)
 -- Name: private_chat private_chat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -586,7 +633,7 @@ ALTER TABLE ONLY public.private_chat
 
 
 --
--- TOC entry 4819 (class 2606 OID 16606)
+-- TOC entry 4820 (class 2606 OID 16606)
 -- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -595,7 +642,7 @@ ALTER TABLE ONLY public.user_profiles
 
 
 --
--- TOC entry 4816 (class 2606 OID 16571)
+-- TOC entry 4817 (class 2606 OID 16571)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -604,7 +651,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 4833 (class 1259 OID 16779)
+-- TOC entry 4831 (class 1259 OID 16779)
 -- Name: idx_messages_search_vector; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -612,7 +659,7 @@ CREATE INDEX idx_messages_search_vector ON public.messages USING gin (search_vec
 
 
 --
--- TOC entry 4817 (class 1259 OID 16773)
+-- TOC entry 4818 (class 1259 OID 16773)
 -- Name: idx_user_profiles_search_vector; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -620,15 +667,7 @@ CREATE INDEX idx_user_profiles_search_vector ON public.user_profiles USING gin (
 
 
 --
--- TOC entry 4824 (class 1259 OID 16643)
--- Name: unique_pair_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX unique_pair_idx ON public.private_chat USING btree (LEAST(user1_id, user2_id), GREATEST(user1_id, user2_id));
-
-
---
--- TOC entry 4858 (class 2620 OID 16778)
+-- TOC entry 4855 (class 2620 OID 16778)
 -- Name: chat chat_search_update; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -636,7 +675,7 @@ CREATE TRIGGER chat_search_update BEFORE INSERT OR UPDATE ON public.chat FOR EAC
 
 
 --
--- TOC entry 4857 (class 2620 OID 16772)
+-- TOC entry 4854 (class 2620 OID 16772)
 -- Name: user_profiles tsvectorupdate; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -644,7 +683,7 @@ CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE ON public.user_profiles FO
 
 
 --
--- TOC entry 4859 (class 2620 OID 16781)
+-- TOC entry 4856 (class 2620 OID 16781)
 -- Name: messages tsvectorupdate_messages; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
@@ -652,7 +691,7 @@ CREATE TRIGGER tsvectorupdate_messages BEFORE INSERT OR UPDATE ON public.message
 
 
 --
--- TOC entry 4847 (class 2606 OID 16702)
+-- TOC entry 4844 (class 2606 OID 16702)
 -- Name: channel channel_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -661,7 +700,7 @@ ALTER TABLE ONLY public.channel
 
 
 --
--- TOC entry 4848 (class 2606 OID 16707)
+-- TOC entry 4845 (class 2606 OID 16707)
 -- Name: channel channel_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -670,7 +709,7 @@ ALTER TABLE ONLY public.channel
 
 
 --
--- TOC entry 4849 (class 2606 OID 16720)
+-- TOC entry 4846 (class 2606 OID 16720)
 -- Name: channel_subscribers channel_subscribers_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -679,7 +718,7 @@ ALTER TABLE ONLY public.channel_subscribers
 
 
 --
--- TOC entry 4850 (class 2606 OID 16725)
+-- TOC entry 4847 (class 2606 OID 16725)
 -- Name: channel_subscribers channel_subscribers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -688,7 +727,7 @@ ALTER TABLE ONLY public.channel_subscribers
 
 
 --
--- TOC entry 4855 (class 2606 OID 16799)
+-- TOC entry 4852 (class 2606 OID 16799)
 -- Name: contacts contacts_contact_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -697,7 +736,7 @@ ALTER TABLE ONLY public.contacts
 
 
 --
--- TOC entry 4856 (class 2606 OID 16794)
+-- TOC entry 4853 (class 2606 OID 16794)
 -- Name: contacts contacts_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -706,7 +745,7 @@ ALTER TABLE ONLY public.contacts
 
 
 --
--- TOC entry 4842 (class 2606 OID 16653)
+-- TOC entry 4839 (class 2606 OID 16653)
 -- Name: group_chat group_chat_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -715,7 +754,7 @@ ALTER TABLE ONLY public.group_chat
 
 
 --
--- TOC entry 4843 (class 2606 OID 16658)
+-- TOC entry 4840 (class 2606 OID 16658)
 -- Name: group_chat group_chat_creator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -724,7 +763,7 @@ ALTER TABLE ONLY public.group_chat
 
 
 --
--- TOC entry 4844 (class 2606 OID 16678)
+-- TOC entry 4841 (class 2606 OID 16678)
 -- Name: group_members group_members_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -733,7 +772,7 @@ ALTER TABLE ONLY public.group_members
 
 
 --
--- TOC entry 4845 (class 2606 OID 16688)
+-- TOC entry 4842 (class 2606 OID 16688)
 -- Name: group_members group_members_invited_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -742,7 +781,7 @@ ALTER TABLE ONLY public.group_members
 
 
 --
--- TOC entry 4846 (class 2606 OID 16683)
+-- TOC entry 4843 (class 2606 OID 16683)
 -- Name: group_members group_members_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -751,7 +790,7 @@ ALTER TABLE ONLY public.group_members
 
 
 --
--- TOC entry 4851 (class 2606 OID 16752)
+-- TOC entry 4848 (class 2606 OID 16752)
 -- Name: messages messages_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -760,7 +799,7 @@ ALTER TABLE ONLY public.messages
 
 
 --
--- TOC entry 4852 (class 2606 OID 16767)
+-- TOC entry 4849 (class 2606 OID 16767)
 -- Name: messages messages_forwarded_from_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -769,7 +808,7 @@ ALTER TABLE ONLY public.messages
 
 
 --
--- TOC entry 4853 (class 2606 OID 16762)
+-- TOC entry 4850 (class 2606 OID 16762)
 -- Name: messages messages_reply_to_message_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -778,39 +817,12 @@ ALTER TABLE ONLY public.messages
 
 
 --
--- TOC entry 4854 (class 2606 OID 16757)
+-- TOC entry 4851 (class 2606 OID 16757)
 -- Name: messages messages_sender_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.users(user_id);
-
-
---
--- TOC entry 4839 (class 2606 OID 16628)
--- Name: private_chat private_chat_chat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.private_chat
-    ADD CONSTRAINT private_chat_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES public.chat(chat_id) ON DELETE CASCADE;
-
-
---
--- TOC entry 4840 (class 2606 OID 16633)
--- Name: private_chat private_chat_user1_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.private_chat
-    ADD CONSTRAINT private_chat_user1_id_fkey FOREIGN KEY (user1_id) REFERENCES public.users(user_id);
-
-
---
--- TOC entry 4841 (class 2606 OID 16638)
--- Name: private_chat private_chat_user2_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.private_chat
-    ADD CONSTRAINT private_chat_user2_id_fkey FOREIGN KEY (user2_id) REFERENCES public.users(user_id);
 
 
 --
@@ -822,7 +834,7 @@ ALTER TABLE ONLY public.user_profiles
     ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
--- Completed on 2025-09-03 14:54:08
+-- Completed on 2025-09-04 15:45:16
 
 --
 -- PostgreSQL database dump complete

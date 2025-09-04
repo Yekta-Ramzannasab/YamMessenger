@@ -237,7 +237,7 @@ public class Database {
     public static PrivateChat loadPrivateChat(long chatId) throws SQLException {
         try (Connection connection = Database.getConnection()) {
             String sql = "SELECT chat_id, user1_id, user2_id, created_at " +
-                    "FROM private_chats " +
+                    "FROM private_chat " +
                     "WHERE chat_id = ?";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -263,8 +263,8 @@ public class Database {
         long user2 = Math.max(userA, userB);
 
         try (Connection connection = Database.getConnection()) {
-            String sql = "SELECT chat_id, user1_id, user2_id, created_at " +
-                    "FROM private_chats " +
+            String sql = "SELECT chat_id, user1_id, user2_id " +
+                    "FROM private_chat " +
                     "WHERE user1_id = ? AND user2_id = ?";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -278,7 +278,7 @@ public class Database {
                                 rs.getLong("user1_id"),
                                 rs.getLong("user2_id")
                         );
-                        chat.setCreatedAt(rs.getTimestamp("created_at"));
+
                         return chat;
                     } else {
                         return null;
@@ -292,7 +292,7 @@ public class Database {
         long user2 = Math.max(userA, userB);
 
         try (Connection connection = Database.getConnection()) {
-            String sql = "INSERT INTO private_chats(user1_id, user2_id) VALUES (?, ?) RETURNING chat_id, created_at";
+            String sql = "INSERT INTO private_chat(user1_id, user2_id) VALUES (?, ?) RETURNING chat_id";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setLong(1, user1);
@@ -301,10 +301,9 @@ public class Database {
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         long chatId = rs.getLong("chat_id");
-                        Timestamp createdAt = rs.getTimestamp("created_at");
+
 
                         PrivateChat chat = new PrivateChat(chatId, user1, user2);
-                        chat.setCreatedAt(createdAt);
                         return chat;
                     } else {
                         return null;
@@ -484,7 +483,7 @@ public class Database {
         int counter = 0;
         try (Connection connection = Database.getConnection()) {
             // --- Load Private Chats ---
-            String sqlPrivate = "SELECT chat_id, user1, user2, created_at FROM private_chats " +
+            String sqlPrivate = "SELECT chat_id, user1, user2 FROM private_chat " +
                     "WHERE user1 = ? OR user2 = ?";
             PreparedStatement stmtPrivate = connection.prepareStatement(sqlPrivate);
             stmtPrivate.setLong(1, userId);
@@ -497,7 +496,6 @@ public class Database {
                             rsPrivate.getLong("user1"),
                             rsPrivate.getLong("user2")
                     );
-                    pc.setCreatedAt(rsPrivate.getTimestamp("created_at"));
                     userChats.add(pc);
                 }
             } else {
