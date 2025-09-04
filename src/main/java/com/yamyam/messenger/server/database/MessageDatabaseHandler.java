@@ -1,5 +1,10 @@
 package com.yamyam.messenger.server.database;
 
+import com.yamyam.messenger.shared.model.MessageEntity;
+import com.yamyam.messenger.shared.model.MessageStatus;
+import com.yamyam.messenger.shared.model.MessageType;
+import com.yamyam.messenger.shared.model.PrivateChat;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,48 +14,42 @@ public class MessageDatabaseHandler {
 
 
     public MessageDatabaseHandler(){}
-
-    public void insertMessage(long chatId,long senderId,String message) throws SQLException {
+    public MessageEntity insertMessage(long chatId, long senderId, String text) throws SQLException {
         try (Connection con = Database.getConnection()) {
+            String sql = "INSERT INTO messages(chat_id, sender_id, message_text, message_type, status, is_deleted, is_edited) " +
+                    "VALUES (?, ?, ?, ?, 'sent', false, false) RETURNING *";
 
-
-            String sql = "INSERT INTO messages(chat_id," +
-                    "sender_id," +
-                    "message_text," +
-                    "message_type)" +
-                    "VALUES(?,?,?,'text') RETURNING *";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
                 stmt.setLong(2, senderId);
-                stmt.setString(3, message);
+                stmt.setString(3, text);
+                stmt.setString(4,"text");
+
                 try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        long forward = rs.getLong("forwarded_from_message_id");
+                        if (rs.wasNull()) forward = 0;
+
+                        long reply = rs.getLong("reply_to_message_id");
+                        if (rs.wasNull()) reply = 0;
+
+                        return new MessageEntity(
+                                MessageStatus.valueOf(rs.getString("status")),
+                                rs.getBoolean("is_deleted"),
+                                rs.getBoolean("is_edited"),
+                                forward,
+                                reply,
+                                MessageType.valueOf(rs.getString("message_type")),
+                                rs.getString("message_text"),
+                                new PrivateChat(rs.getLong("chat_id"), 0, 0),
+                                DataManager.getInstance().getUser(senderId),
+                                rs.getLong("message_id")
+                        );
+                    }
                 }
-
-
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-    }
-    public void getMessage(long chatId) throws SQLException {
-        try (Connection con = Database.getConnection()) {
-
-            String sql = "SELECT * FROM messages WHERE chat_id = ? AND is_deleted = false ORDER BY sent_at = ?";
-            try (PreparedStatement st = con.prepareStatement(sql)) {
-                st.setLong(1, chatId);
-                try (ResultSet rs = st.executeQuery()) {
-                    while (rs.next()) ;
-                /*
-                if (!rs.getBoolean("is_deleted")) {
-                }
-
-                 */
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
         }
+        return null;
     }
     public boolean deleteMessage(long messageId,long senderId) throws SQLException {
         try (Connection con = Database.getConnection()) {
