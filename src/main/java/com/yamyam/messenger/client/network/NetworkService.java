@@ -371,6 +371,17 @@ public class NetworkService {
         Message message = new Message(4,email,userProfile.toString());
         sendJsonMessage(message);
     }
+    public List<MessageEntity> fetchMessages(long chatId) throws IOException {
+        Message request = new Message(19, "system", String.valueOf(chatId));
+        sendJsonMessage(request);
+
+        Message response = receiveJsonMessage();
+        if (response != null && response.getContent() != null) {
+            return new Gson().fromJson(response.getContent(), new TypeToken<List<MessageEntity>>() {}.getType());
+        }
+
+        return Collections.emptyList();
+    }
 
 //    public void sendChatMessage(long chatId, String text) throws IOException {
 //        // یک پیام برای ارسال به سرور می‌سازیم
