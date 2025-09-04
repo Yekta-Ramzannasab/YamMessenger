@@ -299,6 +299,22 @@ public class ClientHandler implements Runnable {
                         }
 
                          */
+                        case 19: {
+                            long chatId = Long.parseLong(request.getContent());
+
+                            List<MessageEntity> messages;
+                            try {
+                                messages = DataManager.getInstance().getMessages(chatId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                sendJsonMessage(new Message(15, "Server", null));
+                                break;
+                            }
+
+                            String json = gson.toJson(messages);
+                            sendJsonMessage(new Message(15, "Server", json));
+                            break;
+                        }
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
