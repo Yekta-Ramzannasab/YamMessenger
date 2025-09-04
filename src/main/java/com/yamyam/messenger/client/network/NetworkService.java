@@ -15,9 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.lang.reflect.Type;
 
 public class NetworkService {
@@ -222,17 +220,37 @@ public class NetworkService {
 
         return List.of();
     }
-    public List<SearchResult> fetchSearchResults(String query, String email) throws IOException {
+    public List<Users> fetchSearchResults(String query, String email) throws IOException {
         Message request = new Message(12, email, query);
         sendJsonMessage(request);
 
         Message response = receiveJsonMessage();
-        if (response != null && response.getContent() != null) {
-            Type listType = new TypeToken<List<SearchResult>>() {}.getType();
-            return new Gson().fromJson(response.getContent(), listType);
+
+        if (response == null) {
+            System.err.println("❌ No response received from server");
+            return List.of();
         }
 
-        return List.of();
+        String raw = response.getContent();
+        System.out.println("📥 Raw response content:\n" + raw);
+        System.out.println("🔍 From user: " + request.getSender());
+
+        if (raw == null || raw.isBlank()) {
+            System.out.println("ℹ️ Response content is empty");
+            return List.of();
+        }
+
+        String[] lines = raw.split("\n");
+        System.out.println("📦 Received " + lines.length + " raw line(s)");
+        Arrays.stream(lines).forEach(line -> System.out.println(" - " + line));
+
+        List<Users> results = Arrays.stream(lines)
+                .map(SearchResult::fromString)
+                .filter(Objects::nonNull)
+                .toList();
+
+        System.out.println("✅ Converted to " + results.size() + " SearchResult(s)");
+        return results;
     }
     public Users fetchUserById(long userId) throws IOException {
         Message request = new Message(13,"system",String.valueOf(userId));
