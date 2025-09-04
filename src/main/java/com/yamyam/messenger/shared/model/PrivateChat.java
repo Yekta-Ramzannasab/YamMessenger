@@ -1,5 +1,8 @@
 package com.yamyam.messenger.shared.model;
 
+import com.yamyam.messenger.client.network.dto.Contact;
+import com.yamyam.messenger.client.network.dto.ContactType;
+
 import java.sql.Timestamp;
 
 public class PrivateChat extends Chat {
@@ -27,5 +30,15 @@ public class PrivateChat extends Chat {
 
     public void setUser1(long user1) {
         this.user1 = user1;
+    }
+    public Contact toContact(Users targetUser) {
+        return new Contact(
+                this.getChatId(),
+                targetUser.getUserProfile().getProfileName(),
+                targetUser.getUserProfile().getProfileImageUrl(),
+                targetUser.isOnline(),
+                ContactType.DIRECT,
+                null
+        );
     }
 }
