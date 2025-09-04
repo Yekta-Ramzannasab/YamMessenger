@@ -4,7 +4,9 @@ import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.dto.SearchItem;
 import com.yamyam.messenger.client.network.dto.SearchKind;
+import com.yamyam.messenger.client.network.impl.NetworkChatServiceAdapter;
 import com.yamyam.messenger.client.network.impl.SearchServiceAdapter;
+import com.yamyam.messenger.client.network.service.ChatService;
 import com.yamyam.messenger.client.network.service.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.network.service.SearchService;
@@ -14,10 +16,7 @@ import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.database.Search;
 import com.yamyam.messenger.server.database.SearchResult;
-import com.yamyam.messenger.shared.model.Chat;
-import com.yamyam.messenger.shared.model.MessageEntity;
-import com.yamyam.messenger.shared.model.UserProfile;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -31,6 +30,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.util.Callback;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -246,25 +246,19 @@ public class ChatController implements Initializable {
             System.out.println("✅ Converted to " + userItems.size() + " SearchItem(s)");
             userItems.forEach(item -> System.out.println(" - " + item.title() + " | " + item.subtitle()));
             searchResults.setItems(FXCollections.observableArrayList(userItems));
-            searchResults.setPlaceholder(new Label("هیچ نتیجه‌ای پیدا نشد"));
+            searchResults.setPlaceholder(new Label("Nothing to show ..."));
         });
 
 
         searchResults.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
-            if (sel == null || sel.kind() != SearchKind.USER) return;
+            if (sel == null || sel.kind() != SearchKind.USER || !(sel.rawEntity() instanceof Users u)) return;
 
-            Users u = (Users) sel.rawEntity();
-            UserProfile p = u.getUserProfile();
+            showUserProfile(u);
 
-            infoAvatar.setImage(p.getProfileImageUrl() != null ? new Image(p.getProfileImageUrl()) : placeholder);
-            infoName.setText(p.getProfileName());
-            infoBio.setText(p.getBio());
-            infoUsername.setText(p.getUsername());
-            infoEmail.setText(u.getEmail());
-            infoPresence.setText(u.isOnline() ? "Online" : "Offline");
 
-            // Clear mediaGrid or load user media if available
             mediaGrid.getChildren().clear();
+
+          
         });
 
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
@@ -279,11 +273,22 @@ public class ChatController implements Initializable {
             }
         });
     }
+    private void showUserProfile(Users u) {
+        UserProfile p = u.getUserProfile();
+
+        infoAvatar.setImage(p.getProfileImageUrl() != null ? new Image(p.getProfileImageUrl()) : placeholder);
+        infoName.setText(p.getProfileName() != null ? p.getProfileName() : "No name");
+        infoBio.setText(p.getBio() != null ? p.getBio() : "No bio");
+        infoUsername.setText(p.getUsername() != null ? "@" + p.getUsername() : "");
+        infoEmail.setText(u.getEmail() != null ? u.getEmail() : "");
+        infoPresence.setText(u.isOnline() ? "🟢 Online" : "⚫ Offline");
+    }
+
     private List<SearchItem> convertToSearchItems(List<SearchResult> results) {
         return results.stream()
                 .map(result -> {
                     Object entity = result.getEntity();
-                    Users u = toUsers(entity); // 🔧 تبدیل از Map به Users
+                    Users u = toUsers(entity);
                     if (u == null) return null;
 
                     UserProfile p = u.getUserProfile();
@@ -566,7 +571,8 @@ public class ChatController implements Initializable {
         public final boolean online;         // only meaningful for DIRECT
         public final Integer memberCount;    // useful for GROUP
         public final boolean muted;          // reserved for notifications
-        public final int unreadCount;        // reserved badge
+        public final int unreadCount;// reserved badge
+        public  Objects rawEntity;
 
         public ChatRef(long id, ChatKind kind, String title, String avatarUrl,
                        boolean online, Integer memberCount, boolean muted, int unreadCount) {
@@ -584,6 +590,7 @@ public class ChatController implements Initializable {
         public final Integer memberCount;    // for GROUP
         public final boolean muted;          // reserved
         public final ObservableList<Msg> messages = FXCollections.observableArrayList();
+        public Objects rawEntity;
 
         private ChatItem(long id, String t, boolean o, Image a, ChatKind k, Integer memberCount, boolean muted) {
             contactId=id; title=t; online=o; avatar=a; kind=k; this.memberCount = memberCount; this.muted = muted;
@@ -598,10 +605,19 @@ public class ChatController implements Initializable {
             return new ChatItem(r.id, r.title, online, avatar, r.kind, r.memberCount, r.muted);
         }
 
+        public Objects getRawEntity() {
+            return rawEntity;
+        }
+
+        public void setRawEntity(Objects rawEntity) {
+            this.rawEntity = rawEntity;
+        }
+
         public static ChatItem of(String t, boolean o, Image a, List<Msg> msgs){
             var c = new ChatItem(-1, t, o, a, ChatKind.DIRECT, null, false);
             c.messages.addAll(msgs); return c;
         }
+
 
         public String lastMessagePreview(){
             if (messages.isEmpty()) return "";
