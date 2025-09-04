@@ -52,6 +52,11 @@ public class ChatController implements Initializable {
     @FXML private TextArea inputField;
     @FXML private Button sendBtn;
 
+    @FXML private Label infoBio;
+    @FXML private Label infoUsername;
+    @FXML private Label infoEmail;
+
+
     @FXML private ImageView headerAvatar;
     @FXML private Label headerName, headerStatus;
 
@@ -185,45 +190,36 @@ public class ChatController implements Initializable {
 
     private void setupSearchAndChatList() {
 
-        chatList.setCellFactory(lv -> new ListCell<>() {
+        searchResults.setCellFactory(lv -> new ListCell<>() {
             private final ImageView avatar = new ImageView();
             private final Label name = new Label();
-            private final Label last = new Label();
-            private final VBox labels = new VBox(name, last);
+            private final Label email = new Label();
+            private final VBox labels = new VBox(name, email);
             private final HBox root = new HBox(10, avatar, labels);
 
             {
-                root.setAlignment(Pos.CENTER_LEFT);
-                root.setPadding(new Insets(10, 12, 10, 12));
-                avatar.setFitWidth(40);
-                avatar.setFitHeight(40);
+                avatar.setFitWidth(32);
+                avatar.setFitHeight(32);
                 avatar.setPreserveRatio(true);
-                name.getStyleClass().add("chat-conv__name");
-                last.getStyleClass().add("chat-conv__status");
+                root.setAlignment(Pos.CENTER_LEFT);
+                root.setPadding(new Insets(8));
+                name.getStyleClass().add("search-name");
+                email.getStyleClass().add("search-email");
             }
 
-            @Override protected void updateItem(ChatItem it, boolean empty) {
-                super.updateItem(it, empty);
-                if (empty || it == null) {
+            @Override protected void updateItem(SearchItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
                     setGraphic(null);
                     return;
                 }
 
-                avatar.setImage(it.avatar != null ? it.avatar : placeholder);
-
-                String typeTag = switch (it.kind) {
-                    case DIRECT -> "";
-                    case GROUP -> "  • Group";
-                    case CHANNEL -> "  • Channel";
-                };
-                String presence = (it.kind == ChatKind.DIRECT && it.online) ? " • Online" : "";
-                name.setText(it.title + typeTag + presence);
-                last.setText(it.lastMessagePreview());
-
+                avatar.setImage(item.avatarUrl() != null ? new Image(item.avatarUrl()) : placeholder);
+                name.setText(item.title());
+                email.setText(item.subtitle());
                 setGraphic(root);
             }
         });
-
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             String query = newVal == null ? "" : newVal.trim().toLowerCase(Locale.ROOT);
             if (query.isEmpty()) {
@@ -254,20 +250,23 @@ public class ChatController implements Initializable {
         });
 
 
-     /*
-        searchResults.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
-            if (sel == null) return;
+        searchResults.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
+            if (sel == null || sel.kind() != SearchKind.USER) return;
 
-            switch (sel.kind()) {
-                case USER -> openUserProfile((Users) sel.rawEntity());
-                case CHAT -> openChat((Chat) sel.rawEntity());
-                case MESSAGE -> openChatAtMessage((MessageEntity) sel.rawEntity());
-            }
+            Users u = (Users) sel.rawEntity();
+            UserProfile p = u.getUserProfile();
+
+            infoAvatar.setImage(p.getProfileImageUrl() != null ? new Image(p.getProfileImageUrl()) : placeholder);
+            infoName.setText(p.getProfileName());
+            infoBio.setText(p.getBio());
+            infoUsername.setText(p.getUsername());
+            infoEmail.setText(u.getEmail());
+            infoPresence.setText(u.isOnline() ? "Online" : "Offline");
+
+            // Clear mediaGrid or load user media if available
+            mediaGrid.getChildren().clear();
         });
 
-      */
-
-        // ✅ هندل انتخاب چت از chatList
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
             if (sel == null) return;
             openChat(sel);
