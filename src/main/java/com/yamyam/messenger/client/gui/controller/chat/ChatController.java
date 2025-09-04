@@ -1,10 +1,22 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
+import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.client.network.dto.SearchItem;
+import com.yamyam.messenger.client.network.dto.SearchKind;
+import com.yamyam.messenger.client.network.impl.SearchServiceAdapter;
 import com.yamyam.messenger.client.network.service.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
+import com.yamyam.messenger.client.network.service.SearchService;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
+import com.yamyam.messenger.server.database.DataManager;
+import com.yamyam.messenger.server.database.Database;
+import com.yamyam.messenger.server.database.Search;
+import com.yamyam.messenger.server.database.SearchResult;
+import com.yamyam.messenger.shared.model.Chat;
+import com.yamyam.messenger.shared.model.MessageEntity;
+import com.yamyam.messenger.shared.model.UserProfile;
 import com.yamyam.messenger.shared.model.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -20,9 +32,13 @@ import javafx.scene.layout.*;
 import javafx.util.Callback;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static com.yamyam.messenger.client.network.dto.SearchKind.*;
+import static com.yamyam.messenger.client.util.ServiceLocator.search;
 
 public class ChatController implements Initializable {
 
@@ -30,7 +46,8 @@ public class ChatController implements Initializable {
        FXML references (wired from .fxml)
        -----* *------ */
     @FXML private TextField searchField;
-    @FXML private ListView<ChatItem> chatList;
+    @FXML private ListView<SearchItem> searchResults;
+    private ListView<ChatItem> chatList = new ListView<>();
     @FXML private ListView<Msg> messageList;
     @FXML private TextArea inputField;
     @FXML private Button sendBtn;
@@ -45,6 +62,8 @@ public class ChatController implements Initializable {
 
     @FXML private MenuButton themeBtn;
     @FXML private RadioMenuItem miLight, miDark, miAmoled;
+
+
 
     /* -----* *------
        Controller state & formatting
@@ -75,7 +94,7 @@ public class ChatController implements Initializable {
         System.out.println("✅ Logged in as: " + me.getEmail());
 
 
-        setupChatList();
+        setupSearchAndChatList();
         setupMessageList();
         setupComposer();
 
@@ -119,72 +138,166 @@ public class ChatController implements Initializable {
        - Shows "• Online" only if DIRECT and the contact is online.
        - Shows a tiny type tag for GROUP/CHANNEL (no icon dependency).
        -----* *------ */
-    private void setupChatList() {
-        chatList.setCellFactory(new Callback<>() {
-            @Override public ListCell<ChatItem> call(ListView<ChatItem> lv) {
-                return new ListCell<>() {
-                    private final ImageView avatar = new ImageView();
-                    private final Label name = new Label();
-                    private final Label last = new Label();
-                    private final VBox labels = new VBox(name, last);
-                    private final HBox root = new HBox(10, avatar, labels);
-                    {
-                        root.setAlignment(Pos.CENTER_LEFT);
-                        root.setPadding(new Insets(10,12,10,12));
-                        avatar.setFitWidth(40);
-                        avatar.setFitHeight(40);
-                        avatar.setPreserveRatio(true);
-                        name.getStyleClass().add("chat-conv__name");
-                        last.getStyleClass().add("chat-conv__status");
-                    }
-                    @Override protected void updateItem(ChatItem it, boolean empty) {
-                        super.updateItem(it, empty);
-                        if (empty || it==null) { setGraphic(null); return; }
-                        avatar.setImage(it.avatar != null ? it.avatar : placeholder);
+    @SuppressWarnings("unchecked")
+    private Users toUsers(Object e) {
+        if (e instanceof Users u) return u;
+        if (e instanceof java.util.Map<?, ?> m) {
+            var map = (java.util.Map<String, Object>) m;
 
-                        String typeTag = switch (it.kind) {
-                            case DIRECT -> "";
-                            case GROUP -> "  • Group";
-                            case CHANNEL -> "  • Channel";
-                        };
-                        String presence = (it.kind == ChatKind.DIRECT && it.online) ? " • Online" : "";
-                        name.setText(it.title + typeTag + presence);
+            Users u = new Users();
+            // primitives
+            Object id = map.get("id");
+            if (id != null) u.setId((int) ((Number) id).longValue());
+            u.setEmail((String) map.get("email"));
 
-                        last.setText(it.lastMessagePreview());
-                        setGraphic(root);
-                    }
+            // booleans
+            Object verified = map.get("verified");
+            if (verified != null) u.setVerified((Boolean) verified);
+            Object online = map.get("online");
+            if (online != null) u.setOnline((Boolean) online);
+            Object deleted = map.get("deleted");
+            if (deleted != null) u.setDeleted((Boolean) deleted);
+
+            // timestamps (optional – adapt to your format or ignore for now)
+            // u.setCreateAt(parseDateTime(map.get("createAt")));
+            // u.setLastSeen(parseDateTime(map.get("lastSeen")));
+
+            // searchRank if present
+            Object rank = map.get("searchRank");
+            if (rank != null) u.setSearchRank(((Number) rank).doubleValue());
+
+            // nested profile
+            Object prof = map.get("userProfile");
+            if (prof instanceof java.util.Map<?, ?> pm) {
+                var pmap = (java.util.Map<String, Object>) pm;
+                UserProfile p = new UserProfile();
+                p.setUsername((String) pmap.get("username"));
+                p.setProfileName((String) pmap.get("profileName"));
+                p.setBio((String) pmap.get("bio"));
+                p.setProfileImageUrl((String) pmap.get("profileImageUrl"));
+                u.setUserProfile(p);
+            }
+
+            return u;
+        }
+        return null;
+    }
+
+    private void setupSearchAndChatList() {
+
+        chatList.setCellFactory(lv -> new ListCell<>() {
+            private final ImageView avatar = new ImageView();
+            private final Label name = new Label();
+            private final Label last = new Label();
+            private final VBox labels = new VBox(name, last);
+            private final HBox root = new HBox(10, avatar, labels);
+
+            {
+                root.setAlignment(Pos.CENTER_LEFT);
+                root.setPadding(new Insets(10, 12, 10, 12));
+                avatar.setFitWidth(40);
+                avatar.setFitHeight(40);
+                avatar.setPreserveRatio(true);
+                name.getStyleClass().add("chat-conv__name");
+                last.getStyleClass().add("chat-conv__status");
+            }
+
+            @Override protected void updateItem(ChatItem it, boolean empty) {
+                super.updateItem(it, empty);
+                if (empty || it == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                avatar.setImage(it.avatar != null ? it.avatar : placeholder);
+
+                String typeTag = switch (it.kind) {
+                    case DIRECT -> "";
+                    case GROUP -> "  • Group";
+                    case CHANNEL -> "  • Channel";
                 };
+                String presence = (it.kind == ChatKind.DIRECT && it.online) ? " • Online" : "";
+                name.setText(it.title + typeTag + presence);
+                last.setText(it.lastMessagePreview());
+
+                setGraphic(root);
             }
         });
 
-        /* -----* *------
-           Search filter (by title or last message preview)
-           - Keeps allChats as the master source and applies a filtered view.
-           -----* *------ */
-        searchField.textProperty().addListener((o, ov, nv) -> {
-            String q = nv == null ? "" : nv.trim().toLowerCase(Locale.ROOT);
-            chatList.setItems(q.isEmpty() ? allChats :
-                    allChats.filtered(c ->
-                            c.title.toLowerCase(Locale.ROOT).contains(q) ||
-                                    c.lastMessagePreview().toLowerCase(Locale.ROOT).contains(q)));
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String query = newVal == null ? "" : newVal.trim().toLowerCase(Locale.ROOT);
+            if (query.isEmpty()) {
+                searchResults.setItems(FXCollections.observableArrayList());
+                return;
+            }
+            SearchService searchService = new SearchServiceAdapter(NetworkService.getInstance());
+            Search search = new Search(DataManager.getInstance());
+
+
+
+            long meUserId = AppSession.requireUserId();
+            List<SearchResult> results = null;
+            try {
+                results = search.search(query, meUserId);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("🔍 Search returned " + results.size() + " result(s)");
+            results.forEach(r -> System.out.println(" - " + r));
+
+
+            List<SearchItem> userItems = convertToSearchItems(results);
+            System.out.println("✅ Converted to " + userItems.size() + " SearchItem(s)");
+            userItems.forEach(item -> System.out.println(" - " + item.title() + " | " + item.subtitle()));
+            searchResults.setItems(FXCollections.observableArrayList(userItems));
+            searchResults.setPlaceholder(new Label("هیچ نتیجه‌ای پیدا نشد"));
         });
 
-        /* -----* *------
-           Selection listener:
-           - Opens the selected chat in the middle pane.
-           - Notifies backend that the chat is opened (for presence/seen/typing).
-           -----* *------ */
+
+     /*
+        searchResults.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
+            if (sel == null) return;
+
+            switch (sel.kind()) {
+                case USER -> openUserProfile((Users) sel.rawEntity());
+                case CHAT -> openChat((Chat) sel.rawEntity());
+                case MESSAGE -> openChatAtMessage((MessageEntity) sel.rawEntity());
+            }
+        });
+
+      */
+
+        // ✅ هندل انتخاب چت از chatList
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
             if (sel == null) return;
             openChat(sel);
 
-            long meUserId = AppSession.isLoggedIn() ? AppSession.requireUserId() : 1L; // TEMP until login is wired
+            long meUserId = AppSession.requireUserId();
             try {
                 ServiceLocator.chat().openChat(meUserId, sel.contactId);
             } catch (Exception ex) {
                 System.err.println("[chat] openChat failed: " + ex.getMessage());
             }
         });
+    }
+    private List<SearchItem> convertToSearchItems(List<SearchResult> results) {
+        return results.stream()
+                .map(result -> {
+                    Object entity = result.getEntity();
+                    Users u = toUsers(entity); // 🔧 تبدیل از Map به Users
+                    if (u == null) return null;
+
+                    UserProfile p = u.getUserProfile();
+                    return new SearchItem(
+                            p != null ? p.getProfileName() : u.getEmail(),
+                            u.getEmail(),
+                            p != null ? p.getProfileImageUrl() : null,
+                            SearchKind.USER,
+                            u
+                    );
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     /* ================== Messages ================== */
@@ -195,6 +308,7 @@ public class ChatController implements Initializable {
        - Wrap text and limit bubble width responsively.
        - Auto-scroll to bottom on new items (listener added below).
        -----* *------ */
+
     private void setupMessageList() {
         messageList.setCellFactory(lv -> new ListCell<>() {
             private final Label bubble = new Label();
@@ -221,14 +335,6 @@ public class ChatController implements Initializable {
         messageList.getItems().addListener((ListChangeListener<? super Msg>) c ->
                 Platform.runLater(() -> messageList.scrollTo(messageList.getItems().size() - 1)));
     }
-
-    /* ================== Composer (input + send) ================== */
-
-    /* -----* *------
-       Composer setup
-       - Disables send if input is blank.
-       - ENTER sends; SHIFT+ENTER inserts newline.
-       -----* *------ */
     private void setupComposer() {
         sendBtn.disableProperty().bind(
                 Bindings.createBooleanBinding(
@@ -242,12 +348,7 @@ public class ChatController implements Initializable {
         });
     }
 
-    /* -----* *------
-       sendMessage()
-       - Adds an optimistic "me" message to the current chat.
-       - Clears the input field.
-       - Simulates a tiny auto-reply to keep the UI alive (until real backend is wired).
-       -----* *------ */
+
     @FXML
     private void sendMessage() {
         // Text is read from the input field
@@ -272,11 +373,6 @@ public class ChatController implements Initializable {
         inputField.clear();
     }
 
-    /* ================== Theme ================== */
-
-    /* -----* *------
-       Theme switching (wired from FXML)
-       -----* *------ */
     @FXML public void setThemeLight()  { switchTo(ThemeManager.Theme.LIGHT); }
     @FXML public void setThemeDark()   { switchTo(ThemeManager.Theme.DARK); }
     @FXML public void setThemeAmoled() { switchTo(ThemeManager.Theme.AMOLED); }
@@ -306,14 +402,13 @@ public class ChatController implements Initializable {
         if (themeBtn != null) themeBtn.setText("Theme");
     }
 
-    /* ================== Public loading APIs (Stage-1) ================== */
-
-    /* -----* *------
+    /*================== Public loading APIs (Stage-1) ==================
        loadChats(List<Contact> contacts)
        - PUBLIC entry point for current app flow (DIRECT chats via existing Contact DTO).
        - Converts Contact -> ChatRef(DIRECT) internally and delegates to loadChatsGeneric(...).
        - Backend/DataManager should call this after fetching user's chats by userId.
-       -----* *------ */
+       -----* *------
+    */
     public void loadChats(List<Contact> contacts) {
         if (contacts == null || contacts.isEmpty()) {
             loadChatsGeneric(Collections.emptyList());
@@ -343,12 +438,7 @@ public class ChatController implements Initializable {
         loadChatsGeneric(refs);
     }
 
-    /* -----* *------
-       loadChatsGeneric(List<ChatRef> refs)
-       - PUBLIC, future-proof entry point for DIRECT/GROUP/CHANNEL.
-       - UI-only: builds ChatItem list, preserves previous selection, opens selected chat.
-       - SAFE: if list is empty, clears middle pane headers and images gracefully.
-       -----* *------ */
+
     public void loadChatsGeneric(List<ChatRef> refs) {
         Long keepSelectedId = Optional.ofNullable(chatList.getSelectionModel().getSelectedItem())
                 .map(ci -> ci.contactId).orElse(null);
@@ -383,6 +473,8 @@ public class ChatController implements Initializable {
             infoAvatar.setImage(placeholder);
         }
     }
+
+
 
     /* ================== Helpers ================== */
 
@@ -484,12 +576,6 @@ public class ChatController implements Initializable {
         }
     }
 
-    /* -----* *------
-       ChatItem (UI view-model)
-       - Holds just enough data to render the left list and the middle pane header.
-       - messages is an ObservableList bound to the messageList view.
-       - 'online' is mutable so presence updates can be reflected later (WS).
-       -----* *------ */
     public static final class ChatItem {
         public final long contactId;         // ID of the target (DIRECT/GROUP/CHANNEL)
         public final String title;
@@ -525,11 +611,6 @@ public class ChatController implements Initializable {
         }
     }
 
-    /* -----* *------
-       Msg (UI model for a chat bubble)
-       - Minimal for Stage-1: who sent it (me/other), text, and timestamp.
-       - Delivery/seen states can be added later without breaking the current UI.
-       -----* *------ */
     public static final class Msg {
         public final boolean isMe;
         public final String text;

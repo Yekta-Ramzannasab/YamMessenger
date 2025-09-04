@@ -1,12 +1,18 @@
 package com.yamyam.messenger.client.util;
 
+import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.client.network.impl.SearchServiceAdapter;
 import com.yamyam.messenger.client.network.service.ChatService;
 import com.yamyam.messenger.client.network.service.ContactService;
+import com.yamyam.messenger.client.network.service.SearchService;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class ServiceLocator {
     private static final AtomicReference<ContactService> contacts = new AtomicReference<>();
     private static final AtomicReference<ChatService> chat = new AtomicReference<>();
+    private static final SearchService searchService = new SearchServiceAdapter(NetworkService.getInstance());
+
 
     private ServiceLocator() {}
 
@@ -38,4 +44,8 @@ public final class ServiceLocator {
         contacts.set(null);
         chat.set(null);
     }
+    public static SearchService search() {
+        return searchService;
+    }
+
 }

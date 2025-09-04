@@ -22,7 +22,7 @@
                 <Label text="Yam" styleClass="chat-brand"/>
             </HBox>
             <TextField fx:id="searchField" promptText="Search..." maxWidth="Infinity" styleClass="chat-search"/>
-            <ListView fx:id="chatList" VBox.vgrow="ALWAYS"/>
+            <ListView fx:id="searchResults" VBox.vgrow="ALWAYS"/>
         </VBox>
     </left>
 
