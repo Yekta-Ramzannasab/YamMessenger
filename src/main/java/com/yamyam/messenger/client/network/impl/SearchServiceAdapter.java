@@ -16,7 +16,7 @@ public class SearchServiceAdapter implements SearchService {
     }
 
     @Override
-    public List<SearchResult> search(String query, long meUserId) {
+    public List<Users> search(String query, long meUserId) {
         try {
             Users me = Database.loadUser(meUserId);
             assert me != null;

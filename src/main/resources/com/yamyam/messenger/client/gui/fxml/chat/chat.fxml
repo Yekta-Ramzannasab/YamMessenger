@@ -4,114 +4,86 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 
-<!-- StackPane root lets us show a full-screen overlay (folders drawer) above the main layout -->
-<StackPane xmlns="http://javafx.com/javafx"
-           xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.yamyam.messenger.client.gui.controller.chat.ChatController"
-           stylesheets="@/com/yamyam/messenger/client/gui/styles/chat.css"
-           styleClass="themed chat-root"
-           prefWidth="1120" prefHeight="720">
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.yamyam.messenger.client.gui.controller.chat.ChatController"
+            stylesheets="@/com/yamyam/messenger/client/gui/styles/chat.css"
+            styleClass="themed chat-root"
+            prefWidth="1120" prefHeight="720">
 
-    <!-- Main layout (your previous BorderPane is kept as-is) -->
-    <BorderPane fx:id="mainLayout">
+    <!-- only one time defining outer the tree -->
+    <fx:define>
+        <ToggleGroup fx:id="themeGroup"/>
+    </fx:define>
 
-        <!-- only one time defining outer the tree -->
-        <fx:define>
-            <ToggleGroup fx:id="themeGroup"/>
-        </fx:define>
-
-        <left>
-            <VBox spacing="12" prefWidth="320" styleClass="chat-sidebar">
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="chat-sidebar__header">
-                    <!-- NEW: hamburger button to open the folders drawer -->
-                    <Button fx:id="btnHamburger" text="≡" onAction="#openFoldersManager" styleClass="hamburger-btn"/>
-                    <Label text="Yam" styleClass="chat-brand"/>
-                </HBox>
-                <TextField fx:id="searchField" promptText="Search..." maxWidth="Infinity" styleClass="chat-search"/>
-                <ListView fx:id="chatList" VBox.vgrow="ALWAYS"/>
-            </VBox>
-        </left>
-
-        <center>
-            <BorderPane styleClass="chat-conv">
-                <top>
-                    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="chat-conv__header">
-                        <ImageView fx:id="headerAvatar" fitWidth="36" fitHeight="36" preserveRatio="true"/>
-                        <VBox>
-                            <Label fx:id="headerName"   styleClass="chat-conv__name"   text="Select a chat"/>
-                            <Label fx:id="headerStatus" styleClass="chat-conv__status" text=""/>
-                        </VBox>
-                        <Pane HBox.hgrow="ALWAYS"/>
-
-                        <!-- theme button  -->
-                        <MenuButton fx:id="themeBtn"
-                                    text="Theme"
-                                    styleClass="chat-iconbtn theme-picker"
-                                    onMouseClicked="#cycleTheme">
-                            <items>
-                                <RadioMenuItem fx:id="miLight"  text="Light"
-                                               toggleGroup="$themeGroup"
-                                               onAction="#setThemeLight"/>
-                                <RadioMenuItem fx:id="miDark"   text="Dark"
-                                               toggleGroup="$themeGroup"
-                                               onAction="#setThemeDark"/>
-                                <RadioMenuItem fx:id="miAmoled" text="AMOLED"
-                                               toggleGroup="$themeGroup"
-                                               onAction="#setThemeAmoled"/>
-                            </items>
-                        </MenuButton>
-                    </HBox>
-                </top>
-
-                <center>
-                    <ListView fx:id="messageList"/>
-                </center>
-
-                <bottom>
-                    <HBox spacing="10" alignment="CENTER" styleClass="chat-composer">
-                        <Button text="☺" styleClass="chat-iconbtn"/>
-                        <TextArea fx:id="inputField" promptText="Write a message" wrapText="true"
-                                  prefRowCount="1" HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="sendBtn" text="➤" onAction="#sendMessage" styleClass="chat-send" disable="true"/>
-                    </HBox>
-                </bottom>
-            </BorderPane>
-        </center>
-
-        <right>
-            <VBox fx:id="infoPane" spacing="12" prefWidth="300" styleClass="chat-info" visible="true" managed="true">
-                <ImageView fx:id="infoAvatar" fitWidth="96" fitHeight="96" preserveRatio="true"/>
-                <Label fx:id="infoName"     styleClass="chat-info__name"/>
-                <Label fx:id="infoPresence" styleClass="chat-info__presence"/>
-                <Separator/>
-                <Label text="Media" styleClass="chat-section"/>
-                <FlowPane fx:id="mediaGrid" hgap="8" vgap="8"/>
-            </VBox>
-        </right>
-
-    </BorderPane>
-
-    <!-- ===== Overlay: Telegram-like Folders Drawer (initially hidden) ===== -->
-    <StackPane fx:id="foldersOverlay" visible="false" managed="false" pickOnBounds="true" styleClass="overlay-root">
-        <!-- dark scrim -->
-        <Pane fx:id="overlayScrim" onMouseClicked="#closeFoldersDrawer" styleClass="overlay-scrim"/>
-        <!-- the sliding drawer itself -->
-        <VBox fx:id="foldersDrawer" spacing="12" maxWidth="360" prefWidth="360"
-              StackPane.alignment="CENTER_LEFT" styleClass="overlay-drawer">
-
-            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="drawer__header">
-                <Label text="Folders" styleClass="drawer__title"/>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <Button text="✕" onAction="#closeFoldersDrawer" styleClass="drawer__close"/>
+    <left>
+        <VBox spacing="12" prefWidth="320" styleClass="chat-sidebar">
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="chat-sidebar__header">
+                <Label text="Yam" styleClass="chat-brand"/>
             </HBox>
-
-            <Label text="My folders" styleClass="drawer__subtitle"/>
-
-            <!-- folder list like Telegram -->
-            <ListView fx:id="foldersList" VBox.vgrow="ALWAYS"/>
-
-            <Button fx:id="btnCreateFolder" text="Create new folder"
-                    onAction="#openCreateFolderDialog" styleClass="drawer__create"/>
+            <TextField fx:id="searchField" promptText="Search..." maxWidth="Infinity" styleClass="chat-search"/>
+            <ListView fx:id="searchResults" VBox.vgrow="ALWAYS"/>
         </VBox>
-    </StackPane>
-</StackPane>
+    </left>
+
+    <center>
+        <BorderPane styleClass="chat-conv">
+            <top>
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="chat-conv__header">
+                    <ImageView fx:id="headerAvatar" fitWidth="36" fitHeight="36" preserveRatio="true"/>
+                    <VBox>
+                        <Label fx:id="headerName"   styleClass="chat-conv__name"   text="Select a chat"/>
+                        <Label fx:id="headerStatus" styleClass="chat-conv__status" text=""/>
+                    </VBox>
+                    <Pane HBox.hgrow="ALWAYS"/>
+
+                    <!-- theme button  -->
+                    <MenuButton fx:id="themeBtn"
+                                text="Theme"
+                                styleClass="chat-iconbtn theme-picker"
+                                onMouseClicked="#cycleTheme">
+                        <items>
+                            <RadioMenuItem fx:id="miLight"  text="Light"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeLight"/>
+                            <RadioMenuItem fx:id="miDark"   text="Dark"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeDark"/>
+                            <RadioMenuItem fx:id="miAmoled" text="AMOLED"
+                                           toggleGroup="$themeGroup"
+                                           onAction="#setThemeAmoled"/>
+                        </items>
+                    </MenuButton>
+                </HBox>
+            </top>
+
+            <center>
+                <ListView fx:id="messageList"/>
+            </center>
+
+            <bottom>
+                <HBox spacing="10" alignment="CENTER" styleClass="chat-composer">
+                    <Button text="☺" styleClass="chat-iconbtn"/>
+                    <TextArea fx:id="inputField" promptText="Write a message" wrapText="true"
+                              prefRowCount="1" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="sendBtn" text="➤" onAction="#sendMessage" styleClass="chat-send" disable="true"/>
+                </HBox>
+            </bottom>
+        </BorderPane>
+    </center>
+
+    <right>
+        <VBox fx:id="infoPane" spacing="12" prefWidth="300" styleClass="chat-info" visible="true" managed="true">
+            <ImageView fx:id="infoAvatar" fitWidth="96" fitHeight="96" preserveRatio="true"/>
+            <Label fx:id="infoName"     styleClass="chat-info__name"/>
+            <Label fx:id="infoBio"      styleClass="chat-info__bio"/>
+            <Label fx:id="infoUsername" styleClass="chat-info__username"/>
+            <Label fx:id="infoEmail"    styleClass="chat-info__email"/>
+            <Label fx:id="infoPresence" styleClass="chat-info__presence"/>
+            <Separator/>
+            <Label text="Media" styleClass="chat-section"/>
+            <FlowPane fx:id="mediaGrid" hgap="8" vgap="8"/>
+        </VBox>
+    </right>
+
+</BorderPane>

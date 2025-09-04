@@ -561,16 +561,19 @@ public class Database {
     // ---- User Search ----
     public static List<Users> searchUsers(String query) throws SQLException {
         List<Users> results = new ArrayList<>();
-        String sql = "SELECT u.*, p.*, ts_rank_cd(p.search_vector, plainto_tsquery('simple', ?)) AS rank " +
-                "FROM users u " +
-                "LEFT JOIN user_profiles p ON u.user_id = p.user_id " +
-                "WHERE p.search_vector @@ plainto_tsquery('simple', ?) " +
-                "ORDER BY rank DESC LIMIT 20";
-
+        String sql = """
+    SELECT u.*, p.*, ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', p.search_vector, to_tsquery('simple', ?)) AS rank
+    FROM users u
+    LEFT JOIN user_profiles p ON u.user_id = p.user_id
+    WHERE p.search_vector @@ to_tsquery('simple', ?)
+    ORDER BY rank DESC
+    LIMIT 20
+""";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, query);
-            stmt.setString(2, query);
+            stmt.setString(1, query + ":*");
+            stmt.setString(2, query + ":*");
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Users user = buildUserFromResultSet(rs);
