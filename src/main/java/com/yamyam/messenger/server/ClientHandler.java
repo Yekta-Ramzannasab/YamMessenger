@@ -20,6 +20,7 @@ import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.yamyam.messenger.server.database.Database.getUserIdByEmail;
 import static com.yamyam.messenger.server.database.Database.updateUserProfile;
@@ -168,9 +169,10 @@ public class ClientHandler implements Runnable {
                                 sendJsonMessage(new Message(12, "Server", null));
                                 break;
                             }
-
-                            String json = gson.toJson(results);
-                            sendJsonMessage(new Message(12, "Server", json));
+                            String content = results.stream()
+                                    .map(SearchResult::toString)
+                                    .collect(Collectors.joining("\n")); // ✅ درست
+                            sendJsonMessage(new Message(12, "server", content));
                             break;
                         }
                         case 13 :{
