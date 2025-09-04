@@ -1,5 +1,8 @@
 package com.yamyam.messenger.client.gui.controller.chat;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.dto.SearchItem;
@@ -21,6 +24,7 @@ import com.yamyam.messenger.shared.model.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
+import javafx.collections.transformation.FilteredList; // FEATURE: filtering view
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.*;
@@ -47,7 +51,7 @@ public class ChatController implements Initializable {
        -----* *------ */
     @FXML private TextField searchField;
     @FXML private ListView<SearchItem> searchResults;
-    private ListView<ChatItem> chatList = new ListView<>();
+    @FXML private ListView<ChatItem> chatList;
     @FXML private ListView<Msg> messageList;
     @FXML private TextArea inputField;
     @FXML private Button sendBtn;
@@ -55,7 +59,6 @@ public class ChatController implements Initializable {
     @FXML private Label infoBio;
     @FXML private Label infoUsername;
     @FXML private Label infoEmail;
-
 
     @FXML private ImageView headerAvatar;
     @FXML private Label headerName, headerStatus;
@@ -68,12 +71,19 @@ public class ChatController implements Initializable {
     @FXML private MenuButton themeBtn;
     @FXML private RadioMenuItem miLight, miDark, miAmoled;
 
-
+    // FEATURE (optional FXML): folders drawer UI; null-checked everywhere
+    @FXML private StackPane foldersOverlay;
+    @FXML private Pane overlayScrim;
+    @FXML private VBox foldersDrawer;
+    @FXML private ListView<FolderVM> foldersList;
+    @FXML private Button btnCreateFolder, btnHamburger;
 
     /* -----* *------
        Controller state & formatting
        -----* *------ */
     private final ObservableList<ChatItem> allChats = FXCollections.observableArrayList();
+    // FEATURE: filtered view for unified search+folder filtering. Safe to keep even if not used in FXML.
+    private final FilteredList<ChatItem> filteredChats = new FilteredList<>(allChats, c -> true);
 
     private final Image placeholder = new Image(
             Objects.requireNonNull(getClass().getResource(
@@ -98,11 +108,17 @@ public class ChatController implements Initializable {
         Users me = AppSession.getCurrentUser();
         System.out.println("✅ Logged in as: " + me.getEmail());
 
-
-        setupSearchAndChatList();
+        setupSearchAndChatList(); // keep develop entry point
         setupMessageList();
         setupComposer();
 
+        if (searchResults != null) { searchResults.setVisible(false); searchResults.setManaged(false); }
+        if (chatList != null)      { chatList.setVisible(true);  chatList.setManaged(true);  }
+
+        // FEATURE: ensure the list uses filtered view for combined filtering
+        try {
+            if (chatList != null) chatList.setItems(filteredChats);
+        } catch (Exception ignore) { }
 
         loadContactsFromService();
 
@@ -132,6 +148,12 @@ public class ChatController implements Initializable {
 
             ThemeManager.reapply(scene);
             syncThemeMenu(ThemeManager.current());
+
+            // FEATURE: hook combined filtering + folders drawer (no-op if missing in FXML)
+            hookCombinedFiltering();
+            setupFoldersDrawer();
+            refreshFoldersList();
+            closeFoldersDrawer();
         });
     }
 
@@ -190,6 +212,7 @@ public class ChatController implements Initializable {
 
     private void setupSearchAndChatList() {
 
+        // === keep develop: search results cell factory ===
         searchResults.setCellFactory(lv -> new ListCell<>() {
             private final ImageView avatar = new ImageView();
             private final Label name = new Label();
@@ -220,36 +243,49 @@ public class ChatController implements Initializable {
                 setGraphic(root);
             }
         });
+
+        // === keep develop: search query wiring ===
+        // REPLACE your current listener with this one:
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            String query = newVal == null ? "" : newVal.trim().toLowerCase(Locale.ROOT);
-            if (query.isEmpty()) {
-                searchResults.setItems(FXCollections.observableArrayList());
+            String raw = (newVal == null) ? "" : newVal.trim();
+
+            if (raw.isEmpty()) {
+                // UI only: show chats, hide search results
+                searchResults.getItems().clear();
+                searchResults.setVisible(false);
+                searchResults.setManaged(false);
+                chatList.setVisible(true);
+                chatList.setManaged(true);
                 return;
             }
-            SearchService searchService = new SearchServiceAdapter(NetworkService.getInstance());
+
+            String query = raw.toLowerCase(Locale.ROOT);
+
+            // backend: unchanged
             Search search = new Search(DataManager.getInstance());
-
-
-
             long meUserId = AppSession.requireUserId();
-            List<SearchResult> results = null;
+
+            List<SearchResult> results;
             try {
                 results = search.search(query, meUserId);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("🔍 Search returned " + results.size() + " result(s)");
-            results.forEach(r -> System.out.println(" - " + r));
 
-
+            // convert & show results
             List<SearchItem> userItems = convertToSearchItems(results);
-            System.out.println("✅ Converted to " + userItems.size() + " SearchItem(s)");
-            userItems.forEach(item -> System.out.println(" - " + item.title() + " | " + item.subtitle()));
             searchResults.setItems(FXCollections.observableArrayList(userItems));
-            searchResults.setPlaceholder(new Label("هیچ نتیجه‌ای پیدا نشد"));
+            searchResults.setPlaceholder(new Label("no result found!"));
+
+            // UI only: show results, hide chats
+            searchResults.setVisible(true);
+            searchResults.setManaged(true);
+            chatList.setVisible(false);
+            chatList.setManaged(false);
         });
 
 
+        // === keep develop: on result select, fill right info pane ===
         searchResults.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
             if (sel == null || sel.kind() != SearchKind.USER) return;
 
@@ -267,6 +303,7 @@ public class ChatController implements Initializable {
             mediaGrid.getChildren().clear();
         });
 
+        // === keep develop: chat selection handler ===
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
             if (sel == null) return;
             openChat(sel);
@@ -278,7 +315,51 @@ public class ChatController implements Initializable {
                 System.err.println("[chat] openChat failed: " + ex.getMessage());
             }
         });
+
+        // FEATURE: chat cell renderer (pure UI; does not change backend logic)
+        chatList.setCellFactory(new Callback<>() {
+            @Override public ListCell<ChatItem> call(ListView<ChatItem> lv) {
+                return new ListCell<>() {
+                    private final ImageView avatar = new ImageView();
+                    private final Label name = new Label();
+                    private final Label last = new Label();
+                    private final VBox labels = new VBox(name, last);
+                    private final HBox root = new HBox(10, avatar, labels);
+                    {
+                        root.setAlignment(Pos.CENTER_LEFT);
+                        root.setPadding(new Insets(10,12,10,12));
+                        avatar.setFitWidth(40);
+                        avatar.setFitHeight(40);
+                        avatar.setPreserveRatio(true);
+                        name.getStyleClass().add("chat-conv__name");
+                        last.getStyleClass().add("chat-conv__status");
+                    }
+                    @Override protected void updateItem(ChatItem it, boolean empty) {
+                        super.updateItem(it, empty);
+                        if (empty || it==null) { setGraphic(null); return; }
+                        avatar.setImage(it.avatar != null ? it.avatar : placeholder);
+
+                        String typeTag = switch (it.kind) {
+                            case DIRECT -> "";
+                            case GROUP -> "  • Group";
+                            case CHANNEL -> "  • Channel";
+                        };
+                        String presence = (it.kind == ChatKind.DIRECT && it.online) ? " • Online" : "";
+                        name.setText(it.title + typeTag + presence);
+
+                        last.setText(it.lastMessagePreview());
+                        setGraphic(root);
+                    }
+                };
+            }
+        });
+
+        // FEATURE: ensure list uses filtered view (safe)
+        try {
+            chatList.setItems(filteredChats);
+        } catch (Exception ignore) { }
     }
+
     private List<SearchItem> convertToSearchItems(List<SearchResult> results) {
         return results.stream()
                 .map(result -> {
@@ -346,7 +427,6 @@ public class ChatController implements Initializable {
             }
         });
     }
-
 
     @FXML
     private void sendMessage() {
@@ -451,7 +531,9 @@ public class ChatController implements Initializable {
         }
 
         allChats.setAll(newItems);
-        chatList.setItems(allChats);
+
+        // keep original behavior: bind list items (we redirect to filtered view)
+        try { chatList.setItems(filteredChats); } catch (Exception ignore) { }
 
         if (!allChats.isEmpty()) {
             int idx = 0;
@@ -471,6 +553,10 @@ public class ChatController implements Initializable {
             headerAvatar.setImage(placeholder);
             infoAvatar.setImage(placeholder);
         }
+
+        // FEATURE: keep folder counts and predicate fresh
+        refreshFoldersList();
+        updateFilterPredicate();
     }
 
 
@@ -530,6 +616,9 @@ public class ChatController implements Initializable {
                         allChats.add(ChatItem.fromContact(c, av));
                     }
                     // The ListView is updated automatically because it is connected to allChats
+                    // FEATURE: keep folder view updated if present
+                    refreshFoldersList();
+                    updateFilterPredicate();
                 });
 
             } catch (Exception e) {
@@ -617,4 +706,202 @@ public class ChatController implements Initializable {
 
         public Msg(boolean m, String t, LocalDateTime a){ isMe=m; text=t; at=a; }
     }
+
+    // FEATURE: Folder view-model for the drawer list (UI only)
+    public static final class FolderVM {
+        public final String name;
+        public final int count;
+        public final boolean deletable;
+        public FolderVM(String n, int c, boolean d){
+            this.name = n;
+            this.count = c;
+            this.deletable = d;
+        }
+    }
+
+    /* ========= Filtering (search + folder) ========= */
+    // FEATURE: active folder filter state
+    private enum ActiveFolder { ALL, CHANNELS, GROUPS, PV }
+    private ActiveFolder activeFolder = ActiveFolder.ALL;
+
+    // FEATURE: hook both search text and folder filter into the filteredChats predicate
+    private void hookCombinedFiltering() {
+        try {
+            if (chatList != null) chatList.setItems(filteredChats);
+            if (searchField != null) {
+                searchField.textProperty().addListener((o, ov, nv) -> updateFilterPredicate());
+            }
+            updateFilterPredicate();
+        } catch (Exception ignore) { }
+    }
+
+    // FEATURE: predicate = folder filter ∧ contains(query) on title/preview
+    private void updateFilterPredicate() {
+        final String q = Optional.ofNullable(searchField != null ? searchField.getText() : "")
+                .orElse("").trim().toLowerCase(Locale.ROOT);
+
+        filteredChats.setPredicate(ci -> {
+            boolean folderOk = switch (activeFolder) {
+                case ALL      -> true;
+                case CHANNELS -> ci.kind == ChatKind.CHANNEL;
+                case GROUPS   -> ci.kind == ChatKind.GROUP;
+                case PV       -> ci.kind == ChatKind.DIRECT;
+            };
+            boolean searchOk = q.isEmpty()
+                    || ci.title.toLowerCase(Locale.ROOT).contains(q)
+                    || ci.lastMessagePreview().toLowerCase(Locale.ROOT).contains(q);
+            return folderOk && searchOk;
+        });
+    }
+
+    /* ================== Folders Drawer (all null-safe) ================== */
+    private boolean foldersOpen = false;
+
+    @FXML public void openFoldersManager() { openFoldersDrawer(); }
+
+    private void setupFoldersDrawer() {
+        if (foldersList == null) return;
+
+        foldersList.setCellFactory(lv -> new ListCell<>() {
+            private final Label icon  = new Label("📁");
+            private final Label title = new Label();
+            private final Label sub   = new Label();
+            private final Button trash = new Button("🗑");
+            private final VBox texts = new VBox(title, sub);
+            private final Pane spacer = new Pane();
+            private final HBox root = new HBox(10, icon, texts, spacer, trash);
+            {
+                root.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                root.getStyleClass().add("folder-row");
+                title.getStyleClass().add("folder-row__title");
+                sub.getStyleClass().add("folder-row__sub");
+                trash.getStyleClass().add("folder-row__trash");
+            }
+            @Override protected void updateItem(FolderVM vm, boolean empty) {
+                super.updateItem(vm, empty);
+                if (empty || vm == null) { setGraphic(null); return; }
+                title.setText(vm.name);
+                sub.setText(vm.count + (vm.count==1 ? " chat" : " chats"));
+                trash.setVisible(vm.deletable);
+                trash.setManaged(vm.deletable);
+                trash.setOnAction(e -> getListView().getItems().remove(vm));
+                setGraphic(root);
+            }
+        });
+
+        foldersList.setOnMouseClicked(e -> {
+            FolderVM sel = foldersList.getSelectionModel().getSelectedItem();
+            if (sel == null) return;
+            switch (sel.name.toLowerCase(Locale.ROOT)) {
+                case "channels" -> activeFolder = ActiveFolder.CHANNELS;
+                case "groups"   -> activeFolder = ActiveFolder.GROUPS;
+                case "pv"       -> activeFolder = ActiveFolder.PV;
+                default         -> activeFolder = ActiveFolder.ALL;
+            }
+            updateFilterPredicate();
+            closeFoldersDrawer();
+        });
+    }
+
+    private void refreshFoldersList() {
+        if (foldersList == null) return;
+
+        int all = allChats.size();
+        int ch  = (int) allChats.stream().filter(c -> c.kind == ChatKind.CHANNEL).count();
+        int gr  = (int) allChats.stream().filter(c -> c.kind == ChatKind.GROUP).count();
+        int pv  = (int) allChats.stream().filter(c -> c.kind == ChatKind.DIRECT).count();
+
+        ObservableList<FolderVM> data = FXCollections.observableArrayList(
+                new FolderVM("All chats", all, false),
+                new FolderVM("Channels", ch, false),
+                new FolderVM("Groups",   gr, false),
+                new FolderVM("PV",       pv, false)
+        );
+        foldersList.setItems(data);
+    }
+
+    private void openFoldersDrawer() {
+        if (foldersOverlay == null || foldersOpen) return;
+        foldersOpen = true;
+
+        foldersOverlay.setVisible(true);
+        foldersOverlay.setManaged(true);
+        foldersOverlay.applyCss();
+        foldersOverlay.layout();
+
+        double w = foldersDrawer.getWidth() <= 0 ? foldersDrawer.prefWidth(-1) : foldersDrawer.getWidth();
+        overlayScrim.setOpacity(0);
+        foldersDrawer.setTranslateX(-w);
+
+        FadeTransition fade = new FadeTransition(javafx.util.Duration.millis(120), overlayScrim);
+        fade.setToValue(0.35);
+
+        TranslateTransition slide = new TranslateTransition(javafx.util.Duration.millis(180), foldersDrawer);
+        slide.setToX(0);
+
+        fade.play();
+        slide.play();
+    }
+
+    @FXML
+    public void closeFoldersDrawer() {
+        if (foldersOverlay == null || !foldersOpen) {
+            if (foldersOverlay != null) { foldersOverlay.setVisible(false); foldersOverlay.setManaged(false); }
+            return;
+        }
+        foldersOpen = false;
+
+        double w = foldersDrawer.getWidth() <= 0 ? foldersDrawer.prefWidth(-1) : foldersDrawer.getWidth();
+
+        FadeTransition fade = new FadeTransition(javafx.util.Duration.millis(120), overlayScrim);
+        fade.setToValue(0.0);
+
+        TranslateTransition slide = new TranslateTransition(javafx.util.Duration.millis(180), foldersDrawer);
+        slide.setToX(-w);
+        slide.setOnFinished(e -> {
+            foldersOverlay.setVisible(false);
+            foldersOverlay.setManaged(false);
+        });
+
+        fade.play();
+        slide.play();
+    }
+
+    @FXML
+    private void openCreateFolderDialog() {
+        // Return type must be ButtonType so we can check OK/CANCEL
+        if (foldersList == null) return;
+
+        Dialog<ButtonType> dlg = new Dialog<>();
+        dlg.setTitle("New Folder");
+        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        TextField name = new TextField();
+        name.setPromptText("Folder name");
+
+        VBox box = new VBox(10,
+                new Label("Folder name"),
+                name,
+                new Separator(),
+                new Label("Included chats"),
+                new Label("Add Chats  (+)   —  (UI demo)"),
+                new Separator(),
+                new Label("Excluded chats"),
+                new Label("Add Chats to Exclude  (–)  —  (UI demo)")
+        );
+        box.setPadding(new Insets(8));
+        dlg.getDialogPane().setContent(box);
+
+        // Now the lambda param is ButtonType (not Void)
+        dlg.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.OK) {
+                String n = Optional.ofNullable(name.getText()).orElse("").trim();
+                if (!n.isEmpty()) {
+                    foldersList.getItems().add(new FolderVM(n, 0, true));
+                }
+            }
+        });
+    }
+
 }
