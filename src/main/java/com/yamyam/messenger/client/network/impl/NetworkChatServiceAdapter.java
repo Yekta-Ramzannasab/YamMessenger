@@ -74,9 +74,7 @@ public class NetworkChatServiceAdapter implements ChatService {
             throw new IllegalArgumentException("Message text cannot be empty.");
         }
 
-        //
-        // فرض می‌کنیم متدی به نام sendChatMessage در NetworkService وجود دارد
-        // که chatId و متن پیام را به عنوان ورودی می‌گیرد.
+        // Calling a hypothetical method in NetworkService
         System.out.println("Adapter: Delegating message sending to NetworkService...");
         this.networkService.sendChatMessage(chatId, text);
     }
