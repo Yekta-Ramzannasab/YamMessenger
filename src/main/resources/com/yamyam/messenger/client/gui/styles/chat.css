@@ -25,10 +25,14 @@
 /* chatlist + omit the lines + cell styles */
 .themed.chat-root .list-view { -fx-background-color: transparent; }
 .themed.chat-root .list-view .virtual-flow .clipped-container .sheet { -fx-background-color: transparent; }
-.themed.chat-root .list-cell { -fx-background-color: transparent; -fx-padding: 6 10 6 10; }
-.themed.chat-root .list-cell:filled:selected, .themed .list-cell:filled:selected:focused {
+.themed.chat-root .list-cell { -fx-background-color: transparent; -fx-padding: 6 10 6 10;
+ -fx-text-fill: white;}
+.themed.chat-root .list-cell:filled:selected,
+.themed.chat-root .list-cell:filled:selected:focused {
   -fx-background-color: rgba(124,77,255,0.25);
   -fx-background-radius: 12;
+  -fx-text-fill: white;
+  -fx-font-weight: bold;
 }
 
 /*  CONVERSATION  */
@@ -190,4 +194,31 @@
 }
 .themed.chat-root .folder-row__trash:hover {
   -fx-text-fill: -app-text; -fx-background-color: derive(-app-surface, +8%);
+}
+.search-name {
+  -fx-text-fill: white;
+  -fx-font-size: 20px;
+  -fx-font-weight: 600;
+}
+
+.search-email {
+  -fx-text-fill: #D1D5DB;
+  -fx-font-size: 12px;
+}
+.chat-info__username {
+  -fx-text-fill: white;
+  -fx-font-size: 12px;
+  -fx-font-weight: 700;
+}
+
+.chat-info__email {
+  -fx-text-fill: #D1D5DB;
+  -fx-font-size: 12px;
+  -fx-font-weight: 600;
+}
+
+.chat-info__bio {
+  -fx-text-fill: #A78BFA;
+  -fx-font-size: 13px;
+  -fx-font-style: italic;
 }
