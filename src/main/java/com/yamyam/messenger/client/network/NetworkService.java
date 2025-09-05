@@ -419,7 +419,7 @@ public class NetworkService {
         // We can set the sender to the user ID so that the server has better logging
         Message messageToServer = new Message(MESSAGE_TYPE_SEND_CHAT, String.valueOf(senderId), payload);
 
-        // ۴. ارسال پیام نهایی با استفاده از متد کمکی موجود
+        // Send the final message using the existing helper method
         System.out.println("🚀 Sending chat message to server. Type: 20, Payload: " + payload);
         sendJsonMessage(messageToServer);
     }
