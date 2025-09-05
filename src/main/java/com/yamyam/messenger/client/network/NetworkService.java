@@ -407,7 +407,7 @@ public class NetworkService {
         // We're considering a new type code for sending messages
         final int MESSAGE_TYPE_SEND_CHAT = 20;
 
-        // شناسه‌ی کاربری که لاگین کرده را از AppSession می‌گیریم
+        // We get the logged-in user ID from the AppSession
         long senderId = AppSession.requireUserId();
 
         // ۱. ساخت DTO با اطلاعات لازم
