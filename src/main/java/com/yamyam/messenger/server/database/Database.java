@@ -1,10 +1,7 @@
 package com.yamyam.messenger.server.database;
 
 import com.yamyam.messenger.shared.model.*;
-import com.yamyam.messenger.shared.model.chat.Channel;
-import com.yamyam.messenger.shared.model.chat.ChannelSubscribers;
-import com.yamyam.messenger.shared.model.chat.Chat;
-import com.yamyam.messenger.shared.model.chat.PrivateChat;
+import com.yamyam.messenger.shared.model.chat.*;
 import com.yamyam.messenger.shared.model.message.MessageEntity;
 import com.yamyam.messenger.shared.model.message.MessageStatus;
 import com.yamyam.messenger.shared.model.message.MessageType;

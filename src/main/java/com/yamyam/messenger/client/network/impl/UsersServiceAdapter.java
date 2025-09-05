@@ -6,6 +6,7 @@ import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.shared.model.*;
 import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.ChannelSubscribers;
+import com.yamyam.messenger.shared.model.chat.GroupChat;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.io.IOException;

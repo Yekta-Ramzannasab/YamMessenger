@@ -1,6 +1,6 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.GroupChat;
+import com.yamyam.messenger.shared.model.chat.GroupChat;
 
 import java.sql.SQLException;
 
