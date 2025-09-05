@@ -468,18 +468,15 @@ public class ChatController implements Initializable {
         Msg newMessage = new Msg(true, text, LocalDateTime.now());
         selectedChat.messages.add(newMessage);
 
-        // ۲. پیام را به سرور ارسال کن
+        // Send the message to the server
         try {
             System.out.println("🚀 Sending message to contactId: " + selectedChat.contactId);
-            // این خط را از کامنت خارج کنید
             ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
         } catch (Exception e) {
             e.printStackTrace();
-            // در صورت خطا می‌تونید پیام را با حالت "ارسال ناموفق" نمایش دهید
-            // و گزینه‌ای برای ارسال مجدد قرار دهید.
         }
 
-        // ۳. فیلد ورودی را پاک کن
+        // Clear the input field
         inputField.clear();
     }
 
