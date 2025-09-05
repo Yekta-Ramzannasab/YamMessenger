@@ -304,7 +304,7 @@ public class ChatController implements Initializable {
                 ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
                 PrivateChat chat = net.getOrCreatePrivateChat(meUserId, targetUserId);
                 if (chat != null) {
-                    // یک ChatItem جدید از روی اطلاعات کاربر بساز
+                    // Create a new ChatItem from the user's information
                     String avatarUrl = u.getUserProfile().getProfileImageUrl();
                     Image avatar = (avatarUrl != null && !avatarUrl.isBlank())
                             ? new Image(avatarUrl)
@@ -312,7 +312,7 @@ public class ChatController implements Initializable {
 
                     ChatItem newItem = ChatItem.fromContact(chat.toContact(u), avatar);
 
-                    // مهم: rawEntity را هم ست کن تا در جستجوی بعدی پیدا شود
+                    // Also set rawEntity to be found in the next search
                     newItem.setRawEntity(u);
 
                     // آیتم جدید را به ابتدای لیست چت‌ها اضافه کن
