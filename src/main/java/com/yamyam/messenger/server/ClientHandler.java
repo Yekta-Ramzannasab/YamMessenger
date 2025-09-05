@@ -336,8 +336,7 @@ public class ClientHandler implements Runnable {
                                 long senderId = messageDto.getSenderId();
                                 String text = messageDto.getText();
 
-                                // ۴. فراخوانی متد addMessage در DataManager برای ذخیره پیام در دیتابیس
-                                //    DataManager خودش مدیریت تردها و کش را انجام می‌دهد.
+                                // Calling the addMessage method on the DataManager to save the message to the database
                                 DataManager.getInstance().addMessage(chatId, senderId, text);
                             } catch (com.google.gson.JsonSyntaxException e) {
                                 System.err.println("❌ Error parsing MessageDto JSON: " + e.getMessage());
