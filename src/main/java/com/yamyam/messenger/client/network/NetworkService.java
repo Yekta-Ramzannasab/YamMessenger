@@ -410,7 +410,7 @@ public class NetworkService {
         // We get the logged-in user ID from the AppSession
         long senderId = AppSession.requireUserId();
 
-        // ۱. ساخت DTO با اطلاعات لازم
+        // Create a DTO with the necessary information
         MessageDto messageDto = new MessageDto(chatId, senderId, text);
 
         // ۲. تبدیل DTO به یک رشته JSON (این رشته محتوای پیام ما خواهد بود)
