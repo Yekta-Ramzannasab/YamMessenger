@@ -75,8 +75,8 @@
                     <Pane HBox.hgrow="ALWAYS"/>
                     <Button fx:id="menuTriggerBtn"
                             text="☰"
-                            styleClass="chat-menu-trigger"
-                            onAction="#toggleMenuOverlay"/>
+                            styleClass="chat-menu-trigger"/>
+                           <!-- onAction="#toggleMenuOverlay"/> -->
                 </HBox>
 
                 <ImageView fx:id="infoAvatar" fitWidth="96" fitHeight="96" preserveRatio="true"/>
