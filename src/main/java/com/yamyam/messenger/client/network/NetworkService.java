@@ -413,7 +413,7 @@ public class NetworkService {
         // Create a DTO with the necessary information
         MessageDto messageDto = new MessageDto(chatId, senderId, text);
 
-        // ۲. تبدیل DTO به یک رشته JSON (این رشته محتوای پیام ما خواهد بود)
+        // Convert the DTO to a JSON string (this string will be the content of our message)
         String payload = new Gson().toJson(messageDto);
 
         // ۳. ساخت آبجکت Message اصلی طبق پروتکل شما
