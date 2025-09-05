@@ -2,7 +2,7 @@ package com.yamyam.messenger.server.database;
 
 import com.yamyam.messenger.shared.model.message.MessageEntity;
 import com.yamyam.messenger.shared.model.MessageStatus;
-import com.yamyam.messenger.shared.model.MessageType;
+import com.yamyam.messenger.shared.model.message.MessageType;
 import com.yamyam.messenger.shared.model.PrivateChat;
 
 import java.sql.Connection;
