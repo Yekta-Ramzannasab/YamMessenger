@@ -22,6 +22,7 @@ import com.yamyam.messenger.shared.model.user.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.*;
@@ -29,7 +30,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 import java.net.URL;
@@ -65,6 +68,12 @@ public class ChatController implements Initializable {
 
     @FXML private MenuButton themeBtn;
     @FXML private RadioMenuItem miLight, miDark, miAmoled;
+    @FXML private StackPane menuOverlay;
+    @FXML private StackPane subPageOverlay;
+    @FXML private VBox subPageContent;
+    @FXML private Label subPageTitle;
+    @FXML private Rectangle scrim;
+
 
 
 
@@ -742,5 +751,66 @@ public class ChatController implements Initializable {
         public final LocalDateTime at;
 
         public Msg(boolean m, String t, LocalDateTime a){ isMe=m; text=t; at=a; }
+    }
+
+    @FXML
+    private void toggleMenuOverlay(ActionEvent event) {
+        menuOverlay.setVisible(true);
+        menuOverlay.setManaged(true);
+        scrim.setVisible(true);
+        scrim.setManaged(true);
+    }
+
+    @FXML
+    private void closeAllOverlays(ActionEvent event) {
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(false);
+        subPageOverlay.setManaged(false);
+        scrim.setVisible(false);
+        scrim.setManaged(false);
+    }
+
+    @FXML
+    private void backToMenu(ActionEvent event) {
+        subPageOverlay.setVisible(false);
+        subPageOverlay.setManaged(false);
+        menuOverlay.setVisible(true);
+        menuOverlay.setManaged(true);
+    }
+    @FXML
+    private void openCreateChannel(MouseEvent event) {
+        subPageTitle.setText("Create Channel");
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
+    }
+
+    @FXML
+    private void openCreateGroup(MouseEvent event) {
+        subPageTitle.setText("Create Group");
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
+    }
+
+    @FXML
+    private void openContacts(MouseEvent event) {
+        subPageTitle.setText("Contacts");
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
+    }
+
+    @FXML
+    private void openSettings(MouseEvent event) {
+        subPageTitle.setText("Settings");
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
     }
 }

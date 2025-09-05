@@ -75,8 +75,8 @@
                     <Pane HBox.hgrow="ALWAYS"/>
                     <Button fx:id="menuTriggerBtn"
                             text="☰"
-                            styleClass="chat-menu-trigger"/>
-                           <!-- onAction="#toggleMenuOverlay"/> -->
+                            styleClass="chat-menu-trigger"
+                            onAction="#toggleMenuOverlay"/>
                 </HBox>
 
                 <ImageView fx:id="infoAvatar" fitWidth="96" fitHeight="96" preserveRatio="true"/>
@@ -112,16 +112,16 @@
                 <Pane HBox.hgrow="ALWAYS"/>
                 <Button fx:id="closeBtn"
                         text="✕"
+                        onAction="#closeAllOverlays"
 
                         styleClass="menu-close-btn"/>
-                <!--onAction="#closeAllOverlays"  جاش بالای اینه-->
             </HBox>
 
-            <!--<Label text="Create Channel" onMouseClicked="#openCreateChannel"/>
+            <Label text="Create Channel" onMouseClicked="#openCreateChannel"/>
             <Label text="Create Group" onMouseClicked="#openCreateGroup"/>
             <Label text="Contacts" onMouseClicked="#openContacts"/>
             <Label text="Saved Messages"/>
-            <Label text="Settings" onMouseClicked="#openSettings"/> -->
+            <Label text="Settings" onMouseClicked="#openSettings"/>
         </VBox>
     </StackPane>
 
@@ -135,9 +135,9 @@
         <VBox spacing="10" alignment="TOP_CENTER" fx:id="subPageContent">
             <!-- دکمه‌های بالا: Back چپ، Close راست -->
             <HBox alignment="CENTER" spacing="8">
-              <!--  <Button text="Back" onAction="#backToMenu" styleClass="menu-back-btn"/> -->
+                <Button text="Back" onAction="#backToMenu" styleClass="menu-back-btn"/>
                 <Pane HBox.hgrow="ALWAYS"/>
-                <!--<Button text="✕" onAction="#closeAllOverlays" styleClass="menu-close-btn"/>-->
+                <Button text="✕" onAction="#closeAllOverlays" styleClass="menu-close-btn"/>
             </HBox>
 
             <!-- عنوان صفحه -->
