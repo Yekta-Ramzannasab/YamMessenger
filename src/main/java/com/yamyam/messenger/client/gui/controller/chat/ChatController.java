@@ -452,25 +452,34 @@ public class ChatController implements Initializable {
 
     @FXML
     private void sendMessage() {
-        // Text is read from the input field
         String text = Optional.ofNullable(inputField.getText()).orElse("").trim();
         if (text.isEmpty()) {
             return;
         }
 
-        // The currently active chat is selected
+        // چت فعال فعلی را از chatList بگیر
         ChatItem selectedChat = chatList.getSelectionModel().getSelectedItem();
         if (selectedChat == null) {
+            System.err.println("❌ No chat selected. Cannot send message.");
             return;
         }
 
-        // The sending command is delegated to the service layer
-//        try {
-//            ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        // ۱. پیام را به صورت بصری و فوری به لیست پیام‌ها اضافه کن (Optimistic UI Update)
+        Msg newMessage = new Msg(true, text, LocalDateTime.now());
+        selectedChat.messages.add(newMessage);
 
+        // ۲. پیام را به سرور ارسال کن
+        try {
+            System.out.println("🚀 Sending message to contactId: " + selectedChat.contactId);
+            // این خط را از کامنت خارج کنید
+            ServiceLocator.chat().sendMessage(selectedChat.contactId, text);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // در صورت خطا می‌تونید پیام را با حالت "ارسال ناموفق" نمایش دهید
+            // و گزینه‌ای برای ارسال مجدد قرار دهید.
+        }
+
+        // ۳. فیلد ورودی را پاک کن
         inputField.clear();
     }
 
