@@ -457,14 +457,14 @@ public class ChatController implements Initializable {
             return;
         }
 
-        // چت فعال فعلی را از chatList بگیر
+        // Get the current active chat from chatList
         ChatItem selectedChat = chatList.getSelectionModel().getSelectedItem();
         if (selectedChat == null) {
             System.err.println("❌ No chat selected. Cannot send message.");
             return;
         }
 
-        // ۱. پیام را به صورت بصری و فوری به لیست پیام‌ها اضافه کن (Optimistic UI Update)
+        // Add message to message list visually and instantly (Optimistic UI Update)
         Msg newMessage = new Msg(true, text, LocalDateTime.now());
         selectedChat.messages.add(newMessage);
 
