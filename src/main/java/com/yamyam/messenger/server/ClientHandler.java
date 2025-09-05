@@ -319,6 +319,11 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(new Message(15, "Server", json));
                             break;
                         }
+
+                        case 20 :
+                            
+
+                            break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());
                             break;
