@@ -1,5 +1,7 @@
 package com.yamyam.messenger.shared.model;
 
+import com.yamyam.messenger.shared.model.chat.Channel;
+
 import java.sql.Timestamp;
 
 public class ChannelSubscribers {

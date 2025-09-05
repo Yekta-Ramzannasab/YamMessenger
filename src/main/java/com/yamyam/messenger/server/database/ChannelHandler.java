@@ -1,6 +1,6 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.Channel;
+import com.yamyam.messenger.shared.model.chat.Channel;
 
 import java.sql.SQLException;
 

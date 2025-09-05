@@ -8,6 +8,7 @@ import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
+import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.Chat;
 import com.yamyam.messenger.shared.model.chat.PrivateChat;
 import com.yamyam.messenger.shared.model.message.MessageEntity;

@@ -1,12 +1,8 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.Channel;
+import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.ChannelSubscribers;
-import com.yamyam.messenger.shared.model.Role;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ChannelSubscribersHandler {

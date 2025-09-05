@@ -5,6 +5,7 @@ import com.yamyam.messenger.client.network.dto.ContactType;
 import com.yamyam.messenger.client.network.service.ContactService;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.Chat;
 import com.yamyam.messenger.shared.model.chat.PrivateChat;
 

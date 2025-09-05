@@ -1,7 +1,7 @@
 package com.yamyam.messenger.client.network.service;
 
 
-import com.yamyam.messenger.shared.model.Channel;
+import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.Chat;
 import com.yamyam.messenger.shared.model.GroupChat;
 import com.yamyam.messenger.shared.model.chat.PrivateChat;
