@@ -324,7 +324,7 @@ public class ClientHandler implements Runnable {
                         case 20 :
                             System.out.println("✅ Received message with Type 20: Handling new chat message.");
                             try {
-                                // ۱. دریافت محتوای پیام (که یک رشته JSON از MessageDto است)
+                                // Get the message content (which is a JSON string from MessageDto)
                                 String payload = request.getContent();
 
                                 // ۲. تبدیل رشته JSON به آبجکت MessageDto
@@ -340,13 +340,8 @@ public class ClientHandler implements Runnable {
                                 // ۴. فراخوانی متد addMessage در DataManager برای ذخیره پیام در دیتابیس
                                 //    DataManager خودش مدیریت تردها و کش را انجام می‌دهد.
                                 DataManager.getInstance().addMessage(chatId, senderId, text);
-
-                                // نیازی به ارسال پاسخ به کلاینت نیست، مگر اینکه بخواهید تاییدیه "رسید" ارسال کنید.
-                                // کلاینت پیام را به صورت Optimistic UI نمایش داده است.
-
                             } catch (com.google.gson.JsonSyntaxException e) {
                                 System.err.println("❌ Error parsing MessageDto JSON: " + e.getMessage());
-                                // می‌توانید یک پیام خطا به کلاینت ارسال کنید (اختیاری)
                             } catch (Exception e) {
                                 System.err.println("❌ An unexpected error occurred in case 20: " + e.getMessage());
                                 e.printStackTrace();
