@@ -6,5 +6,9 @@ public class MessageDto {
     private final long senderId;
     private final String text;
 
-    
+    public MessageDto(long chatId, long senderId, String text) {
+        this.chatId = chatId;
+        this.senderId = senderId;
+        this.text = text;
+    }
 }
