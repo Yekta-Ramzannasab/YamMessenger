@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.network.dto.ContactType;
+import com.yamyam.messenger.client.network.dto.MessageDto;
+//import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
@@ -401,4 +403,26 @@ public class NetworkService {
 //        sendJsonMessage(chatMessage);
 //    }
 
+    public void sendChatMessage(long chatId, String text) throws IOException {
+        // یک کد نوع (type) جدید برای ارسال پیام در نظر می‌گیریم.
+        // چون 19 برای fetchMessages است، از 20 استفاده می‌کنیم.
+        final int MESSAGE_TYPE_SEND_CHAT = 20;
+
+        // شناسه‌ی کاربری که لاگین کرده را از AppSession می‌گیریم
+        long senderId = AppSession.requireUserId();
+
+        // ۱. ساخت DTO با اطلاعات لازم
+        MessageDto messageDto = new MessageDto(chatId, senderId, text);
+
+        // ۲. تبدیل DTO به یک رشته JSON (این رشته محتوای پیام ما خواهد بود)
+        String payload = new Gson().toJson(messageDto);
+
+        // ۳. ساخت آبجکت Message اصلی طبق پروتکل شما
+        // sender را می‌توانیم شناسه کاربر قرار دهیم تا سرور لاگ بهتری داشته باشد.
+        Message messageToServer = new Message(MESSAGE_TYPE_SEND_CHAT, String.valueOf(senderId), payload);
+
+        // ۴. ارسال پیام نهایی با استفاده از متد کمکی موجود
+        System.out.println("🚀 Sending chat message to server. Type: 20, Payload: " + payload);
+        sendJsonMessage(messageToServer);
+    }
 }
