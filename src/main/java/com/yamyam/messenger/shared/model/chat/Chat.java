@@ -1,7 +1,8 @@
-package com.yamyam.messenger.shared.model;
+package com.yamyam.messenger.shared.model.chat;
+
+import com.yamyam.messenger.shared.model.ChatType;
 
 import java.sql.Timestamp;
-import java.time.LocalTime;
 
 public abstract class Chat {
     protected long chatId;

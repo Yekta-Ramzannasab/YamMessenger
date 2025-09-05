@@ -1,7 +1,8 @@
 package com.yamyam.messenger.shared.model;
 
+import com.yamyam.messenger.shared.model.chat.Chat;
+
 import java.sql.Timestamp;
-import java.util.Currency;
 
 public class GroupChat extends Chat {
 

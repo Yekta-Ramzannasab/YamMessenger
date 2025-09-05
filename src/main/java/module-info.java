@@ -35,4 +35,5 @@ module com.yam.messenger {
     exports com.yamyam.messenger.client.gui.theme;
     exports com.yamyam.messenger.shared.model.user;
     exports com.yamyam.messenger.shared.model.message;
+    exports com.yamyam.messenger.shared.model.chat;
 }

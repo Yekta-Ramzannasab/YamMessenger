@@ -1,8 +1,10 @@
 package com.yamyam.messenger.shared.model;
 
+import com.yamyam.messenger.shared.model.chat.Chat;
+
 import java.sql.Timestamp;
 
-public class Channel extends Chat{
+public class Channel extends Chat {
 
     private String channelName;
     private long owner;
