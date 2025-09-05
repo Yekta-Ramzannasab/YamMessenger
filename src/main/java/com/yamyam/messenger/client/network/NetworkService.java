@@ -8,6 +8,7 @@ import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
 import com.google.gson.Gson;
+import com.yamyam.messenger.shared.model.user.ContactRelation;
 import com.yamyam.messenger.shared.model.user.UserProfile;
 import com.yamyam.messenger.shared.model.user.Users;
 

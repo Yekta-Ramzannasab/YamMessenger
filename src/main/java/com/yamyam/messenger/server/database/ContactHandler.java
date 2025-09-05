@@ -1,6 +1,6 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.ContactRelation;
+import com.yamyam.messenger.shared.model.user.ContactRelation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
