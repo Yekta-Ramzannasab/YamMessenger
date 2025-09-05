@@ -1,7 +1,6 @@
 package com.yamyam.messenger.shared.model.message;
 
 import com.yamyam.messenger.shared.model.Chat;
-import com.yamyam.messenger.shared.model.MessageStatus;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.sql.Timestamp;
