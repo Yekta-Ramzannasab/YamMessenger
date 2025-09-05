@@ -67,6 +67,21 @@ public class NetworkChatServiceAdapter implements ChatService {
         }
     }
 
+    @Override
+    public void sendMessage(long chatId, String text) throws Exception {
+        // ۱. بررسی ورودی‌ها (اختیاری ولی پیشنهاد می‌شود)
+        if (text == null || text.isBlank()) {
+            // می‌توانید یک Exception خاص برای این مورد تعریف کنید
+            throw new IllegalArgumentException("Message text cannot be empty.");
+        }
+
+        // ۲. فراخوانی متد فرضی در NetworkService
+        // فرض می‌کنیم متدی به نام sendChatMessage در NetworkService وجود دارد
+        // که chatId و متن پیام را به عنوان ورودی می‌گیرد.
+        System.out.println("Adapter: Delegating message sending to NetworkService...");
+        this.networkService.sendChatMessage(chatId, text);
+    }
+
 //    @Override
 //    public void sendMessage(long chatId, String text) {
 //        // The adapter simply hands the request to the corresponding method on the NetworkService
