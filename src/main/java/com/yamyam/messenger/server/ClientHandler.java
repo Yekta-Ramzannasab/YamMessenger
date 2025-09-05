@@ -327,8 +327,7 @@ public class ClientHandler implements Runnable {
                                 // Get the message content (which is a JSON string from MessageDto)
                                 String payload = request.getContent();
 
-                                // ۲. تبدیل رشته JSON به آبجکت MessageDto
-                                //    مطمئن شوید که کلاس MessageDto در classpath سرور نیز وجود دارد (در پروژه shared)
+                                // Convert JSON string to MessageDto object
                                 MessageDto messageDto =
                                         gson.fromJson(payload, MessageDto.class);
 
