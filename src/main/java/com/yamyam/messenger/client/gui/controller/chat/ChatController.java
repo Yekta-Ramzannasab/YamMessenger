@@ -297,9 +297,9 @@ public class ChatController implements Initializable {
                 // If there is a chat, just select it in the chatList
                 System.out.println("✅ Chat with " + u.getUserProfile().getProfileName() + " already exists. Selecting it.");
                 chatList.getSelectionModel().select(existingItem.get());
-                chatList.scrollTo(existingItem.get()); // اسکرول به سمت چت مورد نظر
+                chatList.scrollTo(existingItem.get());
             } else {
-                // اگر چت وجود نداشت، یک چت جدید بساز و به لیست اضافه کن
+                // If the chat does not exist, create a new chat and add it to the list
                 System.out.println("ℹ️ Creating a new chat with " + u.getUserProfile().getProfileName());
                 ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
                 PrivateChat chat = net.getOrCreatePrivateChat(meUserId, targetUserId);
