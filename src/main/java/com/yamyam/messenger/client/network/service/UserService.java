@@ -1,9 +1,9 @@
 package com.yamyam.messenger.client.network.service;
 
-import com.yamyam.messenger.shared.model.*;
 import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.ChannelSubscribers;
 import com.yamyam.messenger.shared.model.chat.GroupChat;
+import com.yamyam.messenger.shared.model.chat.GroupMembers;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.util.List;

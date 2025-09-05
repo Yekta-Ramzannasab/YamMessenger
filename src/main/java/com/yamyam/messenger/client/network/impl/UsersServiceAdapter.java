@@ -3,10 +3,10 @@ package com.yamyam.messenger.client.network.impl;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.service.UserService;
 import com.yamyam.messenger.server.database.DataManager;
-import com.yamyam.messenger.shared.model.*;
 import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.ChannelSubscribers;
 import com.yamyam.messenger.shared.model.chat.GroupChat;
+import com.yamyam.messenger.shared.model.chat.GroupMembers;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.io.IOException;
