@@ -600,7 +600,21 @@ public class ChatController implements Initializable {
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
     private void openChat(ChatItem c) {
+        // اگر هیچ چتی انتخاب نشده باشد (c is null)، رابط کاربری را پاک می‌کنیم
+        if (c == null) {
+            headerAvatar.setImage(placeholder);
+            headerName.setText("Select a chat");
+            headerStatus.setText("");
 
+            infoAvatar.setImage(placeholder);
+            infoName.setText("");
+            infoPresence.setText("");
+
+            messageList.setItems(null); // لیست پیام‌ها را خالی می‌کنیم
+            return;
+        }
+
+        // به‌روزرسانی هدر بالای صفحه چت
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
@@ -611,17 +625,17 @@ public class ChatController implements Initializable {
         };
         headerStatus.setText(status);
 
+        // به‌روزرسانی پنل اطلاعات کاربر در سمت راست
         infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         infoName.setText(c.title);
         infoPresence.setText(status);
 
-        messageList.setItems(FXCollections.observableArrayList());
-        System.out.println("🧩 openChat called for: " + c.title);
-        System.out.println("🖼️ Avatar is " + (c.avatar != null ? "set" : "null"));
-        System.out.println("📛 Name: " + c.title);
-        System.out.println("📶 Status: " + headerStatus.getText());
+        // *** مهم‌ترین تغییر اینجاست ***
+        // ListView را مستقیماً به لیست پیام‌های موجود در آبجکت ChatItem متصل می‌کنیم.
+        messageList.setItems(c.messages);
 
-        System.out.println("✅ Chat UI updated for: " + c.title + " | Status: " + status);
+        // لاگ برای دیباگ کردن
+        System.out.println("✅ Chat UI updated for: " + c.title + " | Message list is now correctly bound.");
     }
 
     /* -----* *------
