@@ -1,6 +1,6 @@
-package com.yamyam.messenger.shared.model;
+package com.yamyam.messenger.shared.model.chat;
 
-import com.yamyam.messenger.shared.model.chat.Channel;
+import com.yamyam.messenger.shared.model.Role;
 
 import java.sql.Timestamp;
 
