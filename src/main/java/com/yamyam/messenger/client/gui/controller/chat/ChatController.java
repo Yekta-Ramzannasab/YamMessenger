@@ -288,13 +288,13 @@ public class ChatController implements Initializable {
             long meUserId = AppSession.requireUserId();
             long targetUserId = u.getId();
 
-            // مرحله ۲: بررسی کن آیا این چت از قبل در لیست allChats وجود دارد یا نه
+            // Check if this chat already exists in the allChats list
             Optional<ChatItem> existingItem = allChats.stream()
                     .filter(item -> item.rawEntity instanceof Users && ((Users) item.rawEntity).getId() == targetUserId)
                     .findFirst();
 
             if (existingItem.isPresent()) {
-                // اگر چت وجود داشت، فقط آن را در chatList انتخاب کن
+                // If there is a chat, just select it in the chatList
                 System.out.println("✅ Chat with " + u.getUserProfile().getProfileName() + " already exists. Selecting it.");
                 chatList.getSelectionModel().select(existingItem.get());
                 chatList.scrollTo(existingItem.get()); // اسکرول به سمت چت مورد نظر
