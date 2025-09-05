@@ -76,6 +76,6 @@ public class NetworkChatServiceAdapter implements ChatService {
 
         // Calling a hypothetical method in NetworkService
         System.out.println("Adapter: Delegating message sending to NetworkService...");
-        this.networkService.sendChatMessage(chatId, text);
+        this.net.sendChatMessage(chatId, text);
     }
 }
