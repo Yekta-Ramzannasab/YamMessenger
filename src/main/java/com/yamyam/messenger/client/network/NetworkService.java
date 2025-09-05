@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.network.dto.ContactType;
 import com.yamyam.messenger.client.network.dto.MessageDto;
-//import com.yamyam.messenger.client.util.AppSession;
+import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
