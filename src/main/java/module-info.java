@@ -18,15 +18,16 @@ module com.yam.messenger {
     requires java.desktop;
     requires okhttp3;
 
-
+    // Allows runtime reflective access to all types in this package
+    // Commonly used by frameworks like Spring or Hibernate for serialization, dependency injection, etc
     opens com.yamyam.messenger.client.gui to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.main to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.auth to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.chat to javafx.fxml;
     opens com.yamyam.messenger.client.gui.theme to javafx.fxml;
 
-    // Exposes public types in this package to other modules at compile-time and runtime.
-    // Useful for sharing APIs or libraries with external modules.
+    // Exposes public types in this package to other modules at compile-time and runtime
+    // Useful for sharing APIs or libraries with external module
     exports com.yamyam.messenger.client.gui;
     exports com.yamyam.messenger.server.database;
     exports com.yamyam.messenger.shared.util;
