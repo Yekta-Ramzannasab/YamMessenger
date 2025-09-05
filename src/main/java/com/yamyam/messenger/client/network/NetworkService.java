@@ -404,8 +404,7 @@ public class NetworkService {
 //    }
 
     public void sendChatMessage(long chatId, String text) throws IOException {
-        // یک کد نوع (type) جدید برای ارسال پیام در نظر می‌گیریم.
-        // چون 19 برای fetchMessages است، از 20 استفاده می‌کنیم.
+        // We're considering a new type code for sending messages
         final int MESSAGE_TYPE_SEND_CHAT = 20;
 
         // شناسه‌ی کاربری که لاگین کرده را از AppSession می‌گیریم
