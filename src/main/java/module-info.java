@@ -1,4 +1,5 @@
 module com.yam.messenger {
+
     // requirement for core JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
@@ -17,16 +18,15 @@ module com.yam.messenger {
     requires java.desktop;
     requires okhttp3;
 
-
-
-
+    
     opens com.yamyam.messenger.client.gui to javafx.fxml;
-
     opens com.yamyam.messenger.client.gui.controller.main to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.auth to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.chat to javafx.fxml;
     opens com.yamyam.messenger.client.gui.theme to javafx.fxml;
 
+    // Exposes public types in this package to other modules at compile-time and runtime.
+    // Useful for sharing APIs or libraries with external modules.
     exports com.yamyam.messenger.client.gui;
     exports com.yamyam.messenger.server.database;
     exports com.yamyam.messenger.shared.util;
