@@ -416,8 +416,7 @@ public class NetworkService {
         // Convert the DTO to a JSON string (this string will be the content of our message)
         String payload = new Gson().toJson(messageDto);
 
-        // ۳. ساخت آبجکت Message اصلی طبق پروتکل شما
-        // sender را می‌توانیم شناسه کاربر قرار دهیم تا سرور لاگ بهتری داشته باشد.
+        // We can set the sender to the user ID so that the server has better logging
         Message messageToServer = new Message(MESSAGE_TYPE_SEND_CHAT, String.valueOf(senderId), payload);
 
         // ۴. ارسال پیام نهایی با استفاده از متد کمکی موجود
