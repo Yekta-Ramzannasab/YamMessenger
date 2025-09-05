@@ -15,7 +15,7 @@ import com.yamyam.messenger.client.util.ServiceLocator;
 import com.yamyam.messenger.server.database.DataManager;
 import com.yamyam.messenger.server.database.Search;
 import com.yamyam.messenger.server.database.SearchResult;
-import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.chat.PrivateChat;
 import com.yamyam.messenger.shared.model.message.MessageEntity;
 import com.yamyam.messenger.shared.model.user.UserProfile;
 import com.yamyam.messenger.shared.model.user.Users;

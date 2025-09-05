@@ -1,8 +1,8 @@
-package com.yamyam.messenger.shared.model;
+package com.yamyam.messenger.shared.model.chat;
 
 import com.yamyam.messenger.client.network.dto.Contact;
 import com.yamyam.messenger.client.network.dto.ContactType;
-import com.yamyam.messenger.shared.model.chat.Chat;
+import com.yamyam.messenger.shared.model.ChatType;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.sql.Timestamp;
@@ -13,7 +13,7 @@ public class PrivateChat extends Chat {
     private long user2;
 
     public PrivateChat(long id,long user1 , long user2){
-        super(id, new Timestamp(System.currentTimeMillis()),ChatType.PRIVATE_CHAT);
+        super(id, new Timestamp(System.currentTimeMillis()), ChatType.PRIVATE_CHAT);
         this.user1 = user1;
         this.user2 = user2;
     }

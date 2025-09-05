@@ -1,13 +1,8 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.ChatType;
-import com.yamyam.messenger.shared.model.PrivateChat;
+import com.yamyam.messenger.shared.model.chat.PrivateChat;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Locale;
 
 public class PrivateChatHandler {
 
