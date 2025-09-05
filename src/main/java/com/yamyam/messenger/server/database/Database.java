@@ -311,12 +311,12 @@ public class Database {
         long user2 = Math.max(userA, userB);
 
         try (Connection connection = Database.getConnection()) {
-            String sql = "INSERT INTO private_chat(user1_id, user2_id) VALUES (?, ?) RETURNING chat_id";
+            String sql = "INSERT INTO private_chat(chat_id,user1_id, user2_id) VALUES (?,?, ?) RETURNING chat_id";
 
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-
-                stmt.setLong(1, user1);
-                stmt.setLong(2, user2);
+                stmt.setLong(1, chatId);
+                stmt.setLong(2, user1);
+                stmt.setLong(3, user2);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
