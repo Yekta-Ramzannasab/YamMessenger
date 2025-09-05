@@ -2,6 +2,7 @@ package com.yamyam.messenger.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.yamyam.messenger.client.network.dto.MessageDto;
 import com.yamyam.messenger.server.database.*;
 import com.yamyam.messenger.server.services.EmailService;
 import com.yamyam.messenger.shared.model.*;
@@ -112,7 +113,7 @@ public class ClientHandler implements Runnable {
                             userProfile = UserProfile.fromString(request.getContent()) ;
                             long id = getUserIdByEmail(request.getSender());
                             updateUserProfile (id , userProfile);
-                        
+
                             break;
                         case 7:
                             String userPrompt = request.getContent();
@@ -321,8 +322,35 @@ public class ClientHandler implements Runnable {
                         }
 
                         case 20 :
-                            
+                            System.out.println("✅ Received message with Type 20: Handling new chat message.");
+                            try {
+                                // ۱. دریافت محتوای پیام (که یک رشته JSON از MessageDto است)
+                                String payload = request.getContent();
 
+                                // ۲. تبدیل رشته JSON به آبجکت MessageDto
+                                //    مطمئن شوید که کلاس MessageDto در classpath سرور نیز وجود دارد (در پروژه shared)
+                                MessageDto messageDto =
+                                        gson.fromJson(payload, MessageDto.class);
+
+                                // ۳. استخراج اطلاعات لازم از DTO
+                                long chatId = messageDto.getChatId();
+                                long senderId = messageDto.getSenderId();
+                                String text = messageDto.getText();
+
+                                // ۴. فراخوانی متد addMessage در DataManager برای ذخیره پیام در دیتابیس
+                                //    DataManager خودش مدیریت تردها و کش را انجام می‌دهد.
+                                DataManager.getInstance().addMessage(chatId, senderId, text);
+
+                                // نیازی به ارسال پاسخ به کلاینت نیست، مگر اینکه بخواهید تاییدیه "رسید" ارسال کنید.
+                                // کلاینت پیام را به صورت Optimistic UI نمایش داده است.
+
+                            } catch (com.google.gson.JsonSyntaxException e) {
+                                System.err.println("❌ Error parsing MessageDto JSON: " + e.getMessage());
+                                // می‌توانید یک پیام خطا به کلاینت ارسال کنید (اختیاری)
+                            } catch (Exception e) {
+                                System.err.println("❌ An unexpected error occurred in case 20: " + e.getMessage());
+                                e.printStackTrace();
+                            }
                             break;
                         default:
                             System.err.println("Unknown request type: " + request.getType());
