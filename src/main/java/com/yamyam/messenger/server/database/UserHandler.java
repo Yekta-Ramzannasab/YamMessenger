@@ -1,6 +1,6 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.UserProfile;
+import com.yamyam.messenger.shared.model.user.UserProfile;
 import com.yamyam.messenger.shared.model.user.Users;
 
 import java.sql.*;

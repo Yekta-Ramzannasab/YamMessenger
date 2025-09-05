@@ -1,4 +1,4 @@
-package com.yamyam.messenger.shared.model;
+package com.yamyam.messenger.shared.model.user;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
