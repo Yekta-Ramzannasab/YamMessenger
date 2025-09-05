@@ -18,7 +18,7 @@ module com.yam.messenger {
     requires java.desktop;
     requires okhttp3;
 
-    
+
     opens com.yamyam.messenger.client.gui to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.main to javafx.fxml;
     opens com.yamyam.messenger.client.gui.controller.auth to javafx.fxml;
@@ -31,5 +31,6 @@ module com.yam.messenger {
     exports com.yamyam.messenger.server.database;
     exports com.yamyam.messenger.shared.util;
     exports com.yamyam.messenger.shared.model;
+    exports com.yamyam.messenger.shared.model.*;
     exports com.yamyam.messenger.client.gui.theme;
 }
