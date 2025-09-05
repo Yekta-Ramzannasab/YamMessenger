@@ -42,4 +42,40 @@ public class PrivateChat extends Chat {
                 null
         );
     }
+
+    @Override
+    public String toString() {
+        return chatId + "," + user1 + "," + user2 ;
+    }
+
+    public static PrivateChat fromString(String data) {
+        // ۱. ورودی null یا خالی را بررسی می‌کنیم
+        if (data == null || data.trim().isEmpty()) {
+            return null;
+        }
+
+        // ۲. رشته را بر اساس کاما (,) به سه بخش تقسیم می‌کنیم
+        String[] parts = data.split(",");
+
+        // ۳. بررسی می‌کنیم که دقیقاً سه بخش داشته باشیم
+        if (parts.length != 3) {
+            System.err.println("Invalid format for PrivateChat string (expected 3 parts): " + data);
+            return null;
+        }
+
+        try {
+            // ۴. هر بخش را به عدد (long) تبدیل می‌کنیم
+            long chatId = Long.parseLong(parts[0].trim());
+            long user1 = Long.parseLong(parts[1].trim());
+            long user2 = Long.parseLong(parts[2].trim());
+
+            // ۵. با استفاده از کانستراکتور اصلی، آبجکت را می‌سازیم
+            return new PrivateChat(chatId, user1, user2);
+
+        } catch (NumberFormatException e) {
+            // اگر بخش‌ها عدد نباشند، خطا می‌دهیم
+            System.err.println("Failed to parse long values from string: " + data);
+            return null;
+        }
+    }
 }

@@ -99,12 +99,16 @@ public class ClientHandler implements Runnable {
                                 privateChats = DataManager.getInstance().getPrivateChatsForUser(userId);
                             } catch (SQLException e) {
                                 e.printStackTrace();
-                                sendJsonMessage(new Message(3, "Server", null));
+                                sendJsonMessage(new Message(3, "Server", "")); // ارسال رشته خالی در صورت خطا
                                 break;
                             }
 
-                            String json = gson.toJson(privateChats);
-                            Message response = new Message(3, "Server", json);
+                            // لیست آبجکت‌ها را به یک رشته چندخطی تبدیل می‌کنیم
+                            String content = privateChats.stream()
+                                    .map(PrivateChat::toString) // متد toString هر آبجکت را صدا می‌زنیم
+                                    .collect(Collectors.joining("\n")); // با خط جدید به هم می‌چسبانیم
+
+                            Message response = new Message(3, "Server", content);
                             sendJsonMessage(response);
                             break;
                         }
@@ -210,7 +214,7 @@ public class ClientHandler implements Runnable {
                                 break;
                             }
 
-                            String json = gson.toJson(chat);
+                            String json = chat.toString();
                             sendJsonMessage(new Message(14, "Server", json));
                             break;
                         }
@@ -312,15 +316,20 @@ public class ClientHandler implements Runnable {
                                 messages = DataManager.getInstance().getMessages(chatId);
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                sendJsonMessage(new Message(15, "Server", null));
+                                // در صورت خطا، یک رشته خالی ارسال می‌کنیم
+                                sendJsonMessage(new Message(19, "Server", ""));
                                 break;
                             }
 
-                            String json = gson.toJson(messages);
-                            sendJsonMessage(new Message(15, "Server", json));
+                            // ۱. لیست پیام‌ها را با استریم به یک رشته چندخطی تبدیل می‌کنیم
+                            String content = messages.stream()
+                                    .map(MessageEntity::toString) // متد toString() هر پیام را فراخوانی می‌کند
+                                    .collect(Collectors.joining("\n")); // نتایج را با کاراکتر خط جدید به هم می‌چسباند
+
+                            // ۲. پاسخ را با محتوای جدید و نوع صحیح (19) ارسال می‌کنیم
+                            sendJsonMessage(new Message(19, "Server", content));
                             break;
                         }
-
                         case 20 :
                             System.out.println("✅ Received message with Type 20: Handling new chat message.");
                             try {
@@ -328,8 +337,9 @@ public class ClientHandler implements Runnable {
                                 String payload = request.getContent();
 
                                 // Convert JSON string to MessageDto object
-                                MessageDto messageDto =
-                                        gson.fromJson(payload, MessageDto.class);
+//                                MessageDto messageDto = MessageDto.fromString(payload) ;
+                                com.yamyam.messenger.client.network.dto.MessageDto messageDto =
+                                        com.yamyam.messenger.client.network.dto.MessageDto.fromString(payload);
 
                                 // Extracting the necessary information from the DTO
                                 long chatId = messageDto.getChatId();

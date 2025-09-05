@@ -185,11 +185,23 @@ public class NetworkService {
 
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
-            Type listType = new TypeToken<List<PrivateChat>>() {}.getType();
-            return new Gson().fromJson(response.getContent(), listType);
+            // ۱. محتوای خام را از سرور دریافت می‌کنیم (که انتظار داریم یک رشته چندخطی باشد)
+            String rawContent = response.getContent();
+            if (rawContent.isBlank()) {
+                return List.of(); // اگر محتوا خالی بود، لیست خالی برمی‌گردانیم
+            }
+
+            // ۲. محتوا را بر اساس کاراکتر خط جدید (\n) به آرایه‌ای از رشته‌ها تقسیم می‌کنیم
+            String[] lines = rawContent.split("\n");
+
+            // ۳. از استریم برای پردازش هر خط استفاده می‌کنیم
+            return Arrays.stream(lines)
+                    .map(PrivateChat::fromString) // هر خط را با متد fromString به آبجکت PrivateChat تبدیل می‌کنیم
+                    .filter(Objects::nonNull)      // اگر خطی قابل تبدیل نبود و null برگشت، آن را حذف می‌کنیم
+                    .toList();                     // نتایج را در یک لیست جمع‌آوری می‌کنیم
         }
 
-        return List.of();
+        return List.of(); // اگر پاسخی از سرور نیامد، لیست خالی برمی‌گردانیم
     }
     public List<Chat> fetchGroupAndChannelChatsForUser(String email) throws IOException {
         Message request = new Message(8, email, "GET_GROUP_CHANNEL_CHATS");
@@ -276,7 +288,7 @@ public class NetworkService {
 
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
-            return new Gson().fromJson(response.getContent(), PrivateChat.class);
+            return PrivateChat.fromString(response.getContent());
         }
 
         return null;
@@ -384,10 +396,23 @@ public class NetworkService {
 
         Message response = receiveJsonMessage();
         if (response != null && response.getContent() != null) {
-            return new Gson().fromJson(response.getContent(), new TypeToken<List<MessageEntity>>() {}.getType());
+            // ۱. دریافت محتوای خام از سرور
+            String rawContent = response.getContent();
+            if (rawContent.isBlank()) {
+                return Collections.emptyList();
+            }
+
+            // ۲. تقسیم محتوا به خطوط جداگانه
+            String[] lines = rawContent.split("\n");
+
+            // ۳. استفاده از استریم برای تبدیل هر خط به یک آبجکت MessageEntity
+            return Arrays.stream(lines)
+                    .map(MessageEntity::fromString) // هر خط را با fromString به آبجکت تبدیل می‌کنیم
+                    .filter(Objects::nonNull)      // موارد ناموفق (null) را حذف می‌کنیم
+                    .toList();                     // نتیجه را در یک لیست جمع‌آوری می‌کنیم
         }
 
-        return Collections.emptyList();
+        return Collections.emptyList(); // اگر پاسخی نبود، لیست خالی برمی‌گردانیم
     }
 
 //    public void sendChatMessage(long chatId, String text) throws IOException {
@@ -414,7 +439,7 @@ public class NetworkService {
         MessageDto messageDto = new MessageDto(chatId, senderId, text);
 
         // Convert the DTO to a JSON string (this string will be the content of our message)
-        String payload = new Gson().toJson(messageDto);
+        String payload = messageDto.toString();
 
         // We can set the sender to the user ID so that the server has better logging
         Message messageToServer = new Message(MESSAGE_TYPE_SEND_CHAT, String.valueOf(senderId), payload);

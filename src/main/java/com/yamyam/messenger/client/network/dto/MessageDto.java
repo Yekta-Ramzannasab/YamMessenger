@@ -23,4 +23,32 @@ public class MessageDto {
     public String getText() {
         return text;
     }
+
+    @Override
+    public String toString() {
+        return chatId + "," + senderId + "," + text ;
+    }
+
+    public static MessageDto fromString(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        String[] parts = str.split(",", 3);
+
+        if (parts.length != 3) {
+            System.err.println("❌ Invalid MessageDto string format: " + str);
+            return null; // strings format is incorrect
+        }
+
+        try {
+            long chatId = Long.parseLong(parts[0]);
+            long senderId = Long.parseLong(parts[1]);
+            String text = parts[2];
+            return new MessageDto(chatId, senderId, text);
+        } catch (NumberFormatException e) {
+            System.err.println("❌ Failed to parse Long value in MessageDto string: " + str);
+            return null; // error for convert string to object
+        }
+    }
 }

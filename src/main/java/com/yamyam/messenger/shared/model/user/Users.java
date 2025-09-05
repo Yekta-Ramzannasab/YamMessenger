@@ -130,15 +130,6 @@ public class Users {
 
         try {
             // Convert each part to the corresponding data type
-            //    private long id;
-//    private Timestamp createAt;
-//    private Timestamp lastSeen;
-//    private boolean isVerified;
-//    private boolean isOnline;
-//    private boolean isDeleted;
-//    private String email;
-//    private UserProfile userProfile;
-//    private double searchRank;
             long id = Long.parseLong(parts[0]);
             Timestamp createAt = Timestamp.valueOf(parts[1]);
             Timestamp lastSeen = parts[2].equals("null") ? null : Timestamp.valueOf(parts[2]);

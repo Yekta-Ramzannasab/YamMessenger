@@ -42,6 +42,7 @@ public class MessageEntity {
         this.id = id;
         this.sentAt = new Timestamp(System.currentTimeMillis());
     }
+    public MessageEntity(){}
 
     public long getId() {
         return id;
@@ -138,4 +139,73 @@ public class MessageEntity {
         this.searchRank = searchRank;
     }
 
+    public String toString() {
+        // برای سادگی، آبجکت‌های sender و chat را با ID آن‌ها نمایش می‌دهیم
+        // و تاریخ را به میلی‌ثانیه تبدیل می‌کنیم که یک عدد ساده باشد.
+        long senderId = (sender != null) ? sender.getId() : 0;
+        long chatId = (chat != null) ? chat.getChatId() : 0;
+        long sentAtMillis = (sentAt != null) ? sentAt.getTime() : 0;
+
+        return id + "," +
+                senderId + "," +
+                chatId + "," +
+                text + "," +
+                type + "," +
+                reply + "," +
+                forward + "," +
+                isEdited + "," +
+                isDeleted + "," +
+                status + "," +
+                sentAtMillis + "," +
+                searchRank;
+    }
+    public static MessageEntity fromString(String data) {
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
+
+        // هشدار: این روش بسیار شکننده است. اگر متن پیام (text) حاوی کاما باشد، این کد به درستی کار نخواهد کرد.
+        String[] parts = data.split(",", 12);
+        if (parts.length != 12) {
+            System.err.println("Invalid MessageEntity string format. Expected 12 parts, got " + parts.length);
+            return null;
+        }
+
+        try {
+            MessageEntity entity = new MessageEntity();
+            entity.setId(Long.parseLong(parts[0]));
+
+            // آبجکت‌های Users و Chat را نمی‌توانیم کامل بازسازی کنیم.
+            // پس یک آبجکت موقت فقط با ID می‌سازیم.
+            Users sender = new Users();
+            sender.setId(Long.parseLong(parts[1]));
+            entity.setSender(sender);
+
+            Chat chat = new Chat();
+            chat.setChatId(Long.parseLong(parts[2]));
+            entity.setChat(chat);
+
+            entity.setText(parts[3]);
+            entity.setType(MessageType.valueOf(parts[4]));
+            entity.setReply(Long.parseLong(parts[5]));
+            entity.setForward(Long.parseLong(parts[6]));
+            entity.setEdited(Boolean.parseBoolean(parts[7]));
+            entity.setDeleted(Boolean.parseBoolean(parts[8]));
+            entity.setStatus(MessageStatus.valueOf(parts[9]));
+
+            long sentAtMillis = Long.parseLong(parts[10]);
+            entity.setSentAt(new Timestamp(sentAtMillis));
+
+            entity.setSearchRank(Double.parseDouble(parts[11]));
+
+            return entity;
+
+        } catch (Exception e) {
+            System.err.println("Failed to parse MessageEntity from string: " + data + " | Error: " + e.getMessage());
+            return null;
+        }
+    }
+    //</editor-fold>
 }
+
+
