@@ -331,7 +331,7 @@ public class ClientHandler implements Runnable {
                                 MessageDto messageDto =
                                         gson.fromJson(payload, MessageDto.class);
 
-                                // ۳. استخراج اطلاعات لازم از DTO
+                                // Extracting the necessary information from the DTO
                                 long chatId = messageDto.getChatId();
                                 long senderId = messageDto.getSenderId();
                                 String text = messageDto.getText();
