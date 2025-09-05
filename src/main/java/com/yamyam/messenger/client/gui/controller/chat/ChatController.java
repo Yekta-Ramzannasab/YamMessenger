@@ -315,16 +315,16 @@ public class ChatController implements Initializable {
                     // Also set rawEntity to be found in the next search
                     newItem.setRawEntity(u);
 
-                    // آیتم جدید را به ابتدای لیست چت‌ها اضافه کن
+                    // Add the new item to the top of the chat list
                     allChats.add(0, newItem);
 
-                    // آیتم جدید را در chatList انتخاب کن
+                    // Select the new item in the chatList
                     chatList.getSelectionModel().select(newItem);
-                    chatList.scrollTo(0); // اسکرول به بالای لیست
+                    chatList.scrollTo(0);
                 }
             }
 
-            // بعد از انتخاب یا ایجاد چت، فیلد جستجو را پاک کن و نتایج را مخفی کن
+            // After selecting or creating a chat, clear the search field and hide the results
             searchField.clear();
             searchResults.getItems().clear();
         });
