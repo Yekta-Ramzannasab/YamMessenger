@@ -81,15 +81,4 @@ public class NetworkChatServiceAdapter implements ChatService {
         System.out.println("Adapter: Delegating message sending to NetworkService...");
         this.networkService.sendChatMessage(chatId, text);
     }
-
-//    @Override
-//    public void sendMessage(long chatId, String text) {
-//        // The adapter simply hands the request to the corresponding method on the NetworkService
-//        try {
-//            NetworkService.sendChatMessage(chatId, text);
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to send message", e);
-//        }
-//    }
-
 }
