@@ -1,4 +1,6 @@
-package com.yamyam.messenger.shared.model;
+package com.yamyam.messenger.shared.model.user;
+
+import com.yamyam.messenger.shared.model.UserProfile;
 
 import java.sql.Timestamp;
 

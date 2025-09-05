@@ -2,7 +2,7 @@ package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.util.AppSession;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.user.Users;
 import com.yamyam.messenger.shared.util.PageNavigator;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

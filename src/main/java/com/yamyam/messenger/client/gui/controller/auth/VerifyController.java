@@ -3,13 +3,12 @@ package com.yamyam.messenger.client.gui.controller.auth;
 import com.yamyam.messenger.client.gui.controller.chat.ProfileController;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.util.PageNavigator;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.user.Users;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import com.yamyam.messenger.client.util.AppSession;
-import com.yamyam.messenger.shared.model.UserProfile;
 
 import java.io.IOException;
 

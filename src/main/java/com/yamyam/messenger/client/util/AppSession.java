@@ -1,7 +1,6 @@
 package com.yamyam.messenger.client.util;
 
-import com.yamyam.messenger.shared.model.UserProfile;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.user.Users;
 
 import java.util.concurrent.atomic.AtomicReference; // این import را اضافه کن
 

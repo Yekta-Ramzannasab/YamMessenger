@@ -1,11 +1,8 @@
 package com.yamyam.messenger.server.database;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.user.Users;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

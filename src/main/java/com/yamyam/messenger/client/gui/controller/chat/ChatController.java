@@ -13,10 +13,10 @@ import com.yamyam.messenger.client.network.service.SearchService;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
 import com.yamyam.messenger.server.database.DataManager;
-import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.database.Search;
 import com.yamyam.messenger.server.database.SearchResult;
 import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.user.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
@@ -28,7 +28,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,9 +35,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import static com.yamyam.messenger.client.network.dto.SearchKind.*;
-import static com.yamyam.messenger.client.util.ServiceLocator.search;
 
 public class ChatController implements Initializable {
 

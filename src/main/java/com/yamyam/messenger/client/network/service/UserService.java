@@ -1,6 +1,7 @@
 package com.yamyam.messenger.client.network.service;
 
 import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.user.Users;
 
 import java.util.List;
 

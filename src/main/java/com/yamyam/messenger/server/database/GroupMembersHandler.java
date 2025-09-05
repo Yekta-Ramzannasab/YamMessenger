@@ -2,7 +2,7 @@ package com.yamyam.messenger.server.database;
 
 import com.yamyam.messenger.shared.model.GroupChat;
 import com.yamyam.messenger.shared.model.GroupMembers;
-import com.yamyam.messenger.shared.model.Users;
+import com.yamyam.messenger.shared.model.user.Users;
 
 import java.sql.SQLException;
 
