@@ -29,6 +29,7 @@ module com.yam.messenger {
     // Exposes public types in this package to other modules at compile-time and runtime
     // Useful for sharing APIs or libraries with external module
     exports com.yamyam.messenger.client.gui;
+    exports com.yamyam.messenger.client.network.dto;
     exports com.yamyam.messenger.server.database;
     exports com.yamyam.messenger.shared.util;
     exports com.yamyam.messenger.shared.model;
