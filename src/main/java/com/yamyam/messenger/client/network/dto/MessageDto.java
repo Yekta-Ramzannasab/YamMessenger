@@ -11,4 +11,16 @@ public class MessageDto {
         this.senderId = senderId;
         this.text = text;
     }
+
+    public long getChatId() {
+        return chatId;
+    }
+
+    public long getSenderId() {
+        return senderId;
+    }
+
+    public String getText() {
+        return text;
+    }
 }
