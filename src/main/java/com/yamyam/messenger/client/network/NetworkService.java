@@ -144,24 +144,25 @@ public class NetworkService {
 
     public List<Chat> fetchMyChatList(String email) {
         try {
-            // Request for chat list
-            Message message = new Message(3 , email, "GET_CHATS");
+            Message message = new Message(21, email, "GET_CHATS");
             sendJsonMessage(message);
 
-            // Reading response
             Message response = receiveJsonMessage();
 
             if(response != null){
-                String chatsJson = response.getContent();
-                Gson gson = new Gson();
+                String chatsData = response.getContent();
+                List<Chat> chats = new ArrayList<>();
 
-                // Use TypeToken to tell Gson to expect a list of type Chat
-                Type chatListType = new TypeToken<ArrayList<Chat>>() {}.getType();
 
-                // Convert json string to a real list
-                return gson.fromJson(chatsJson, chatListType);
-            }else
-                return null;
+                String[] lines = chatsData.split("\n");
+                for (String line : lines) {
+                    Chat chat = Chat.fromString(line);
+                    if (chat != null) {
+                        chats.add(chat);
+                    }
+                }
+                return chats;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

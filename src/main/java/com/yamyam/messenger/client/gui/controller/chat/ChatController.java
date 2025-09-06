@@ -708,7 +708,7 @@ public class ChatController implements Initializable {
         } else if (c.rawEntity instanceof Chat chat) {
             showChatInfo(chat);
         } else {
-           
+
             infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
             infoName.setText(c.title);
             infoPresence.setText(status);
