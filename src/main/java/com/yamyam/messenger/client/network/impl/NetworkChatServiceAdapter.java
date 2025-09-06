@@ -12,6 +12,7 @@ import com.yamyam.messenger.shared.model.user.Users;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 public class NetworkChatServiceAdapter implements ChatService {
@@ -90,14 +91,11 @@ public class NetworkChatServiceAdapter implements ChatService {
     }
 
     public List<Chat> getAllChats(long userId) {
-        List<Chat> chats;
-        Users user = null;
         try {
-            user = Database.loadUser(userId);
-            chats = net.fetchMyChatList(user.getEmail());
+            return DataManager.getInstance().getAllChatsForUser(userId);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.err.println("❌ Failed to get chats: " + e.getMessage());
+            return Collections.emptyList();
         }
-        return chats;
     }
 }
