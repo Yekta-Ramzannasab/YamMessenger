@@ -122,7 +122,7 @@
     <StackPane fx:id="menuOverlay"
                styleClass="menu-overlay"
                visible="false" managed="false"
-               maxWidth="280" maxHeight="260"
+               maxWidth="280" maxHeight="320"
                StackPane.alignment="CENTER">
 
         <VBox spacing="10" alignment="TOP_CENTER" styleClass="menu-content">
@@ -134,8 +134,8 @@
                         styleClass="menu-close-btn"/>
             </HBox>
 
-            <Label text="My Profile"      onMouseClicked="#openSettings"/>
-            <Label text="Themes"          onMouseClicked="#openSettings"/>
+            <Label text="My Profile"      onMouseClicked="#openMyProfile"/>
+            <Label text="Themes"          onMouseClicked="#openThemes"/>
             <Label text="Create Channel"  onMouseClicked="#openCreateChannel"/>
             <Label text="Create Group"    onMouseClicked="#openCreateGroup"/>
             <Label text="Contacts"        onMouseClicked="#openContacts"/>
