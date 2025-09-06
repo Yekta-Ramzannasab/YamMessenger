@@ -25,7 +25,6 @@ public class Database {
         String user = System.getenv("DB_USER");
         String password = System.getenv("DB_PASSWORD");
 
-// مقدار پیش‌فرض برای تست لوکال
         if (url == null || url.isBlank()) {
             url = "jdbc:postgresql://localhost:5432/YAM";
         }
@@ -40,6 +39,7 @@ public class Database {
             throw new RuntimeException("Database environment variables (DB_URL, DB_USER, DB_PASSWORD) are not set!");
         }
 
+//
 //        if (url == null || url.isBlank()) {
 //            url = "jdbc:postgresql://localhost:5432/yam_messenger_db";
 //        }
