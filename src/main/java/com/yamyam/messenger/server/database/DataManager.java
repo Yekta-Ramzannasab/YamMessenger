@@ -27,6 +27,9 @@ public class DataManager {
     private final Map<String, ChannelSubscribers> subscriptionCache = new HashMap<>();
     private final Map<Long, GroupChat> groupChatCache = new HashMap<>();
     private final Map<String, GroupMembers> groupMemberCache = new HashMap<>();
+    private final Map<String, Boolean> membershipCache = new HashMap<>();
+    private final Object cacheLock = new Object();
+
 
 
     // Private constructor to enforce singleton
@@ -298,6 +301,7 @@ public class DataManager {
         groupChatCache.put(groupChat.getChatId(), groupChat);
         return groupChat;
     }
+    /*
 
     public GroupMembers getOrJoinGroupMember(GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
         String key = groupChat.getChatId() + "_" + member.getId();
@@ -306,10 +310,34 @@ public class DataManager {
             return groupMemberCache.get(key);
         }
 
-        GroupMembers groupMember = GroupMembersHandler.getInstance().checkOrJoinUser(groupChat, member, invitedBy);
+        GroupMembers groupMember = GroupMembersHandler.getInstance().joinUser(groupChat, member, invitedBy);
         groupMemberCache.put(key, groupMember);
         return groupMember;
     }
+    public boolean isUserMemberOfChat(long chatId, long userId, ChatType chatType) throws SQLException {
+        String cacheKey = "member_" + chatId + "_" + userId + "_" + chatType;
+
+        synchronized (cacheLock) {
+            Boolean cachedResult = membershipCache.get(cacheKey);
+            if (cachedResult != null) {
+                return cachedResult;
+            }
+        }
+
+        boolean isMember = switch (chatType) {
+            case GROUP_CHAT -> Database.checkMemberGroup(chatId, userId);
+            case CHANNEL -> Database.isMemberChannel(chatId, userId);
+            case PRIVATE_CHAT -> true;
+        };
+        synchronized (cacheLock) {
+            membershipCache.put(cacheKey, isMember);
+        }
+
+        return isMember;
+    }
+
+     */
+
 
 
 }
