@@ -718,7 +718,7 @@ public class ChatController implements Initializable {
             mediaGrid.getChildren().clear();
         }
 
-        messageList.setItems(FXCollections.observableArrayList());
+        messageList.setItems(c.messages);
     }
     /* -----* *------
        Current app flow helper:
