@@ -20,7 +20,7 @@ public class PrivateChatHandler {
             System.out.println("not exit");
         }
 
-        long chatId = Database.createChat();
+        long chatId = Database.createChat("private");
         System.out.println("🆕 Creating new private chat with chatId=" + chatId);
 
         return Database.createPrivateChat(chatId, user1, user2);

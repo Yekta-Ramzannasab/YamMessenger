@@ -2,17 +2,24 @@ package com.yamyam.messenger.client.network.impl;
 
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.service.ChatService;
+import com.yamyam.messenger.server.database.DataManager;
+import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.shared.model.chat.Channel;
 import com.yamyam.messenger.shared.model.chat.Chat;
 import com.yamyam.messenger.shared.model.chat.GroupChat;
 import com.yamyam.messenger.shared.model.chat.PrivateChat;
+import com.yamyam.messenger.shared.model.user.Users;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 public class NetworkChatServiceAdapter implements ChatService {
     private final NetworkService net;
-    public NetworkChatServiceAdapter(NetworkService net) { this.net = net; }
+
+    public NetworkChatServiceAdapter(NetworkService net) {
+        this.net = net;
+    }
 
     @Override
     public void openChat(long meUserId, long targetUserId) {
@@ -30,6 +37,7 @@ public class NetworkChatServiceAdapter implements ChatService {
             return List.of();
         }
     }
+
     @Override
     public List<Chat> getGroupAndChannelChatsForUser(String email) {
         try {
@@ -39,6 +47,7 @@ public class NetworkChatServiceAdapter implements ChatService {
             return List.of();
         }
     }
+
     @Override
     public PrivateChat getOrCreatePrivateChat(long meUserId, long otherUserId) {
         try {
@@ -53,11 +62,12 @@ public class NetworkChatServiceAdapter implements ChatService {
     public Channel getChannelByChatId(long chatId) {
         try {
             return net.fetchChannelById(chatId);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
+
     @Override
     public GroupChat getOrCreateGroupChat(String name, String description, long creatorId, boolean isPrivate) {
         try {
@@ -77,5 +87,17 @@ public class NetworkChatServiceAdapter implements ChatService {
         // Calling a hypothetical method in NetworkService
         System.out.println("Adapter: Delegating message sending to NetworkService...");
         this.net.sendChatMessage(chatId, text);
+    }
+
+    public List<Chat> getAllChats(long userId) {
+        List<Chat> chats;
+        Users user = null;
+        try {
+            user = Database.loadUser(userId);
+            chats = net.fetchMyChatList(user.getEmail());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return chats;
     }
 }

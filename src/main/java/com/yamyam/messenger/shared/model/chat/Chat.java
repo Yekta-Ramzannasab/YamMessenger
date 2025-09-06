@@ -2,21 +2,27 @@ package com.yamyam.messenger.shared.model.chat;
 
 import java.sql.Timestamp;
 
-public  class Chat {
+public class Chat {
     protected long chatId;
     protected Timestamp createdAt;
     protected ChatType type;
+    private String name;
     private double searchRank;
-
-    public Chat(long chatId, Timestamp createdAt, ChatType type){
+    // کانستراکتور کامل
+    public Chat(long chatId, Timestamp createdAt, ChatType type, String name) {
         this.chatId = chatId;
         this.createdAt = createdAt;
         this.type = type;
+        this.name = name;
     }
+
+
+    public Chat(long chatId, Timestamp createdAt, ChatType type) {
+        this(chatId, createdAt, type, null);
+    }
+
     public Chat() {
     }
-
-
 
     public long getChatId() {
         return chatId;
@@ -41,49 +47,64 @@ public  class Chat {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public double getSearchRank() {
         return searchRank;
     }
+
     public void setSearchRank(double searchRank) {
         this.searchRank = searchRank;
     }
+
     @Override
     public String toString() {
-        return chatId + "," + createdAt + "," + type + "," + searchRank  ;
+        return chatId + "|" +
+                (createdAt != null ? createdAt.getTime() : "null") + "|" +
+                type + "|" +
+                (name != null ? name.replace("|", "\\|") : "null") + "|" +
+                searchRank;
     }
+
     public static Chat fromString(String data) {
-        // ۱. ورودی null یا خالی را بررسی می‌کنیم
         if (data == null || data.trim().isEmpty()) {
             return null;
         }
 
-        // ۲. رشته را بر اساس کاما (,) به چهار بخش تقسیم می‌کنیم
-        String[] parts = data.split(",");
-        if (parts.length != 4) {
-            System.err.println("Invalid format for Chat string (expected 4 parts): " + data);
+        String[] parts = data.split("\\|", -1);
+        if (parts.length != 5) {
+            System.err.println("Invalid format for Chat string: " + data);
             return null;
         }
 
         try {
-            // ۳. هر بخش را به نوع داده مربوطه تبدیل می‌کنیم
-            long chatId = Long.parseLong(parts[0].trim());
-            Timestamp createdAt = Timestamp.valueOf(parts[1].trim());
-            ChatType type = ChatType.valueOf(parts[2].trim());
-            double searchRank = Double.parseDouble(parts[3].trim());
+            long chatId = Long.parseLong(parts[0]);
 
-            // ۴. آبجکت جدید را می‌سازیم
-            // این بخش فرض می‌کند شما یک کانستراکتور مناسب دارید
-            Chat chat = new Chat(chatId, createdAt, type);
-            // و یک setter برای searchRank
+            Timestamp createdAt = null;
+            if (!"null".equals(parts[1])) {
+                createdAt = new Timestamp(Long.parseLong(parts[1]));
+            }
+
+            ChatType type = ChatType.valueOf(parts[2]);
+
+            String name = "null".equals(parts[3]) ? null : parts[3].replace("\\|", "|");
+
+            double searchRank = Double.parseDouble(parts[4]);
+
+            Chat chat = new Chat(chatId, createdAt, type, name);
             chat.setSearchRank(searchRank);
-
             return chat;
 
-        } catch (IllegalArgumentException e) {
-            // این خطا انواع مختلفی از خطاهای پارس (عدد، تاریخ، enum) را مدیریت می‌کند
-            System.err.println("Failed to parse values from Chat string: " + data + " | Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Failed to parse Chat string: " + data);
             return null;
         }
     }
-
 }

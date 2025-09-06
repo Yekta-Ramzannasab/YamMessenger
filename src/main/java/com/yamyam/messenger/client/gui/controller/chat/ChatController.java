@@ -2,6 +2,7 @@ package com.yamyam.messenger.client.gui.controller.chat;
 
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.client.network.dto.ContactType;
 import com.yamyam.messenger.client.network.dto.SearchItem;
 import com.yamyam.messenger.client.network.dto.SearchKind;
 import com.yamyam.messenger.client.network.impl.NetworkChatServiceAdapter;
@@ -13,8 +14,12 @@ import com.yamyam.messenger.client.network.service.SearchService;
 import com.yamyam.messenger.client.util.AppSession;
 import com.yamyam.messenger.client.util.ServiceLocator;
 import com.yamyam.messenger.server.database.DataManager;
+import com.yamyam.messenger.server.database.Database;
 import com.yamyam.messenger.server.database.Search;
 import com.yamyam.messenger.server.database.SearchResult;
+import com.yamyam.messenger.shared.model.chat.Channel;
+import com.yamyam.messenger.shared.model.chat.Chat;
+import com.yamyam.messenger.shared.model.chat.GroupChat;
 import com.yamyam.messenger.shared.model.chat.PrivateChat;
 import com.yamyam.messenger.shared.model.message.MessageEntity;
 import com.yamyam.messenger.shared.model.user.UserProfile;
@@ -40,6 +45,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
 
 public class ChatController implements Initializable {
 
@@ -255,89 +261,76 @@ public class ChatController implements Initializable {
             searchResults.setItems(FXCollections.observableArrayList(userItems));
             searchResults.setPlaceholder(new Label("Nothing to show ..."));
         });
-
-
-//        searchResults.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
-//            if (sel == null || sel.kind() != SearchKind.USER || !(sel.rawEntity() instanceof Users u)) return;
-//
-//            showUserProfile(u);
-//
-//
-//            mediaGrid.getChildren().clear();
-//
-//            long meUserId = AppSession.requireUserId();
-//            ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
-//
-//            try {
-//                PrivateChat chat = net.getOrCreatePrivateChat(meUserId, u.getId());
-//                if (chat != null) {
-//                    String avatarUrl = u.getUserProfile().getProfileImageUrl();
-//                    Image avatar = (avatarUrl != null && !avatarUrl.isBlank())
-//                            ? new Image(avatarUrl)
-//                            : placeholder;
-//                    ChatItem item = ChatItem.fromContact(chat.toContact(u), avatar);
-//                    item.setRawEntity(DataManager.getInstance().getUser(u.getId()));
-//                    openChat(item);
-//                }
-//            } catch (SQLException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-
-        // inside setupSearchAndChatList() method
-
         searchResults.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
-            if (sel == null || sel.kind() != SearchKind.USER || !(sel.rawEntity() instanceof Users u)) {
+            if (sel == null) return;
+
+            // ✅ هندل یوزرها (بدون تغییر)
+            if (sel.kind() == SearchKind.USER && sel.rawEntity() instanceof Users u) {
+                showUserProfile(u);
+                mediaGrid.getChildren().clear();
+
+                long meUserId = AppSession.requireUserId();
+                long targetUserId = u.getId();
+
+                Optional<ChatItem> existingItem = allChats.stream()
+                        .filter(item -> item.rawEntity instanceof Users && ((Users) item.rawEntity).getId() == targetUserId)
+                        .findFirst();
+
+                if (existingItem.isPresent()) {
+                    System.out.println("✅ Chat with " + u.getUserProfile().getProfileName() + " already exists. Selecting it.");
+                    chatList.getSelectionModel().select(existingItem.get());
+                    chatList.scrollTo(existingItem.get());
+                } else {
+                    System.out.println("ℹ️ Creating a new chat with " + u.getUserProfile().getProfileName());
+                    ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
+                    PrivateChat chat = net.getOrCreatePrivateChat(meUserId, targetUserId);
+                    if (chat != null) {
+                        String avatarUrl = u.getUserProfile().getProfileImageUrl();
+                        Image avatar = (avatarUrl != null && !avatarUrl.isBlank())
+                                ? new Image(avatarUrl)
+                                : placeholder;
+
+                        ChatItem newItem = ChatItem.fromContact(chat.toContact(u), avatar);
+                        newItem.setRawEntity(u);
+                        allChats.add(0, newItem);
+                        chatList.getSelectionModel().select(newItem);
+                        chatList.scrollTo(0);
+                    }
+                }
+
+                searchField.clear();
+                searchResults.getItems().clear();
                 return;
             }
 
-            showUserProfile(u);
-            mediaGrid.getChildren().clear();
+            // ✅ هندل چت‌ها (اضافه‌شده)
+            if (sel.kind() == SearchKind.CHAT && sel.rawEntity() instanceof Chat c) {
+                System.out.println("💬 Selecting chat from search: " + c.getChatId() + " | " + c.getName());
 
-            long meUserId = AppSession.requireUserId();
-            long targetUserId = u.getId();
+                Optional<ChatItem> existingItem = allChats.stream()
+                        .filter(item -> item.rawEntity instanceof Chat && ((Chat) item.rawEntity).getChatId() == c.getChatId())
+                        .findFirst();
 
-            // Check if this chat already exists in the allChats list
-            Optional<ChatItem> existingItem = allChats.stream()
-                    .filter(item -> item.rawEntity instanceof Users && ((Users) item.rawEntity).getId() == targetUserId)
-                    .findFirst();
-
-            if (existingItem.isPresent()) {
-                // If there is a chat, just select it in the chatList
-                System.out.println("✅ Chat with " + u.getUserProfile().getProfileName() + " already exists. Selecting it.");
-                chatList.getSelectionModel().select(existingItem.get());
-                chatList.scrollTo(existingItem.get());
-            } else {
-                // If the chat does not exist, create a new chat and add it to the list
-                System.out.println("ℹ️ Creating a new chat with " + u.getUserProfile().getProfileName());
-                ChatService net = new NetworkChatServiceAdapter(NetworkService.getInstance());
-                PrivateChat chat = net.getOrCreatePrivateChat(meUserId, targetUserId);
-                if (chat != null) {
-                    // Create a new ChatItem from the user's information
-                    String avatarUrl = u.getUserProfile().getProfileImageUrl();
-                    Image avatar = (avatarUrl != null && !avatarUrl.isBlank())
-                            ? new Image(avatarUrl)
+                if (existingItem.isPresent()) {
+                    chatList.getSelectionModel().select(existingItem.get());
+                    chatList.scrollTo(existingItem.get());
+                } else {
+                    Contact contact = buildContactFromChat(c);
+                    Image avatar = (contact.avatarUrl() != null && !contact.avatarUrl().isBlank())
+                            ? new Image(contact.avatarUrl())
                             : placeholder;
 
-                    ChatItem newItem = ChatItem.fromContact(chat.toContact(u), avatar);
-
-                    // Also set rawEntity to be found in the next search
-                    newItem.setRawEntity(u);
-
-                    // Add the new item to the top of the chat list
+                    ChatItem newItem = ChatItem.fromContact(contact, avatar);
+                    newItem.setRawEntity(c);
                     allChats.add(0, newItem);
-
-                    // Select the new item in the chatList
                     chatList.getSelectionModel().select(newItem);
                     chatList.scrollTo(0);
                 }
+
+                searchField.clear();
+                searchResults.getItems().clear();
             }
-
-            // After selecting or creating a chat, clear the search field and hide the results
-            searchField.clear();
-            searchResults.getItems().clear();
         });
-
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
             if (sel == null) {
                 System.out.println("⚠️ No chat item selected");
@@ -379,6 +372,40 @@ public class ChatController implements Initializable {
             }
         });
     }
+    private Contact buildContactFromChat(Chat c) {
+        String title = c.getName();
+        String avatarUrl = null;
+        Integer memberCount = null;
+        ContactType type;
+
+        switch (c.getType()) {
+            case PRIVATE_CHAT -> type = ContactType.DIRECT;
+            case GROUP_CHAT -> {
+                type = ContactType.GROUP;
+                if (c instanceof GroupChat g) {
+                    avatarUrl = g.getGroupAvatarUrl();
+                    memberCount = g.getMemberCount();
+                }
+            }
+            case CHANNEL -> {
+                type = ContactType.CHANNEL;
+                if (c instanceof Channel ch) {
+                    avatarUrl = ch.getChannelAvatarUrl();
+                    memberCount = ch.getSubscriberCount();
+                }
+            }
+            default -> throw new IllegalStateException("Unknown chat type: " + c.getType());
+        }
+
+        return new Contact(
+                c.getChatId(),
+                title,
+                avatarUrl,
+                false,
+                type,
+                memberCount
+        );
+    }
     private void showUserProfile(Users u) {
         UserProfile p = u.getUserProfile();
 
@@ -394,22 +421,87 @@ public class ChatController implements Initializable {
         return results.stream()
                 .map(result -> {
                     Object entity = result.getEntity();
-                    Users u = toUsers(entity);
-                    if (u == null) return null;
 
-                    UserProfile p = u.getUserProfile();
-                    return new SearchItem(
-                            p != null ? p.getProfileName() : u.getEmail(),
-                            u.getEmail(),
-                            p != null ? p.getProfileImageUrl() : null,
-                            SearchKind.USER,
-                            u
-                    );
+
+                    if (entity instanceof Users u) {
+                        UserProfile p = u.getUserProfile();
+                        String profileName = p != null ? p.getProfileName() : null;
+                        String email = u.getEmail();
+
+
+                        if ((profileName != null && !profileName.isBlank()) ||
+                                (email != null && !email.isBlank())) {
+
+                            return new SearchItem(
+                                    profileName != null ? profileName : email,
+                                    email != null ? email : "No email",
+                                    p != null ? p.getProfileImageUrl() : null,
+                                    SearchKind.USER,
+                                    u
+                            );
+                        }
+                        return null;
+                    }
+
+
+                    if (entity instanceof Chat c) {
+                        String title = null;
+                        String subtitle = null;
+                        String avatarUrl = null;
+
+                        if (c instanceof Channel ch) {
+                            title = ch.getChannelName();
+                            subtitle = "Channel";
+                            avatarUrl = ch.getChannelAvatarUrl();
+                        } else if (c instanceof GroupChat g) {
+                            title = g.getGroupName();
+                            subtitle = "Group";
+                            avatarUrl = g.getGroupAvatarUrl();
+                        }
+
+                        if (title != null && !title.isBlank()) {
+                            return new SearchItem(
+                                    title,
+                                    subtitle != null ? subtitle : "Chat",
+                                    avatarUrl,
+                                    SearchKind.CHAT,
+                                    c
+                            );
+                        }
+                        return null;
+                    }
+
+                    return null;
                 })
                 .filter(Objects::nonNull)
+                .filter(item -> item.title() != null && !item.title().isBlank())
+                .filter(item -> !item.title().equals("Unknown"))
                 .toList();
     }
+    private void showChatInfo(Chat chat) {
+        if (chat instanceof Channel channel) {
 
+            infoAvatar.setImage(channel.getChannelAvatarUrl() != null ?
+                    new Image(channel.getChannelAvatarUrl()) : placeholder);
+            infoName.setText(channel.getChannelName() != null ? channel.getChannelName() : "No name");
+            infoBio.setText(channel.getDescription() != null ? channel.getDescription() : "No description");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            infoPresence.setText("Channel • " + channel.getSubscriberCount() + " subscribers");
+
+        } else if (chat instanceof GroupChat group) {
+
+            infoAvatar.setImage(group.getGroupAvatarUrl() != null ?
+                    new Image(group.getGroupAvatarUrl()) : placeholder);
+            infoName.setText(group.getGroupName() != null ? group.getGroupName() : "No name");
+            infoBio.setText(group.getDescription() != null ? group.getDescription() : "No description");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            infoPresence.setText("Group • " + group.getMemberCount() + " members");
+        }
+
+        mediaGrid.getChildren().clear();
+    }
     /* ================== Messages ================== */
 
     /* -----* *------
@@ -600,21 +692,6 @@ public class ChatController implements Initializable {
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
     private void openChat(ChatItem c) {
-        // اگر هیچ چتی انتخاب نشده باشد (c is null)، رابط کاربری را پاک می‌کنیم
-        if (c == null) {
-            headerAvatar.setImage(placeholder);
-            headerName.setText("Select a chat");
-            headerStatus.setText("");
-
-            infoAvatar.setImage(placeholder);
-            infoName.setText("");
-            infoPresence.setText("");
-
-            messageList.setItems(null); // لیست پیام‌ها را خالی می‌کنیم
-            return;
-        }
-
-        // به‌روزرسانی هدر بالای صفحه چت
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
@@ -625,19 +702,24 @@ public class ChatController implements Initializable {
         };
         headerStatus.setText(status);
 
-        // به‌روزرسانی پنل اطلاعات کاربر در سمت راست
-        infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
-        infoName.setText(c.title);
-        infoPresence.setText(status);
 
-        // *** مهم‌ترین تغییر اینجاست ***
-        // ListView را مستقیماً به لیست پیام‌های موجود در آبجکت ChatItem متصل می‌کنیم.
+        if (c.rawEntity instanceof Users user) {
+            showUserProfile(user);
+        } else if (c.rawEntity instanceof Chat chat) {
+            showChatInfo(chat);
+        } else {
+
+            infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
+            infoName.setText(c.title);
+            infoPresence.setText(status);
+            infoBio.setText("");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            mediaGrid.getChildren().clear();
+        }
+
         messageList.setItems(c.messages);
-
-        // لاگ برای دیباگ کردن
-        System.out.println("✅ Chat UI updated for: " + c.title + " | Message list is now correctly bound.");
     }
-
     /* -----* *------
        Current app flow helper:
        - Reads contacts via ServiceLocator and injects them using the public API.

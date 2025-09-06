@@ -144,24 +144,25 @@ public class NetworkService {
 
     public List<Chat> fetchMyChatList(String email) {
         try {
-            // Request for chat list
-            Message message = new Message(3 , email, "GET_CHATS");
+            Message message = new Message(21, email, "GET_CHATS");
             sendJsonMessage(message);
 
-            // Reading response
             Message response = receiveJsonMessage();
 
             if(response != null){
-                String chatsJson = response.getContent();
-                Gson gson = new Gson();
+                String chatsData = response.getContent();
+                List<Chat> chats = new ArrayList<>();
 
-                // Use TypeToken to tell Gson to expect a list of type Chat
-                Type chatListType = new TypeToken<ArrayList<Chat>>() {}.getType();
 
-                // Convert json string to a real list
-                return gson.fromJson(chatsJson, chatListType);
-            }else
-                return null;
+                String[] lines = chatsData.split("\n");
+                for (String line : lines) {
+                    Chat chat = Chat.fromString(line);
+                    if (chat != null) {
+                        chats.add(chat);
+                    }
+                }
+                return chats;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -239,7 +240,7 @@ public class NetworkService {
 
         return List.of();
     }
-    public List<Users> fetchSearchResults(String query, String email) throws IOException {
+    public List<SearchResult> fetchSearchResults(String query, String email) throws IOException {
         Message request = new Message(12, email, query);
         sendJsonMessage(request);
 
@@ -263,7 +264,7 @@ public class NetworkService {
         System.out.println("📦 Received " + lines.length + " raw line(s)");
         Arrays.stream(lines).forEach(line -> System.out.println(" - " + line));
 
-        List<Users> results = Arrays.stream(lines)
+        List<SearchResult> results = Arrays.stream(lines)
                 .map(SearchResult::fromString)
                 .filter(Objects::nonNull)
                 .toList();
@@ -271,6 +272,7 @@ public class NetworkService {
         System.out.println("✅ Converted to " + results.size() + " SearchResult(s)");
         return results;
     }
+
     public Users fetchUserById(long userId) throws IOException {
         Message request = new Message(13,"system",String.valueOf(userId));
         sendJsonMessage(request);
