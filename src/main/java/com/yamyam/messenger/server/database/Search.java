@@ -1,6 +1,7 @@
 package com.yamyam.messenger.server.database;
 
-import com.yamyam.messenger.shared.model.*;
+import com.yamyam.messenger.shared.model.chat.Chat;
+import com.yamyam.messenger.shared.model.user.Users;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -19,20 +20,14 @@ public class Search {
         // users
         dataManager.searchUsers(query).forEach(u -> {
             results.add(new SearchResult(u, u.getSearchRank()));
-
         });
 
-        // chats
+        // chats (group + channel)
         dataManager.searchChats(query, userId).forEach(c -> {
             results.add(new SearchResult(c, c.getSearchRank()));
         });
 
-        // messages
-        dataManager.searchMessages(query, userId).forEach(m -> {
-            results.add(new SearchResult(m, m.getSearchRank()));
-        });
-
-        // sort by rank
+        // sort by rank descending
         results.sort(Comparator.comparing(SearchResult::getRank).reversed());
 
         return results;
