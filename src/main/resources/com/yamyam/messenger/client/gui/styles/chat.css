@@ -297,3 +297,12 @@
   -fx-font-weight: bold;
   -fx-cursor: hand;
 }
+.chat-info__members {
+    -fx-text-fill: #666;
+    -fx-font-size: 13px;
+}
+
+.chat-info__description {
+    -fx-wrap-text: true;
+    -fx-text-alignment: justify;
+}

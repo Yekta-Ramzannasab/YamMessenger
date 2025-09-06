@@ -478,6 +478,30 @@ public class ChatController implements Initializable {
                 .filter(item -> !item.title().equals("Unknown"))
                 .toList();
     }
+    private void showChatInfo(Chat chat) {
+        if (chat instanceof Channel channel) {
+
+            infoAvatar.setImage(channel.getChannelAvatarUrl() != null ?
+                    new Image(channel.getChannelAvatarUrl()) : placeholder);
+            infoName.setText(channel.getChannelName() != null ? channel.getChannelName() : "No name");
+            infoBio.setText(channel.getDescription() != null ? channel.getDescription() : "No description");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            infoPresence.setText("Channel • " + channel.getSubscriberCount() + " subscribers");
+
+        } else if (chat instanceof GroupChat group) {
+
+            infoAvatar.setImage(group.getGroupAvatarUrl() != null ?
+                    new Image(group.getGroupAvatarUrl()) : placeholder);
+            infoName.setText(group.getGroupName() != null ? group.getGroupName() : "No name");
+            infoBio.setText(group.getDescription() != null ? group.getDescription() : "No description");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            infoPresence.setText("Group • " + group.getMemberCount() + " members");
+        }
+
+        mediaGrid.getChildren().clear();
+    }
     /* ================== Messages ================== */
 
     /* -----* *------
@@ -668,7 +692,6 @@ public class ChatController implements Initializable {
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
     private void openChat(ChatItem c) {
-
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
@@ -679,19 +702,24 @@ public class ChatController implements Initializable {
         };
         headerStatus.setText(status);
 
-        infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
-        infoName.setText(c.title);
-        infoPresence.setText(status);
+
+        if (c.rawEntity instanceof Users user) {
+            showUserProfile(user);
+        } else if (c.rawEntity instanceof Chat chat) {
+            showChatInfo(chat);
+        } else {
+           
+            infoAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
+            infoName.setText(c.title);
+            infoPresence.setText(status);
+            infoBio.setText("");
+            infoUsername.setText("");
+            infoEmail.setText("");
+            mediaGrid.getChildren().clear();
+        }
 
         messageList.setItems(FXCollections.observableArrayList());
-        System.out.println("🧩 openChat called for: " + c.title);
-        System.out.println("🖼️ Avatar is " + (c.avatar != null ? "set" : "null"));
-        System.out.println("📛 Name: " + c.title);
-        System.out.println("📶 Status: " + headerStatus.getText());
-
-        System.out.println("✅ Chat UI updated for: " + c.title + " | Status: " + status);
     }
-
     /* -----* *------
        Current app flow helper:
        - Reads contacts via ServiceLocator and injects them using the public API.
