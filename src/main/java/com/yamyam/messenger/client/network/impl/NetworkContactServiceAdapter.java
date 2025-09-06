@@ -22,7 +22,7 @@ public class NetworkContactServiceAdapter implements ContactService {
 
     @Override
     public List<Contact> getContacts(long meUserId) {
-        List<Chat> chats = NetworkService.fetchAllChatsForUser(meUserId);
+        List<Chat> chats = NetworkService.getInstance().fetchAllChatsForUser(meUserId);
         if (chats == null || chats.isEmpty()) return Collections.emptyList();
 
         List<Contact> contacts = new ArrayList<>();
