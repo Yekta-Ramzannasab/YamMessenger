@@ -354,7 +354,7 @@ public class NetworkService {
 
         return null;
     }
-    public static List<Chat> fetchAllChatsForUser(long userId) {
+    public List<Chat> fetchAllChatsForUser(long userId) {
         try {
             return DataManager.getInstance().getAllChatsForUser(userId);
         } catch (SQLException e) {
