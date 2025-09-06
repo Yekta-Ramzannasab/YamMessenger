@@ -239,7 +239,7 @@ public class NetworkService {
 
         return List.of();
     }
-    public List<Users> fetchSearchResults(String query, String email) throws IOException {
+    public List<SearchResult> fetchSearchResults(String query, String email) throws IOException {
         Message request = new Message(12, email, query);
         sendJsonMessage(request);
 
@@ -263,7 +263,7 @@ public class NetworkService {
         System.out.println("📦 Received " + lines.length + " raw line(s)");
         Arrays.stream(lines).forEach(line -> System.out.println(" - " + line));
 
-        List<Users> results = Arrays.stream(lines)
+        List<SearchResult> results = Arrays.stream(lines)
                 .map(SearchResult::fromString)
                 .filter(Objects::nonNull)
                 .toList();
@@ -271,6 +271,7 @@ public class NetworkService {
         System.out.println("✅ Converted to " + results.size() + " SearchResult(s)");
         return results;
     }
+
     public Users fetchUserById(long userId) throws IOException {
         Message request = new Message(13,"system",String.valueOf(userId));
         sendJsonMessage(request);
