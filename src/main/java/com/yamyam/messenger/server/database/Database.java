@@ -330,33 +330,7 @@ public class Database {
         }
     }
 
-    public static GroupChat loadGroupChat(long chatId) throws SQLException {
-        try (Connection connection = Database.getConnection()) {
-            String sql = "SELECT group_id, group_name, description, creator_id, is_private, created_at " +
-                    "FROM group_chats WHERE group_id = ?";
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setLong(1, chatId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                GroupChat groupChat = new GroupChat(
-                        rs.getLong("group_id"),
-                        rs.getString("group_name"),
-                        rs.getString("description"),
-                        rs.getLong("creator_id"),
-                        rs.getBoolean("is_private"),
-                        rs.getString("group_avatar_url")
-                );
-
-                groupChat.setCreatedAt(rs.getTimestamp("created_at"));
-
-                return groupChat;
-            }
-        }
-
-        return null;
-    }
     public static GroupMembers loadGroupMember(long chatId, long userId, GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
         try (Connection con = Database.getConnection()) {
             String sql = "SELECT role FROM group_members WHERE chat_id = ? AND user_id = ?";
@@ -396,8 +370,8 @@ public class Database {
 
     public static Channel loadChannel(long chatId) throws SQLException {
         try (Connection con = Database.getConnection()) {
-            String sql = "SELECT chat_id, channel_name, owner_id, is_private, description, created_at " +
-                    "FROM channels WHERE chat_id = ?";
+            String sql = "SELECT *" +
+                    "FROM channel WHERE chat_id = ?";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
@@ -412,7 +386,6 @@ public class Database {
                             rs.getString("description"),
                             rs.getString("avatar_url")
                     );
-                    channel.setCreatedAt(rs.getTimestamp("created_at"));
                     return channel;
                 }
             }
@@ -420,30 +393,42 @@ public class Database {
         return null;
     }
     public static Channel insertChannel(String name, long ownerId, boolean isPrivate, String description) throws SQLException {
-        long chatId = createChat();
+        long chatId = createChat("channel");
 
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO channels(chat_id, channel_name, owner_id, is_private, description, avatar_url) " +
-                    "VALUES (?, ?, ?, ?, ?, ?) RETURNING created_at";
+            con.setAutoCommit(false); // برای atomic بودن عملیات
 
-            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            // 1. ثبت در جدول channel
+            String sqlChannel = """
+            INSERT INTO channel(chat_id, channel_name, description, owner_id, is_private, avatar_url)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
+
+            try (PreparedStatement stmt = con.prepareStatement(sqlChannel)) {
                 stmt.setLong(1, chatId);
                 stmt.setString(2, name);
-                stmt.setLong(3, ownerId);
-                stmt.setBoolean(4, isPrivate);
-                stmt.setString(5, description);
-                stmt.setString(6, null); // default avatar is null
+                stmt.setString(3, description);
+                stmt.setLong(4, ownerId);
+                stmt.setBoolean(5, isPrivate);
+                stmt.setString(6, null); // default avatar
 
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    Channel channel = new Channel(chatId, name, ownerId, isPrivate, description, null);
-                    channel.setCreatedAt(rs.getTimestamp("created_at"));
-                    return channel;
-                }
+                stmt.executeUpdate();
             }
-        }
 
-        throw new SQLException("Failed to insert channel");
+            // 2. مقداردهی فیلد name در جدول chat
+            String sqlUpdateChat = "UPDATE chat SET name = ? WHERE chat_id = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sqlUpdateChat)) {
+                stmt.setString(1, name);
+                stmt.setLong(2, chatId);
+                stmt.executeUpdate();
+            }
+
+            con.commit(); // همه‌چیز موفق بود
+
+            return new Channel(chatId, name, ownerId, isPrivate, description, null);
+        } catch (SQLException e) {
+            throw e;
+        }
     }
     public static ChannelSubscribers loadSubscription(long chatId, long userId, Channel channel) throws SQLException {
         try (Connection con = Database.getConnection()) {
@@ -481,10 +466,11 @@ public class Database {
         }
         throw new SQLException("Failed to insert subscription");
     }
-    public static long createChat() {
+    public static long createChat(String type) {
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO chat(chat_type) VALUES ('private') RETURNING chat_id";
+            String sql = "INSERT INTO chat(chat_type) VALUES (?) RETURNING chat_id";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setString(1,type);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     return rs.getLong("chat_id");
@@ -548,8 +534,8 @@ public class Database {
             }
 
             // --- Load Channels ---
-            String sqlChannel = "SELECT channel_id, channel_name, owner, is_private, description, created_at " +
-                    "FROM channels WHERE owner = ?";
+            String sqlChannel = "SELECT channel_id, channel_name, description,owner_id, is_private , created_at " +
+                    "FROM channels WHERE owner_id = ?";
             PreparedStatement stmtChannel = connection.prepareStatement(sqlChannel);
             stmtChannel.setLong(1, userId);
             ResultSet rsChannel = stmtChannel.executeQuery();
@@ -558,7 +544,7 @@ public class Database {
                     Channel ch = new Channel(
                             rsChannel.getLong("channel_id"),
                             rsChannel.getString("channel_name"),
-                            rsChannel.getLong("owner"),
+                            rsChannel.getLong("owner_id"),
                             rsChannel.getBoolean("is_private"),
                             rsChannel.getString("description"),
                             rsChannel.getString("avatar_url")
@@ -580,10 +566,10 @@ public class Database {
     public static List<Users> searchUsers(String query) throws SQLException {
         List<Users> results = new ArrayList<>();
         String sql = """
-    SELECT u.*, p.*, ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', p.search_vector, to_tsquery('simple', ?)) AS rank
+    SELECT u.*, p.*, ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', p.search_vector, plainto_tsquery('simple', ?)) AS rank
     FROM users u
     LEFT JOIN user_profiles p ON u.user_id = p.user_id
-    WHERE p.search_vector @@ to_tsquery('simple', ?)
+    WHERE p.search_vector @@ plainto_tsquery('simple', ?)
     ORDER BY rank DESC
     LIMIT 20
 """;
@@ -643,16 +629,77 @@ public class Database {
 
     public static List<Chat> searchChats(String query, long userId) throws SQLException {
         List<Chat> results = new ArrayList<>();
-        String sql = "SELECT c.*, ts_rank_cd(c.search_vector, plainto_tsquery('simple', ?)) AS rank " +
-                "FROM chat c " +
-                "LEFT JOIN channel_subscribers cs ON c.chat_id = cs.chat_id " +
-                "WHERE c.search_vector @@ plainto_tsquery('simple', ?) " +
-                "ORDER BY rank DESC LIMIT 20";
 
+        // Query for searching users with fuzzy matching
+        String userSql = """
+        SELECT u.*, p.*,
+               GREATEST(
+                   ts_rank_cd(p.search_vector, to_tsquery('simple', ? || ':*')),
+                   CASE WHEN p.username ILIKE '%' || ? || '%' THEN 0.9 ELSE 0 END,
+                   CASE WHEN p.profile_name ILIKE '%' || ? || '%' THEN 0.8 ELSE 0 END,
+                   SIMILARITY(p.username, ?),
+                   SIMILARITY(p.profile_name, ?)
+               ) AS rank
+        FROM users u
+        LEFT JOIN user_profiles p ON u.user_id = p.user_id
+        WHERE p.search_vector @@ to_tsquery('simple', ? || ':*')
+           OR p.username ILIKE '%' || ? || '%'
+           OR p.profile_name ILIKE '%' || ? || '%'
+           OR p.username % ?
+           OR p.profile_name % ?
+        ORDER BY rank DESC
+        LIMIT 20
+    """;
+
+        // Query for searching groups and channels
+        String chatSql = """
+        SELECT 
+            c.*,
+            ch.channel_name,
+            ch.owner_id,
+            ch.is_private,
+            ch.description,
+            ch.avatar_url,
+            gc.group_name,
+            gc.description AS group_description,
+            gc.creator_id,
+            gc.is_private AS group_is_private,
+            gc.group_avatar_url,
+            ts_rank_cd(c.search_vector, to_tsquery('simple', ? || ':*')) AS rank
+        FROM chat c
+        LEFT JOIN channel ch ON c.chat_id = ch.chat_id AND c.chat_type = 'channel'
+        LEFT JOIN group_chat gc ON c.chat_id = gc.chat_id AND c.chat_type = 'group'
+        WHERE c.chat_type IN ('channel', 'group')
+          AND c.search_vector @@ to_tsquery('simple', ? || ':*')
+        ORDER BY rank DESC
+        LIMIT 10
+    """;
+
+        // Search for users and convert to PrivateChat objects
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(userSql)) {
+
+            // Set all 10 parameters for user search
+            for (int i = 1; i <= 10; i++) {
+                stmt.setString(i, query);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Users user = buildUserFromResultSet(rs);
+                PrivateChat privateChat = new PrivateChat(0, userId, user.getId());
+                privateChat.setSearchRank(rs.getDouble("rank"));
+                results.add(privateChat);
+            }
+        }
+
+        // Search for groups and channels
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(chatSql)) {
+
             stmt.setString(1, query);
             stmt.setString(2, query);
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Chat chat = buildChatFromResultSet(rs);
@@ -660,6 +707,10 @@ public class Database {
                 results.add(chat);
             }
         }
+
+        // Sort all results by rank (highest first)
+        results.sort((c1, c2) -> Double.compare(c2.getSearchRank(), c1.getSearchRank()));
+
         return results;
     }
     public static List<PrivateChat> getPrivateChatsByUserId(long userId) throws SQLException {
@@ -714,7 +765,7 @@ public class Database {
             }
         }
 
-        String channelSql = "SELECT c.chat_id, c.channel_name, c.owner, c.is_private, c.description " +
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.description , c.owner_id, c.is_private " +
                 "FROM channel c " +
                 "JOIN channel_subscribers cs ON c.chat_id = cs.channel_id " +
                 "WHERE cs.user_id = ?";
@@ -726,7 +777,7 @@ public class Database {
                         Channel channel = new Channel(
                                 rs.getLong("chat_id"),
                                 rs.getString("channel_name"),
-                                rs.getLong("owner"),
+                                rs.getLong("owner_id"),
                                 rs.getBoolean("is_private"),
                                 rs.getString("description"),
                                 rs.getString("avatar_url")
@@ -787,7 +838,7 @@ public class Database {
         }
 
         // --- Channels ---
-        String channelSql = "SELECT c.chat_id, c.channel_name, c.owner, c.is_private, c.description " +
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.description.,c.owner_id, c.is_private,  " +
                 "FROM channel c " +
                 "JOIN channel_subscribers cs ON c.chat_id = cs.channel_id " +
                 "WHERE cs.user_id = ?";
@@ -801,7 +852,7 @@ public class Database {
                     Channel channel = new Channel(
                             rs.getLong("chat_id"),
                             rs.getString("channel_name"),
-                            rs.getLong("owner"),
+                            rs.getLong("owner_id"),
                             rs.getBoolean("is_private"),
                             rs.getString("description"),
                             rs.getString(" avatar_url ")
@@ -843,23 +894,39 @@ public class Database {
     }
 
     public static Chat buildChatFromResultSet(ResultSet rs) throws SQLException {
+        String chatType = rs.getString("chat_type");
         Chat chat;
-        if ("PRIVATE_CHAT".equals(rs.getString("chat_type"))) {
-            chat = new PrivateChat(
-                    rs.getLong("chat_id"),
-                    rs.getLong("user1"),
-                    rs.getLong("user2")
-            );
-        } else {
+
+        if ("channel".equals(chatType)) {
             chat = new Channel(
                     rs.getLong("chat_id"),
                     rs.getString("channel_name"),
-                    rs.getLong("owner"),
+                    rs.getLong("owner_id"),
                     rs.getBoolean("is_private"),
                     rs.getString("description"),
                     rs.getString("avatar_url")
             );
+        } else if ("group".equals(chatType)) {
+            chat = new GroupChat(
+                    rs.getLong("chat_id"),
+                    rs.getString("group_name"),
+                    rs.getString("group_description"),
+                    rs.getLong("creator_id"),
+                    rs.getBoolean("group_is_private"),
+                    rs.getString("group_avatar_url")
+            );
+        } else {
+
+            throw new SQLException("Unknown chat type: " + chatType);
         }
+
+
+        try {
+            chat.setCreatedAt(rs.getTimestamp("created_at"));
+        } catch (SQLException e) {
+
+        }
+
         return chat;
     }
 
@@ -880,11 +947,11 @@ public class Database {
         );
     }
     public static GroupChat insertGroupChat(String name, String description, long creatorId, boolean isPrivate) throws SQLException {
-        long chatId = createChat();
+        long chatId = createChat("group");
 
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO groups(chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) " +
-                    "VALUES (?, ?, ?, ?, now(), ?, ?) RETURNING created_at";
+            String sql = "INSERT INTO group_chat(chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) " +
+                    "VALUES (?, ?, ?, ?, now(), ?, ?)";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
@@ -894,16 +961,39 @@ public class Database {
                 stmt.setBoolean(5, isPrivate);
                 stmt.setString(6, null); // default avatar is null
 
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate, null);
-                    group.setCreatedAt(rs.getTimestamp("created_at"));
-                    return group;
-                }
+                stmt.executeUpdate();
+                GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate, null);
+
+                return group;
+            }
+        }
+    }
+    public static GroupChat loadGroupChat(long chatId) throws SQLException {
+        try (Connection connection = Database.getConnection()) {
+            String sql = "SELECT chat_id, group_name, description, creator_id, is_private, created_at,group_avatar_url " +
+                    "FROM group_chat WHERE chat_id = ?";
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setLong(1, chatId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                GroupChat groupChat = new GroupChat(
+                        rs.getLong("chat_id"),
+                        rs.getString("group_name"),
+                        rs.getString("description"),
+                        rs.getLong("creator_id"),
+                        rs.getBoolean("is_private"),
+                        rs.getString("group_avatar_url")
+                );
+
+                groupChat.setCreatedAt(rs.getTimestamp("created_at"));
+
+                return groupChat;
             }
         }
 
-        throw new SQLException("Failed to insert group chat");
+        return null;
     }
     public static void updateUserProfile(long userId, UserProfile profile) throws SQLException {
 
