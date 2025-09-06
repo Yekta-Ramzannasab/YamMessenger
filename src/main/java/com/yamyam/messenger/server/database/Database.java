@@ -566,10 +566,10 @@ public class Database {
     public static List<Users> searchUsers(String query) throws SQLException {
         List<Users> results = new ArrayList<>();
         String sql = """
-    SELECT u.*, p.*, ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', p.search_vector, plainto_tsquery('simple', ?)) AS rank
+    SELECT u.*, p.*, ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', p.search_vector, to_tsquery('simple', ?)) AS rank
     FROM users u
     LEFT JOIN user_profiles p ON u.user_id = p.user_id
-    WHERE p.search_vector @@ plainto_tsquery('simple', ?)
+    WHERE p.search_vector @@ to_tsquery('simple', ?)
     ORDER BY rank DESC
     LIMIT 20
 """;
@@ -630,30 +630,9 @@ public class Database {
     public static List<Chat> searchChats(String query, long userId) throws SQLException {
         List<Chat> results = new ArrayList<>();
 
-        // Query for searching users with fuzzy matching
-        String userSql = """
-        SELECT u.*, p.*,
-               GREATEST(
-                   ts_rank_cd(p.search_vector, to_tsquery('simple', ? || ':*')),
-                   CASE WHEN p.username ILIKE '%' || ? || '%' THEN 0.9 ELSE 0 END,
-                   CASE WHEN p.profile_name ILIKE '%' || ? || '%' THEN 0.8 ELSE 0 END,
-                   SIMILARITY(p.username, ?),
-                   SIMILARITY(p.profile_name, ?)
-               ) AS rank
-        FROM users u
-        LEFT JOIN user_profiles p ON u.user_id = p.user_id
-        WHERE p.search_vector @@ to_tsquery('simple', ? || ':*')
-           OR p.username ILIKE '%' || ? || '%'
-           OR p.profile_name ILIKE '%' || ? || '%'
-           OR p.username % ?
-           OR p.profile_name % ?
-        ORDER BY rank DESC
-        LIMIT 20
-    """;
-
         // Query for searching groups and channels
         String chatSql = """
-        SELECT 
+        SELECT\s
             c.*,
             ch.channel_name,
             ch.owner_id,
@@ -675,23 +654,6 @@ public class Database {
         LIMIT 10
     """;
 
-        // Search for users and convert to PrivateChat objects
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(userSql)) {
-
-            // Set all 10 parameters for user search
-            for (int i = 1; i <= 10; i++) {
-                stmt.setString(i, query);
-            }
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Users user = buildUserFromResultSet(rs);
-                PrivateChat privateChat = new PrivateChat(0, userId, user.getId());
-                privateChat.setSearchRank(rs.getDouble("rank"));
-                results.add(privateChat);
-            }
-        }
 
         // Search for groups and channels
         try (Connection conn = getConnection();
