@@ -58,4 +58,12 @@ public class GroupMembers {
     public void setRole(Role role) {
         this.role = role;
     }
+    @Override
+    public String toString() {
+        return groupChat.getChatId() + "," +
+                role.name() + "," +
+                member.getId() + "," +
+                invitedBy.getId() + "," +
+                joinedAt.getTime();
+    }
 }

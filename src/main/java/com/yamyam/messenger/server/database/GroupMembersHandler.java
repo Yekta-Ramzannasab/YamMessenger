@@ -16,9 +16,9 @@ public class GroupMembersHandler {
 
     private GroupMembersHandler() {}
 
-    public GroupMembers checkOrJoinUser(GroupChat groupChat, Users member, Users invitedBy) {
+    public GroupMembers JoinUser(GroupChat groupChat, Users member, Users invitedBy) {
         try {
-            GroupMembers existing = Database.loadGroupMember(groupChat.getChatId(), member.getId(), groupChat, member, invitedBy);
+            GroupMembers existing = Database.loadGroupMember(groupChat.getChatId(), member.getId());
             if (existing != null) return existing;
 
             return Database.insertGroupMember(groupChat.getChatId(), member.getId(), groupChat, member, invitedBy);

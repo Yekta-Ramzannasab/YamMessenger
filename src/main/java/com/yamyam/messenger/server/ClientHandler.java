@@ -275,39 +275,34 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(new Message(17, "Server", json));
                             break;
                         }
-                        /*
-                        case 18: {
-                            JsonObject payload = JsonParser.parseString(request.getContent()).getAsJsonObject();
-                            long chatId = payload.get("chatId").getAsLong();
-                            long memberId = payload.get("memberId").getAsLong();
-                            long invitedById = payload.get("invitedById").getAsLong();
 
-                            GroupChat groupChat;
-                            Users member;
-                            Users invitedBy;
-                            GroupMembers groupMember;
+                        case 18: {
+                            String content = request.getContent();
+                            String[] parts = content.split(",");
+
+                            long chatId = Long.parseLong(parts[0]);
+                            long memberId = Long.parseLong(parts[1]);
+                            long invitedById = Long.parseLong(parts[2]);
 
                             try {
+                                UserHandler userHandler = new UserHandler();
+                               // GroupChat groupChat = DataManager.getInstance().getOrCreateGroupChat(chatId);
+                                Users member = Database.loadUser(memberId);
+                                Users invitedBy = Database.loadUser(memberId);
 
-                                groupChat = DataManager.getInstance().getGroupChatById(chatId);
-                                member = UserHandler.getInstance().loadUserById(memberId);
-                                invitedBy = UserHandler.getInstance().loadUserById(invitedById);
+                             //   GroupMembers groupMember = DataManager.getInstance().getOrJoinGroupMember(groupChat, member, invitedBy);
 
+                                // ارسال به کلاینت با toString
+                              //  sendJsonMessage(new Message(18, "Server", groupMember.toString()));
 
-
-                                groupMember = DataManager.getInstance().getOrJoinGroupMember(groupChat, member, invitedBy);
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 sendJsonMessage(new Message(18, "Server", null));
-                                break;
                             }
 
-                            String json = gson.toJson(groupMember);
-                            sendJsonMessage(new Message(18, "Server", json));
                             break;
                         }
 
-                         */
                         case 19: {
                             long chatId = Long.parseLong(request.getContent());
 
