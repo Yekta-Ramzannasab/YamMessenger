@@ -314,37 +314,32 @@ public class ChatController implements Initializable {
             }
         });
 
-        // <--- CHANGE 2: This entire listener block has been replaced.
         // When a chat is selected from the list
         chatList.getSelectionModel().selectedItemProperty().addListener((o, oldSel, sel) -> {
-            // 1. Stop listening to the previously selected chat
+            // Stop listening to the previously selected chat
             if (oldSel != null) {
                 AppSession.stopListening(oldSel.contactId);
             }
 
+            // If no new chat is selected, do nothing.
             if (sel == null) {
                 activeChatId = -1;
                 System.out.println("⚠️ No chat item selected");
                 return;
             }
 
-            // 2. Start listening to the newly selected chat
-            activeChatId = sel.contactId;
-            // We pass the chat's specific message list for direct updates
-            AppSession.listenActively(activeChatId, sel.messages);
-
-            System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
-            openChat(sel);
+            // --- START OF CORRECTED LOGIC ---
 
             long meUserId = AppSession.requireUserId();
             long chatId = sel.contactId;
 
-            // This part loads the initial chat history. The listener will handle new messages.
+            // STEP 1: FIRST, fetch the existing message history using the main thread.
             try {
                 System.out.println("📡 Fetching messages for chatId=" + chatId);
                 List<MessageEntity> messages = NetworkService.getInstance().fetchMessages(chatId);
                 System.out.println("📥 Received " + messages.size() + " messages");
-                sel.messages.clear(); // Clear previous messages before adding new ones
+                sel.messages.clear(); // Clear any old messages before adding the new list
+
                 for (MessageEntity m : messages) {
                     Msg msg = new Msg(
                             m.getSender().getId() == meUserId,
@@ -354,11 +349,22 @@ public class ChatController implements Initializable {
                     sel.messages.add(msg);
                 }
                 System.out.println("✅ Messages added to chat item: " + sel.messages.size());
-                openChat(sel);
+
             } catch (IOException ex) {
                 System.err.println("❌ Failed to load messages: " + ex.getMessage());
             }
 
+            // STEP 2: NOW that the main thread's task is done, start the background listener for NEW messages.
+            activeChatId = sel.contactId;
+            AppSession.listenActively(activeChatId, sel.messages);
+
+            // --- END OF CORRECTED LOGIC ---
+
+            // Update the UI with the selected chat's info
+            System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
+            openChat(sel);
+
+            // Notify the server that this chat is now open
             try {
                 ServiceLocator.chat().openChat(meUserId, sel.contactId);
                 System.out.println("📨 Notified server: chat opened");
