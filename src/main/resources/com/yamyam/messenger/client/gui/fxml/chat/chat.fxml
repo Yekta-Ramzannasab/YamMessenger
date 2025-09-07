@@ -43,7 +43,10 @@
 
 
                 <TextField fx:id="searchField" promptText="Search..." maxWidth="Infinity" styleClass="chat-search"/>
+                <StackPane VBox.vgrow="ALWAYS">
+                <ListView fx:id="chatList" VBox.vgrow="ALWAYS" visible="true" managed="true"/>
                 <ListView fx:id="searchResults" VBox.vgrow="ALWAYS"/>
+                </StackPane>
             </VBox>
         </left>
 
