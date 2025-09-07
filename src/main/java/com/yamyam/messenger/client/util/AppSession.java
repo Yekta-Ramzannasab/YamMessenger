@@ -10,7 +10,7 @@ public final class AppSession {
     private static final AtomicReference<Users> currentUser = new AtomicReference<>();
 
     private static Thread activeChatListenerThread;
-    
+    private static ChatReceiver activeChatReceiver;
 
     private AppSession() {}
 
