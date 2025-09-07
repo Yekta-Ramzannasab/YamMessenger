@@ -139,25 +139,31 @@ public class MessageEntity {
         this.searchRank = searchRank;
     }
 
+    @Override
     public String toString() {
-        // برای سادگی، آبجکت‌های sender و chat را با ID آن‌ها نمایش می‌دهیم
-        // و تاریخ را به میلی‌ثانیه تبدیل می‌کنیم که یک عدد ساده باشد.
-        long senderId = (sender != null) ? sender.getId() : 0;
-        long chatId = (chat != null) ? chat.getChatId() : 0;
-        long sentAtMillis = (sentAt != null) ? sentAt.getTime() : 0;
+        // A more robust delimiter that is unlikely to be in the message text.
+        final String DELIMITER = "|:|";
 
-        return id + "," +
-                senderId + "," +
-                chatId + "," +
-                text + "," +
-                type + "," +
-                reply + "," +
-                forward + "," +
-                isEdited + "," +
-                isDeleted + "," +
-                status + "," +
-                sentAtMillis + "," +
-                searchRank;
+        // Use a StringBuilder for better performance.
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(this.getId()).append(DELIMITER);
+        // Handle potential null sender/chat objects gracefully.
+        sb.append(this.getSender() != null ? this.getSender().getId() : "null").append(DELIMITER);
+        sb.append(this.getChat() != null ? this.getChat().getChatId() : "null").append(DELIMITER);
+        // Handle null text.
+        sb.append(this.getText() != null ? this.getText() : "").append(DELIMITER);
+        sb.append(this.getType()).append(DELIMITER);
+        sb.append(this.getReply()).append(DELIMITER);
+        sb.append(this.getForward()).append(DELIMITER);
+        sb.append(this.isEdited()).append(DELIMITER);
+        sb.append(this.isDeleted()).append(DELIMITER);
+        sb.append(this.getStatus()).append(DELIMITER);
+        // Convert timestamp to a simple long (milliseconds) to avoid formatting issues.
+        sb.append(this.getSentAt() != null ? this.getSentAt().getTime() : "0").append(DELIMITER);
+        sb.append(this.getSearchRank());
+
+        return sb.toString();
     }
     public static MessageEntity fromString(String data) {
         if (data == null || data.isEmpty()) {
@@ -205,7 +211,4 @@ public class MessageEntity {
             return null;
         }
     }
-    //</editor-fold>
 }
-
-
