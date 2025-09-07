@@ -1,26 +1,28 @@
-package com.yamyam.messenger.client.network.receiver;
+package com.yamyam.messenger.client.network.receiver; // Your specified package
 
+import com.google.gson.Gson;
 import com.yamyam.messenger.client.gui.controller.chat.ChatController;
-import com.yamyam.messenger.client.util.AppSession;
+import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.shared.model.Message;
 import com.yamyam.messenger.shared.model.message.MessageEntity;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import com.yamyam.messenger.client.network.NetworkService;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 
 /**
- * A runnable task that continuously listens for incoming objects (specifically MessageEntity)
- * from the server's ObjectInputStream. When a message is received, it updates the
- * UIs message list on the JavaFX Application Thread.
+ * A runnable task that continuously listens for incoming 'Message' objects
+ * from the server using the existing JSON-based protocol.
  */
 public class ChatReceiver implements Runnable {
 
     private final NetworkService networkService;
     private final ObservableList<ChatController.Msg> messages;
-    private volatile boolean running = true; // 'volatile' ensures visibility across threads
+    private volatile boolean running = true;
+
+    // A new constant for the message type for pushed chat messages from the server
+    private static final int PUSH_CHAT_MESSAGE_TYPE = 21;
 
     public ChatReceiver(NetworkService networkService, ObservableList<ChatController.Msg> messages) {
         this.networkService = networkService;
@@ -29,53 +31,49 @@ public class ChatReceiver implements Runnable {
 
     @Override
     public void run() {
-        try {
-            ObjectInputStream in = networkService.getObjectInputStream();
-            System.out.println("✅ ChatReceiver thread started. Waiting for messages...");
+        System.out.println("✅ ChatReceiver thread started. Waiting for messages using JSON protocol...");
 
-            while (running) {
-                // This line blocks until an object is sent from the server
-                final Object receivedObject = in.readObject();
+        while (running) {
+            try {
+                // Use the existing method to receive a 'Message' object
+                Message serverMessage = networkService.receiveJsonMessage();
 
-                if (receivedObject instanceof MessageEntity messageEntity) {
-                    System.out.println("📬 New message received from server: " + messageEntity.getText());
+                // Check if the message is a new chat message pushed from the server
+                if (serverMessage != null && serverMessage.getType() == PUSH_CHAT_MESSAGE_TYPE) {
+                    System.out.println("📬 New chat message pushed from server.");
 
-                    // UI updates MUST happen on the JavaFX Application Thread.
-                    // Platform.runLater schedules the code to run on that thread.
-                    Platform.runLater(() -> {
-                        // Determine if the message is from the current user or someone else
-                        boolean isMe = messageEntity.getSender().getId() == AppSession.requireUserId();
+                    // The content of the message is the string representation of MessageEntity
+                    String messageEntityString = serverMessage.getContent();
+                    MessageEntity messageEntity = MessageEntity.fromString(messageEntityString);
 
-                        // We set isMe to false because this listener only receives messages from others.
-                        // Messages sent by "me" are added to the UI optimistically in ChatController.
-                        // If the server were to broadcast our own messages back, we would need logic to avoid duplicates.
-                        // For now, we assume the server doesn't send our own messages back to us.
-
-                        ChatController.Msg newMsg = new ChatController.Msg(
-                                isMe, // This will likely be false
-                                messageEntity.getText(),
-                                messageEntity.getSentAt().toLocalDateTime()
-                        );
-                        messages.add(newMsg);
-                    });
+                    if (messageEntity != null) {
+                        // UI updates MUST happen on the JavaFX Application Thread
+                        Platform.runLater(() -> {
+                            // Since this is a pushed message, it's always from someone else.
+                            ChatController.Msg newMsg = new ChatController.Msg(
+                                    false, // isMe is always false for received messages
+                                    messageEntity.getText(),
+                                    messageEntity.getSentAt().toLocalDateTime()
+                            );
+                            messages.add(newMsg);
+                        });
+                    }
                 }
+                // We ignore other message types here because they are responses to requests
+                // made by the main thread, and receiveJsonMessage has already returned them there.
+                // This architecture has a potential risk of race conditions, but we proceed as requested.
+
+            } catch (IOException e) {
+                if (running) {
+                    System.err.println("❌ Connection error in ChatReceiver: " + e.getMessage());
+                }
+                // Stop the loop on connection error
+                stop();
             }
-        } catch (SocketException e) {
-            System.out.println("🔌 Socket closed. ChatReceiver is stopping. " + e.getMessage());
-        } catch (IOException | ClassNotFoundException e) {
-            if (running) {
-                System.err.println("❌ Error in ChatReceiver: " + e.getMessage());
-                e.printStackTrace();
-            }
-        } finally {
-            System.out.println("🛑 ChatReceiver thread finished.");
-            running = false;
         }
+        System.out.println("🛑 ChatReceiver thread finished.");
     }
 
-    /**
-     * Signals the listening loop to terminate gracefully.
-     */
     public void stop() {
         this.running = false;
     }
