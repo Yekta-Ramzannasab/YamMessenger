@@ -31,6 +31,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.*;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -1029,15 +1030,12 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         scrim.setVisible(false);
         scrim.setManaged(false);
-<<<<<<< HEAD
-=======
         // Clear dynamic body when closing (keep header + title)
         clearSubPageBody();
 
         if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
         if (myProfileView != null) myProfileView.cancel();
 
->>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
     }
 
     @FXML
@@ -1046,15 +1044,12 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         menuOverlay.setVisible(true);
         menuOverlay.setManaged(true);
-<<<<<<< HEAD
-=======
         // Clear dynamic body when going back
         clearSubPageBody();
 
         if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
         if (myProfileView != null) myProfileView.cancel();
 
->>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
     }
     @FXML
     private void openCreateChannel(MouseEvent event) {
@@ -1096,7 +1091,6 @@ public class ChatController implements Initializable {
         subPageContent.getChildren().add(placeholder);
     }
     @FXML
-<<<<<<< HEAD
     private void confirmLeave(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Leave this chat?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(response -> {
@@ -1107,7 +1101,6 @@ public class ChatController implements Initializable {
     }
 
 
-=======
     private void openMyProfile(MouseEvent event) {
         //subPageTitle.setText("My Profile");
 
@@ -1193,5 +1186,4 @@ public class ChatController implements Initializable {
         return b;
     }
 
->>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
 }
