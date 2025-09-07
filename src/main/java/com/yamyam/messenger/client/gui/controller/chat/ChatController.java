@@ -40,6 +40,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -78,6 +79,10 @@ public class ChatController implements Initializable {
     @FXML private VBox subPageContent;              // container with (header HBox, title Label, ...dynamic body)
     @FXML private Label subPageTitle;
     @FXML private Rectangle scrim;
+
+    @FXML private Button editTopBtn;
+
+    private MyProfileView myProfileView;
 
     /* -----* *------
        Controller state & formatting
@@ -764,6 +769,10 @@ public class ChatController implements Initializable {
         scrim.setManaged(false);
         // Clear dynamic body when closing (keep header + title)
         clearSubPageBody();
+
+        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
+        if (myProfileView != null) myProfileView.cancel();
+
     }
 
     @FXML
@@ -774,6 +783,10 @@ public class ChatController implements Initializable {
         menuOverlay.setManaged(true);
         // Clear dynamic body when going back
         clearSubPageBody();
+
+        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
+        if (myProfileView != null) myProfileView.cancel();
+
     }
 
     @FXML
@@ -826,24 +839,36 @@ public class ChatController implements Initializable {
 
     @FXML
     private void openMyProfile(MouseEvent event) {
-        subPageTitle.setText("My Profile");
+        //subPageTitle.setText("My Profile");
+
+        // show subpage, hide menu
         menuOverlay.setVisible(false);
         menuOverlay.setManaged(false);
         subPageOverlay.setVisible(true);
         subPageOverlay.setManaged(true);
 
+        // SAFE: touch session so backend-initialized user stays loaded (no UI from here uses it directly)
         Users me = AppSession.getCurrentUser();
         UserProfile p = (me != null) ? me.getUserProfile() : null;
 
-        Label name = new Label("Name: " + (p != null && p.getProfileName() != null ? p.getProfileName() : "—"));
-        Label uname = new Label("Username: " + (p != null && p.getUsername() != null ? "@"+p.getUsername() : "—"));
-        Label email = new Label("Email: " + (me != null && me.getEmail() != null ? me.getEmail() : "—"));
-        Label bio = new Label("Bio: " + (p != null && p.getBio() != null ? p.getBio() : "—"));
+        if (myProfileView == null) {
+            myProfileView = new MyProfileView(placeholder);
+        } else {
+            myProfileView.cancel();
+        }
+        // build a single profile card (no duplicates)
+        setSubPageBody(myProfileView.getRoot());
 
-        VBox body = new VBox(6, name, uname, email, bio);
-        body.setPadding(new Insets(8, 0, 0, 0));
-        setSubPageBody(body);
+        // top "Edit" only toggles local edit mode; Save/Cancel appear on the card itself
+        if (editTopBtn != null) {
+            editTopBtn.setVisible(true);
+            editTopBtn.setManaged(true);
+            editTopBtn.setDisable(false);
+            editTopBtn.setOnAction(a -> myProfileView.enterEdit());
+        }
     }
+
+
 
     @FXML
     private void openThemes(MouseEvent event) {
@@ -897,4 +922,5 @@ public class ChatController implements Initializable {
         b.setMaxWidth(Double.MAX_VALUE);
         return b;
     }
+
 }
