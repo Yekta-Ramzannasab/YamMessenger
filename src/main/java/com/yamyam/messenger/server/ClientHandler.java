@@ -37,18 +37,14 @@ public class ClientHandler implements Runnable {
     private final DataInputStream binaryIn;
     private final DataOutputStream binaryOut;
 
-    private final List allClients;
-
     private Users authenticatedUser;
 
-    public ClientHandler(Socket socket , List allClients) throws IOException {
+    public ClientHandler(Socket socket ) throws IOException {
         this.socket = socket;
         this.gson = new Gson();
 
         this.binaryIn = new DataInputStream(socket.getInputStream());
         this.binaryOut = new DataOutputStream(socket.getOutputStream());
-
-        this.allClients = allClients ;
     }
 
     @Override
