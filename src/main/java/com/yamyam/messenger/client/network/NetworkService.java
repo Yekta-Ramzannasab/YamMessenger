@@ -27,6 +27,7 @@ import java.lang.reflect.Type;
 
 public class NetworkService {
     private final int PORT = 5001;
+    private ObjectInputStream objectInputStream;
 
     // Singleton section
     private static NetworkService instance;
