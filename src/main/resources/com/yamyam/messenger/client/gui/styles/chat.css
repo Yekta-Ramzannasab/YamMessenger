@@ -282,3 +282,192 @@
 
 .chat-info__members { -fx-text-fill: #666; -fx-font-size: 13px; }
 .chat-info__description { -fx-wrap-text: true; -fx-text-alignment: justify; }
+
+
+/* ===== MyProfileView (append at the very end of chat.css) ===== */
+
+/* Card */
+.themed.chat-root .profile-card {
+  -fx-alignment: top-center;
+  -fx-spacing: 12;
+  -fx-padding: 8 0 0 0;
+}
+.themed.chat-root .profile-title {
+  -fx-text-fill: -app-text;
+  -fx-font-size: 18px;
+  -fx-font-weight: 700;
+}
+
+/* Avatar */
+.themed.chat-root .profile-avatar {
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, .25, 0, 3);
+}
+
+/* "Change photo" link */
+.themed.chat-root .profile-link {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-padding: 2 0 0 0;
+  -fx-font-size: 12px;
+  -fx-underline: true;
+}
+.themed.chat-root .profile-link:hover { -fx-opacity: 0.9; }
+
+/* Inputs: Telegram-like underline style */
+.themed.chat-root .profile-input {
+  -fx-background-color: transparent;
+  -fx-text-fill: -app-text;
+  -fx-padding: 6 2 6 2;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+  -fx-border-color: transparent;
+  -fx-border-radius: 0;
+  -fx-prompt-text-fill: -app-muted;
+  -fx-font-size: 13px;
+}
+.themed.chat-root .profile-underline {
+  -fx-border-color: transparent transparent -app-input-border transparent;
+  -fx-border-width: 0 0 1 0;
+}
+.themed.chat-root .profile-input:focused {
+  -fx-border-color: transparent transparent #7c6cf3 transparent;
+}
+.themed.chat-root .profile-input.text-area .content {
+  -fx-background-color: transparent;
+}
+
+/* Readonly state */
+.themed.chat-root .profile-readonly { -fx-opacity: 0.95; -fx-cursor: default; }
+
+/* Actions (Save/Cancel) */
+.themed.chat-root .profile-actions {
+  -fx-alignment: center;
+  -fx-padding: 8 0 0 0;
+  -fx-spacing: 10;
+}
+.themed.chat-root .profile-primary {
+  -fx-background-color: linear-gradient(to right, -app-accent-start, -app-accent-end);
+  -fx-text-fill: white;
+  -fx-background-radius: 999;
+  -fx-padding: 8 16;
+  -fx-font-weight: 700;
+}
+.themed.chat-root .profile-primary:pressed { -fx-opacity: 0.9; }
+.themed.chat-root .profile-secondary {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-padding: 8 12;
+  -fx-font-weight: 700;
+}
+.themed.chat-root .profile-secondary:hover { -fx-underline: true; }
+
+/* --- Photo Lightbox --- */
+.photo-lightbox-root {
+  -fx-background-color: rgba(0,0,0,0.92);
+  -fx-padding: 24;
+}
+
+.photo-lightbox-img {
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 40, 0.5, 0, 6);
+}
+
+.photo-lightbox-arrow {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-font-size: 32px;
+  -fx-font-weight: 800;
+  -fx-padding: 10 16;
+  -fx-background-radius: 999;
+}
+.photo-lightbox-arrow:hover {
+  -fx-background-color: rgba(255,255,255,0.08);
+}
+
+.photo-lightbox-close {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-font-size: 20px;
+  -fx-padding: 6;
+}
+
+.photo-lightbox-caption {
+  -fx-text-fill: rgba(255,255,255,0.85);
+  -fx-font-size: 12px;
+}
+
+.photo-lightbox-film {
+  -fx-background-color: transparent;
+  -fx-padding: 8 0 0 0;
+}
+
+.photo-lightbox-thumb {
+  -fx-background-color: rgba(255,255,255,0.06);
+  -fx-background-radius: 6;
+  -fx-padding: 4;
+  -fx-cursor: hand;
+}
+.photo-lightbox-thumb:selected,
+.photo-lightbox-thumb.selected {
+  -fx-border-color: #A78BFA;
+  -fx-border-width: 2;
+  -fx-border-radius: 6;
+}
+
+.photo-lightbox-delete {
+  -fx-background-color: transparent;
+  -fx-text-fill: rgba(255,255,255,0.75);
+  -fx-font-size: 12px;
+}
+.photo-lightbox-delete:hover { -fx-text-fill: #ff6b6b; }
+
+
+/* --- PhotoViewer --------------------------------------------------------- */
+.pv-scrim { -fx-background-color: rgba(0,0,0,0.88); }
+
+.pv-pane {
+  -fx-background-color: -app-surface;
+  -fx-background-radius: 16;
+  -fx-padding: 16;
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 26, 0.30, 0, 8);
+  -fx-border-color: -app-input-border;
+  -fx-border-radius: 16;
+}
+
+/* top-right close button */
+.pv-close {
+  -fx-background-color: rgba(0,0,0,0.55);
+  -fx-text-fill: white;
+  -fx-background-radius: 999;
+  -fx-padding: 4 10;
+  -fx-font-size: 16px;
+}
+.pv-close:hover { -fx-background-color: rgba(0,0,0,0.75); }
+
+/* bottom dark bar (thumbnails + arrows + footer) */
+.pv-bar {
+  -fx-background-color: rgba(0,0,0,0.86);
+  -fx-background-radius: 0 0 16 16;
+  -fx-padding: 10 12 12 12;
+}
+
+.pv-thumbs { -fx-alignment: center; }
+.pv-thumb  { -fx-background-color: transparent; -fx-background-radius: 8; -fx-padding: 2; }
+.pv-thumb--active { -fx-background-color: rgba(124,77,255,0.30); }
+
+.pv-info   { -fx-text-fill: white; -fx-opacity: 0.95; }
+.pv-delete { -fx-background-color: transparent; -fx-text-fill: #ef4444; -fx-font-weight: 700; }
+.pv-delete:hover { -fx-underline: true; }
+
+/* purple arrows placed in the bottom bar */
+.pv-arrow {
+  -fx-background-color: rgba(124,77,255,0.92);
+  -fx-text-fill: white;
+  -fx-background-radius: 999;
+  -fx-padding: 6 14;
+  -fx-font-size: 20px;
+  -fx-opacity: .95;
+}
+.pv-arrow:hover { -fx-opacity: 1; }
+
+
+
