@@ -65,4 +65,25 @@ public final class AppSession {
             e.printStackTrace();
         }
     }
+
+    public static void stopListening(long chatId) {
+        System.out.println("Received request to stop listening on chatId: " + chatId);
+        stopListening(); // Call the main stop method
+    }
+
+    private static void stopListening() {
+        if (activeChatListenerThread != null && activeChatListenerThread.isAlive()) {
+            System.out.println("⏹️ Stopping active chat listener.");
+
+            // Gracefully stop the runnable task and interrupt the thread
+            if (activeChatReceiver != null) {
+                activeChatReceiver.stop();
+            }
+            activeChatListenerThread.interrupt();
+
+            // Clear references
+            activeChatListenerThread = null;
+            activeChatReceiver = null;
+        }
+    }
 }
