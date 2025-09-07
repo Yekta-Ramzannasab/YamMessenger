@@ -83,7 +83,7 @@ public class NetworkService {
         binaryOut.flush();
     }
 
-    private Message receiveJsonMessage() throws IOException {
+    public Message receiveJsonMessage() throws IOException {
         // reading length of response
         int length = binaryIn.readInt();
         if (length > 0) {
