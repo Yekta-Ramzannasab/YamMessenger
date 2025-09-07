@@ -9,6 +9,9 @@ public final class AppSession {
     // Atomic Reference is Thread Safety
     private static final AtomicReference<Users> currentUser = new AtomicReference<>();
 
+    private static Thread activeChatListenerThread;
+    
+
     private AppSession() {}
 
     public static void setCurrentUser(Users u) {
