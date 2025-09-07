@@ -165,13 +165,17 @@ public class MessageEntity {
 
         return sb.toString();
     }
+
     public static MessageEntity fromString(String data) {
         if (data == null || data.isEmpty()) {
             return null;
         }
 
-        // هشدار: این روش بسیار شکننده است. اگر متن پیام (text) حاوی کاما باشد، این کد به درستی کار نخواهد کرد.
-        String[] parts = data.split(",", 12);
+        // Use the same robust delimiter. We need to escape the pipe character for regex.
+        final String DELIMITER_REGEX = "\\|:\\|";
+        // The -1 limit ensures trailing empty fields are not discarded.
+        String[] parts = data.split(DELIMITER_REGEX, -1);
+
         if (parts.length != 12) {
             System.err.println("Invalid MessageEntity string format. Expected 12 parts, got " + parts.length);
             return null;
@@ -181,15 +185,18 @@ public class MessageEntity {
             MessageEntity entity = new MessageEntity();
             entity.setId(Long.parseLong(parts[0]));
 
-            // آبجکت‌های Users و Chat را نمی‌توانیم کامل بازسازی کنیم.
-            // پس یک آبجکت موقت فقط با ID می‌سازیم.
-            Users sender = new Users();
-            sender.setId(Long.parseLong(parts[1]));
-            entity.setSender(sender);
+            // Recreate placeholder objects for sender and chat.
+            if (!"null".equals(parts[1])) {
+                Users sender = new Users();
+                sender.setId(Long.parseLong(parts[1]));
+                entity.setSender(sender);
+            }
 
-            Chat chat = new Chat();
-            chat.setChatId(Long.parseLong(parts[2]));
-            entity.setChat(chat);
+            if (!"null".equals(parts[2])) {
+                Chat chat = new Chat();
+                chat.setChatId(Long.parseLong(parts[2]));
+                entity.setChat(chat);
+            }
 
             entity.setText(parts[3]);
             entity.setType(MessageType.valueOf(parts[4]));
@@ -199,8 +206,11 @@ public class MessageEntity {
             entity.setDeleted(Boolean.parseBoolean(parts[8]));
             entity.setStatus(MessageStatus.valueOf(parts[9]));
 
+            // Parse the long back to a Timestamp.
             long sentAtMillis = Long.parseLong(parts[10]);
-            entity.setSentAt(new Timestamp(sentAtMillis));
+            if (sentAtMillis > 0) {
+                entity.setSentAt(new Timestamp(sentAtMillis));
+            }
 
             entity.setSearchRank(Double.parseDouble(parts[11]));
 
@@ -208,7 +218,7 @@ public class MessageEntity {
 
         } catch (Exception e) {
             System.err.println("Failed to parse MessageEntity from string: " + data + " | Error: " + e.getMessage());
-            return null;
+            return null; // Return null instead of crashing.
         }
     }
 }
