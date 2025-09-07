@@ -39,6 +39,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -80,6 +81,10 @@ public class ChatController implements Initializable {
     @FXML private VBox subPageContent;
     @FXML private Label subPageTitle;
     @FXML private Rectangle scrim;
+
+    @FXML private Button editTopBtn;
+
+    private MyProfileView myProfileView;
 
     /* -----* *------
        Controller state & formatting
@@ -1024,6 +1029,15 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         scrim.setVisible(false);
         scrim.setManaged(false);
+<<<<<<< HEAD
+=======
+        // Clear dynamic body when closing (keep header + title)
+        clearSubPageBody();
+
+        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
+        if (myProfileView != null) myProfileView.cancel();
+
+>>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
     }
 
     @FXML
@@ -1032,6 +1046,15 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         menuOverlay.setVisible(true);
         menuOverlay.setManaged(true);
+<<<<<<< HEAD
+=======
+        // Clear dynamic body when going back
+        clearSubPageBody();
+
+        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
+        if (myProfileView != null) myProfileView.cancel();
+
+>>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
     }
     @FXML
     private void openCreateChannel(MouseEvent event) {
@@ -1073,6 +1096,7 @@ public class ChatController implements Initializable {
         subPageContent.getChildren().add(placeholder);
     }
     @FXML
+<<<<<<< HEAD
     private void confirmLeave(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Leave this chat?", ButtonType.YES, ButtonType.NO);
         alert.showAndWait().ifPresent(response -> {
@@ -1083,4 +1107,91 @@ public class ChatController implements Initializable {
     }
 
 
+=======
+    private void openMyProfile(MouseEvent event) {
+        //subPageTitle.setText("My Profile");
+
+        // show subpage, hide menu
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
+
+        // SAFE: touch session so backend-initialized user stays loaded (no UI from here uses it directly)
+        Users me = AppSession.getCurrentUser();
+        UserProfile p = (me != null) ? me.getUserProfile() : null;
+
+        if (myProfileView == null) {
+            myProfileView = new MyProfileView(placeholder);
+        } else {
+            myProfileView.cancel();
+        }
+        // build a single profile card (no duplicates)
+        setSubPageBody(myProfileView.getRoot());
+
+        // top "Edit" only toggles local edit mode; Save/Cancel appear on the card itself
+        if (editTopBtn != null) {
+            editTopBtn.setVisible(true);
+            editTopBtn.setManaged(true);
+            editTopBtn.setDisable(false);
+            editTopBtn.setOnAction(a -> myProfileView.enterEdit());
+        }
+    }
+
+
+
+    @FXML
+    private void openThemes(MouseEvent event) {
+        subPageTitle.setText("Themes");
+        menuOverlay.setVisible(false);
+        menuOverlay.setManaged(false);
+        subPageOverlay.setVisible(true);
+        subPageOverlay.setManaged(true);
+
+        ToggleGroup group = new ToggleGroup();
+
+        RadioButton rbLight  = new RadioButton("Light");
+        RadioButton rbDark   = new RadioButton("Dark");
+        RadioButton rbAmoled = new RadioButton("AMOLED");
+
+        rbLight.setToggleGroup(group);
+        rbDark.setToggleGroup(group);
+        rbAmoled.setToggleGroup(group);
+
+        // Reflect current theme
+        switch (ThemeManager.current()) {
+            case LIGHT -> rbLight.setSelected(true);
+            case DARK -> rbDark.setSelected(true);
+            case AMOLED -> rbAmoled.setSelected(true);
+        }
+
+        rbLight.setOnAction(a -> setThemeLight());
+        rbDark.setOnAction(a -> setThemeDark());
+        rbAmoled.setOnAction(a -> setThemeAmoled());
+
+        VBox body = new VBox(8, rbLight, rbDark, rbAmoled);
+        body.setPadding(new Insets(8, 0, 0, 0));
+        setSubPageBody(body);
+    }
+
+    /* ----- Subpage body helpers (keeps header + title intact) ----- */
+    private void clearSubPageBody() {
+        ObservableList<Node> kids = subPageContent.getChildren();
+        if (kids.size() > 2) kids.remove(2, kids.size());
+    }
+
+    private void setSubPageBody(Node... nodes) {
+        clearSubPageBody();
+        subPageContent.getChildren().addAll(nodes);
+    }
+
+    private Button makeNavButton(String text, javafx.event.EventHandler<ActionEvent> handler) {
+        Button b = new Button(text);
+        b.setOnAction(handler);
+        b.getStyleClass().add("menu-back-btn"); // reuse existing rounded/light style
+        b.setMaxWidth(Double.MAX_VALUE);
+        return b;
+    }
+
+>>>>>>> 6dad5d94a4e7c78fb28ca0229b622ca899d82e14
 }
