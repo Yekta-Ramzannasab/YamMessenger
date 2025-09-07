@@ -39,6 +39,8 @@ public class ClientHandler implements Runnable {
 
     private final List allClients;
 
+    private Users authenticatedUser;
+
     public ClientHandler(Socket socket , List allClients) throws IOException {
         this.socket = socket;
         this.gson = new Gson();
