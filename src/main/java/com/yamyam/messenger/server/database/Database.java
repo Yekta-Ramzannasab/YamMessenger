@@ -366,7 +366,7 @@ public class Database {
     public static List<Chat> getUserGroupsAndChannels(long userId) throws SQLException {
         List<Chat> chats = new ArrayList<>();
 
-        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private " +
+        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private,g.group_avatar_url " +
                 "FROM group_chat g " +
                 "JOIN group_members gm ON g.chat_id = gm.chat_id " +
                 "WHERE gm.user_id = ?";
@@ -389,7 +389,7 @@ public class Database {
             }
         }
 
-        String channelSql = "SELECT c.chat_id, c.channel_name, c.description , c.owner_id, c.is_private " +
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.description , c.owner_id, c.is_private,c.avatar_url " +
                 "FROM channel c " +
                 "JOIN channel_subscribers cs ON c.chat_id = cs.chat_id " +
                 "WHERE cs.user_id = ?";
