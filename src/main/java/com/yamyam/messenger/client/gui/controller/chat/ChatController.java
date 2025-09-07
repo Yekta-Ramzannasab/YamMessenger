@@ -839,7 +839,7 @@ public class ChatController implements Initializable {
 
     @FXML
     private void openMyProfile(MouseEvent event) {
-        subPageTitle.setText("");
+        //subPageTitle.setText("My Profile");
 
         // show subpage, hide menu
         menuOverlay.setVisible(false);
