@@ -366,7 +366,11 @@ public class ClientHandler implements Runnable {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            System.out.println("finally error");
+            // When the client disconnects, unregister them from the online map
+            if (this.authenticatedUser != null) {
+                Server.unregisterClient(this.authenticatedUser.getId());
+            }
+            System.out.println("finally error"); // Your existing line
         }
     }
 
