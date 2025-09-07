@@ -27,6 +27,7 @@ import com.yamyam.messenger.shared.model.user.Users;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.*;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -360,45 +361,57 @@ public class ChatController implements Initializable {
             }
 
             System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
-            sel.messages.clear();
-            try {
-                openChat(sel);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
 
-            long meUserId = AppSession.requireUserId();
-            long chatId = sel.contactId;
+            messageList.getItems().clear();
+            headerName.setText("Loading...");
 
-            try {
-                System.out.println("📡 Fetching messages for chatId=" + chatId);
-                List<MessageEntity> messages = NetworkService.getInstance().fetchMessages(chatId);
+            Task<List<MessageEntity>> fetchMessagesTask = new Task<>() {
+                @Override
+                protected List<MessageEntity> call() throws Exception {
+                    long meUserId = AppSession.requireUserId();
+                    long chatId = sel.contactId;
+
+                    System.out.println("📡 Fetching messages for chatId=" + chatId);
+                    List<MessageEntity> messages = DataManager.getInstance().getMessages(meUserId);
+
+                    ServiceLocator.chat().openChat(meUserId, sel.contactId);
+
+                    return messages;
+                }
+            };
+
+            fetchMessagesTask.setOnSucceeded(event -> {
+                List<MessageEntity> messages = fetchMessagesTask.getValue();
                 System.out.println("📥 Received " + messages.size() + " messages");
 
+                long meUserId = AppSession.requireUserId();
+                List<Msg> convertedMessages = new ArrayList<>();
                 for (MessageEntity m : messages) {
-                    System.out.println("🔄 Converting message: " + m.getText() + " | sender=" + m.getSender().getEmail());
                     Msg msg = new Msg(
                             m.getSender().getId() == meUserId,
                             m.getText(),
                             m.getSentAt().toLocalDateTime()
                     );
-                    sel.messages.add(msg);
+                    convertedMessages.add(msg);
                 }
 
-                System.out.println("✅ Messages added to chat item: " + sel.messages.size());
-                openChat(sel);
-            } catch (IOException ex) {
-                System.err.println("❌ Failed to load messages: " + ex.getMessage());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+                sel.messages.setAll(convertedMessages);
+                messageList.setItems(sel.messages);
+                try {
+                    openChat(sel);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
 
-            try {
-                ServiceLocator.chat().openChat(meUserId, sel.contactId);
-                System.out.println("📨 Notified server: chat opened");
-            } catch (Exception ex) {
-                System.err.println("[chat] openChat failed: " + ex.getMessage());
-            }
+                System.out.println("✅ UI updated with messages.");
+            });
+
+            fetchMessagesTask.setOnFailed(event -> {
+                Throwable e = fetchMessagesTask.getException();
+                System.err.println("❌ Failed to load messages: " + e.getMessage());
+            });
+
+            new Thread(fetchMessagesTask).start();
         });
     }
 
