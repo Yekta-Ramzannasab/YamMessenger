@@ -453,4 +453,49 @@ public class ClientHandler implements Runnable {
             }
         }
     }
+
+    private void broadcastMessage(MessageEntity message) {
+        // The message type for pushed chat messages to the client
+        final int PUSH_CHAT_MESSAGE_TYPE = 21;
+
+        try {
+            long chatId = message.getChat().getChatId();
+            long senderId = message.getSender().getId();
+
+            // Step 1: Get all member IDs for this chat from the database.
+            // NOTE: You will need to create this method in your DataManager.
+            List<Long> memberIds = DataManager.getInstance().getChatMemberIds(chatId);
+
+            System.out.println("SERVER: Broadcasting message for chat " + chatId + " to " + memberIds.size() + " members.");
+
+            // Step 2: Loop through all members of the chat.
+            for (long memberId : memberIds) {
+                // Rule: Do not send the message back to the original sender.
+                if (memberId == senderId) {
+                    continue;
+                }
+
+                // Step 3: Find the recipient's handler from the central map.
+                ClientHandler recipientHandler = Server.getClientHandler(memberId);
+
+                // Step 4: If the handler is found, the user is online. Send the message.
+                if (recipientHandler != null) {
+                    try {
+                        // Create a new Message object with the special type 21
+                        Message pushMessage = new Message(PUSH_CHAT_MESSAGE_TYPE, "Server", message.toString());
+
+                        // Use the existing sendJsonMessage to send it
+                        recipientHandler.sendJsonMessage(pushMessage);
+                        System.out.println("  -> Sent message to online user " + memberId);
+                    } catch (IOException e) {
+                        System.err.println("  -> FAILED to send message to user " + memberId + ": " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("  -> User " + memberId + " is offline.");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("SERVER: Database error during broadcast for chat " + message.getChat().getChatId() + ": " + e.getMessage());
+        }
+    }
 }
