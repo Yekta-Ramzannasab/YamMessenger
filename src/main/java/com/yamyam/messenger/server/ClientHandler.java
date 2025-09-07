@@ -76,7 +76,12 @@ public class ClientHandler implements Runnable {
                             Users user = handleLogin(request.getSender());
                             Message loginUser = null;
                             if (user != null) {
-                                loginUser = new Message(1, "Server", user.toString() );
+                                // Store the user in our new field
+                                this.authenticatedUser = user;
+                                // Register this handler in the central map of online clients
+                                Server.registerClient(user.getId(), this);
+
+                                loginUser = new Message(1, "Server", user.toString());
                             }
                             sendJsonMessage(loginUser);
                             break;
