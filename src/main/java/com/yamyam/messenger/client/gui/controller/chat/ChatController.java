@@ -31,7 +31,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.*;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -39,7 +38,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-
 
 import java.io.IOException;
 import java.net.URL;
@@ -83,10 +81,6 @@ public class ChatController implements Initializable {
     @FXML private Label subPageTitle;
     @FXML private Rectangle scrim;
 
-    @FXML private Button editTopBtn;
-
-    private MyProfileView myProfileView;
-
     /* -----* *------
        Controller state & formatting
        -----* *------ */
@@ -120,11 +114,7 @@ public class ChatController implements Initializable {
 
         if (!allChats.isEmpty()) {
             chatList.getSelectionModel().select(0);
-            try {
-                openChat(chatList.getSelectionModel().getSelectedItem());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            openChat(chatList.getSelectionModel().getSelectedItem());
         } else {
             System.out.println("ℹ️ No chats available for user: " + me.getEmail());
         }
@@ -335,6 +325,7 @@ public class ChatController implements Initializable {
                     chatList.getSelectionModel().select(existingItem.get());
                     chatList.scrollTo(existingItem.get());
                 } else {
+                    // ایجاد چت جدید با اطلاعات کامل
                     Image avatar = getAvatarForChat(c, AppSession.requireUserId());
                     String title = getChatTitle(c, AppSession.requireUserId());
 
@@ -360,12 +351,7 @@ public class ChatController implements Initializable {
             }
 
             System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
-            sel.messages.clear();
-            try {
-                openChat(sel);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            openChat(sel);
 
             long meUserId = AppSession.requireUserId();
             long chatId = sel.contactId;
@@ -389,8 +375,6 @@ public class ChatController implements Initializable {
                 openChat(sel);
             } catch (IOException ex) {
                 System.err.println("❌ Failed to load messages: " + ex.getMessage());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
 
             try {
@@ -609,7 +593,7 @@ public class ChatController implements Initializable {
                 .filter(item -> !item.title().equals("Unknown"))
                 .toList();
     }
-    private void showChatInfo(Chat chat) throws SQLException {
+    private void showChatInfo(Chat chat) {
         if (chat instanceof Channel channel) {
 
             infoAvatar.setImage(channel.getChannelAvatarUrl() != null ?
@@ -625,9 +609,6 @@ public class ChatController implements Initializable {
             infoName.setText(group.getGroupName() != null ? group.getGroupName() : "No name");
             infoBio.setText(group.getDescription() != null ? group.getDescription() : "No description");
             infoPresence.setText("Group • " + group.getMemberCount() + " members");
-        }
-        else if (chat instanceof PrivateChat privateChat){
-            showUserProfile(Database.loadUser(privateChat.getUser2()));
         }
 
         mediaGrid.getChildren().clear();
@@ -747,7 +728,7 @@ public class ChatController implements Initializable {
        - Backend/DataManager should call this after fetching user's chats by userId.
        -----* *------
     */
-    public void loadChats(List<Contact> contacts) throws SQLException {
+    public void loadChats(List<Contact> contacts) {
         if (contacts == null || contacts.isEmpty()) {
             loadChatsGeneric(Collections.emptyList());
             return;
@@ -777,7 +758,7 @@ public class ChatController implements Initializable {
     }
 
 
-    public void loadChatsGeneric(List<ChatRef> refs) throws SQLException {
+    public void loadChatsGeneric(List<ChatRef> refs) {
         Long keepSelectedId = Optional.ofNullable(chatList.getSelectionModel().getSelectedItem())
                 .map(ci -> ci.contactId).orElse(null);
 
@@ -821,9 +802,7 @@ public class ChatController implements Initializable {
        - Updates header/avatar/presence info based on the selected chat type.
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
-    private void openChat(ChatItem c) throws SQLException {
-
-
+    private void openChat(ChatItem c) {
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
@@ -1030,12 +1009,6 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         scrim.setVisible(false);
         scrim.setManaged(false);
-        // Clear dynamic body when closing (keep header + title)
-        clearSubPageBody();
-
-        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
-        if (myProfileView != null) myProfileView.cancel();
-
     }
 
     @FXML
@@ -1044,12 +1017,6 @@ public class ChatController implements Initializable {
         subPageOverlay.setManaged(false);
         menuOverlay.setVisible(true);
         menuOverlay.setManaged(true);
-        // Clear dynamic body when going back
-        clearSubPageBody();
-
-        if (editTopBtn != null) { editTopBtn.setVisible(false); editTopBtn.setManaged(false); editTopBtn.setOnAction(null); }
-        if (myProfileView != null) myProfileView.cancel();
-
     }
     @FXML
     private void openCreateChannel(MouseEvent event) {
@@ -1100,90 +1067,5 @@ public class ChatController implements Initializable {
         });
     }
 
-
-    private void openMyProfile(MouseEvent event) {
-        //subPageTitle.setText("My Profile");
-
-        // show subpage, hide menu
-        menuOverlay.setVisible(false);
-        menuOverlay.setManaged(false);
-        subPageOverlay.setVisible(true);
-        subPageOverlay.setManaged(true);
-
-        // SAFE: touch session so backend-initialized user stays loaded (no UI from here uses it directly)
-        Users me = AppSession.getCurrentUser();
-        UserProfile p = (me != null) ? me.getUserProfile() : null;
-
-        if (myProfileView == null) {
-            myProfileView = new MyProfileView(placeholder);
-        } else {
-            myProfileView.cancel();
-        }
-        // build a single profile card (no duplicates)
-        setSubPageBody(myProfileView.getRoot());
-
-        // top "Edit" only toggles local edit mode; Save/Cancel appear on the card itself
-        if (editTopBtn != null) {
-            editTopBtn.setVisible(true);
-            editTopBtn.setManaged(true);
-            editTopBtn.setDisable(false);
-            editTopBtn.setOnAction(a -> myProfileView.enterEdit());
-        }
-    }
-
-
-
-    @FXML
-    private void openThemes(MouseEvent event) {
-        subPageTitle.setText("Themes");
-        menuOverlay.setVisible(false);
-        menuOverlay.setManaged(false);
-        subPageOverlay.setVisible(true);
-        subPageOverlay.setManaged(true);
-
-        ToggleGroup group = new ToggleGroup();
-
-        RadioButton rbLight  = new RadioButton("Light");
-        RadioButton rbDark   = new RadioButton("Dark");
-        RadioButton rbAmoled = new RadioButton("AMOLED");
-
-        rbLight.setToggleGroup(group);
-        rbDark.setToggleGroup(group);
-        rbAmoled.setToggleGroup(group);
-
-        // Reflect current theme
-        switch (ThemeManager.current()) {
-            case LIGHT -> rbLight.setSelected(true);
-            case DARK -> rbDark.setSelected(true);
-            case AMOLED -> rbAmoled.setSelected(true);
-        }
-
-        rbLight.setOnAction(a -> setThemeLight());
-        rbDark.setOnAction(a -> setThemeDark());
-        rbAmoled.setOnAction(a -> setThemeAmoled());
-
-        VBox body = new VBox(8, rbLight, rbDark, rbAmoled);
-        body.setPadding(new Insets(8, 0, 0, 0));
-        setSubPageBody(body);
-    }
-
-    /* ----- Subpage body helpers (keeps header + title intact) ----- */
-    private void clearSubPageBody() {
-        ObservableList<Node> kids = subPageContent.getChildren();
-        if (kids.size() > 2) kids.remove(2, kids.size());
-    }
-
-    private void setSubPageBody(Node... nodes) {
-        clearSubPageBody();
-        subPageContent.getChildren().addAll(nodes);
-    }
-
-    private Button makeNavButton(String text, javafx.event.EventHandler<ActionEvent> handler) {
-        Button b = new Button(text);
-        b.setOnAction(handler);
-        b.getStyleClass().add("menu-back-btn"); // reuse existing rounded/light style
-        b.setMaxWidth(Double.MAX_VALUE);
-        return b;
-    }
 
 }

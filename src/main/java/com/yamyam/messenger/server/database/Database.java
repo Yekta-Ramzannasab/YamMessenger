@@ -85,7 +85,6 @@ public class Database {
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
-
     //----------------------------------------------users-------------------------------------------
     public static Users loadUser(long userId) throws SQLException {
         // profile could be null?
@@ -184,6 +183,8 @@ public class Database {
     }
 
 
+
+
     // -------------------------------------------chat---------------------------------------------
     public static PrivateChat loadPrivateChat(long chatId) throws SQLException {
         try (Connection connection = Database.getConnection()) {
@@ -209,7 +210,6 @@ public class Database {
             }
         }
     }
-
     public static PrivateChat loadPrivateChat(long userA, long userB) throws SQLException {
         long user1 = Math.min(userA, userB);
         long user2 = Math.max(userA, userB);
@@ -239,8 +239,7 @@ public class Database {
             }
         }
     }
-
-    public static PrivateChat createPrivateChat(long chatId, long userA, long userB) throws SQLException {
+    public static PrivateChat createPrivateChat(long chatId,long userA, long userB) throws SQLException {
         long user1 = Math.min(userA, userB);
         long user2 = Math.max(userA, userB);
 
@@ -263,7 +262,6 @@ public class Database {
             }
         }
     }
-
     public static Channel loadChannel(long chatId) throws SQLException {
         try (Connection con = Database.getConnection()) {
             String sql = "SELECT *" +
@@ -288,16 +286,15 @@ public class Database {
         }
         return null;
     }
-
     public static Channel insertChannel(String name, long ownerId, boolean isPrivate, String description) throws SQLException {
         long chatId = createChat("channel");
 
         try (Connection con = Database.getConnection()) {
             con.setAutoCommit(false);
             String sqlChannel = """
-                        INSERT INTO channel(chat_id, channel_name, description, owner_id, is_private, avatar_url)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    """;
+            INSERT INTO channel(chat_id, channel_name, description, owner_id, is_private, avatar_url)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
             try (PreparedStatement stmt = con.prepareStatement(sqlChannel)) {
                 stmt.setLong(1, chatId);
@@ -318,9 +315,7 @@ public class Database {
 
             con.commit();
 
-            Channel channel = new Channel(chatId, name, ownerId, isPrivate, description, null);
-            Database.insertSubscription(chatId, ownerId, channel);
-            return channel;
+            return new Channel(chatId, name, ownerId, isPrivate, description, null);
         } catch (SQLException e) {
             throw e;
         }
@@ -371,7 +366,7 @@ public class Database {
     public static List<Chat> getUserGroupsAndChannels(long userId) throws SQLException {
         List<Chat> chats = new ArrayList<>();
 
-        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private,g.group_avatar_url " +
+        String groupSql = "SELECT g.chat_id, g.group_name, g.description, g.creator_id, g.is_private " +
                 "FROM group_chat g " +
                 "JOIN group_members gm ON g.chat_id = gm.chat_id " +
                 "WHERE gm.user_id = ?";
@@ -394,7 +389,7 @@ public class Database {
             }
         }
 
-        String channelSql = "SELECT c.chat_id, c.channel_name, c.description , c.owner_id, c.is_private,c.avatar_url " +
+        String channelSql = "SELECT c.chat_id, c.channel_name, c.description , c.owner_id, c.is_private " +
                 "FROM channel c " +
                 "JOIN channel_subscribers cs ON c.chat_id = cs.chat_id " +
                 "WHERE cs.user_id = ?";
@@ -578,7 +573,7 @@ public class Database {
 
         try (Connection con = Database.getConnection()) {
             String sql = "INSERT INTO group_chat(chat_id, group_name, description, creator_id, created_at, is_private, group_avatar_url) " +
-                    "VALUES (?, ?, ?, ?, now(), ?, null)";
+                    "VALUES (?, ?, ?, ?, now(), ?, ?)";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
@@ -586,11 +581,10 @@ public class Database {
                 stmt.setString(3, description);
                 stmt.setLong(4, creatorId);
                 stmt.setBoolean(5, isPrivate);
+                stmt.setString(6, null); // default avatar is null
 
                 stmt.executeUpdate();
                 GroupChat group = new GroupChat(chatId, name, description, creatorId, isPrivate, null);
-                Database.insertGroupMember(group.getChatId(),creatorId);
-
 
                 return group;
             }
@@ -928,26 +922,6 @@ public class Database {
         }
         throw new SQLException("Failed to insert group member");
     }
-    public static GroupMembers insertGroupMember(long chatId, long userId) throws SQLException {
-        try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO group_members(chat_id, user_id, role, joined_at, invited_by) " +
-                    "VALUES (?, ?, 'member', now(), null) RETURNING role";
-
-            try (PreparedStatement stmt = con.prepareStatement(sql)) {
-                stmt.setLong(1, chatId);
-                stmt.setLong(2, userId);
-
-
-
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    Role role = Role.valueOf(rs.getString("role").toUpperCase());
-                    return new GroupMembers(Database.loadGroupChat(chatId), role, Database.loadUser(userId), null);
-                }
-            }
-        }
-        throw new SQLException("Failed to insert group member");
-    }
     public static GroupMembers loadGroupMember(long chatId, long userId) throws SQLException {
         try (Connection con = Database.getConnection()) {
             String sql = """
@@ -1003,8 +977,8 @@ public class Database {
     }
     public static ChannelSubscribers insertSubscription(long chatId, long userId, Channel channel) throws SQLException {
         try (Connection con = Database.getConnection()) {
-            String sql = "INSERT INTO channel_subscribers(chat_id, user_id, role, joined_at, approved) " +
-                    "VALUES (?, ?, 'member', now(), true) RETURNING role, approved";
+            String sql = "INSERT INTO channel_subscribers(chat_id, user_id, role, joined_at, is_approved) " +
+                    "VALUES (?, ?, 'member', now(), true) RETURNING role, is_approved";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setLong(1, chatId);
@@ -1013,7 +987,7 @@ public class Database {
 
                 if (rs.next()) {
                     Role role = Role.valueOf(rs.getString("role").toUpperCase());
-                    boolean approved = rs.getBoolean("approved");
+                    boolean approved = rs.getBoolean("is_approved");
                     return new ChannelSubscribers(channel, role, userId, approved);
                 }
             }
