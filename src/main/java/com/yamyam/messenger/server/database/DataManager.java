@@ -96,29 +96,54 @@ public class DataManager {
         messageCache.put(chatId, messages);
         return messages;
     }
-    public void addMessage(long chatId, long senderId, String text) {
-        executor.submit(() -> {
+
+    // --- EDITED METHOD ---
+    /**
+     * Submits a task to insert a message into the database and synchronously waits for the result.
+     * This ensures the calling thread (e.g., a ClientHandler) gets the complete MessageEntity object
+     * back before proceeding.
+     *
+     * @return The newly created MessageEntity with its ID and timestamp, or null on failure.
+     */
+    public MessageEntity addMessage(long chatId, long senderId, String text) {
+        // Create a Callable that will return a MessageEntity
+        Callable<MessageEntity> insertTask = () -> {
             try {
                 MessageDatabaseHandler messageDatabaseHandler = new MessageDatabaseHandler();
                 MessageEntity message = messageDatabaseHandler.insertMessage(chatId, senderId, text);
 
                 if (message != null) {
+                    // Update the cache with the new message
                     synchronized (messageCache) {
                         messageCache.computeIfAbsent(chatId, k -> new ArrayList<>()).add(message);
                     }
-
+                    // Notify listeners about the change
                     notifyListeners("message_added", message);
                     System.out.println("✅ Message inserted and cached: " + message.getText());
                 } else {
                     System.err.println("⚠️ Message insertion returned null");
                 }
-
+                return message; // Return the created message
             } catch (SQLException e) {
                 System.err.println("❌ Error inserting message: " + e.getMessage());
                 e.printStackTrace();
+                return null; // Return null on database error
             }
-        });
+        };
+
+        // Submit the task and get a Future object
+        Future<MessageEntity> future = executor.submit(insertTask);
+
+        try {
+            // Block and wait for the task to complete, then return the result.
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("❌ Error waiting for message insertion result: " + e.getMessage());
+            Thread.currentThread().interrupt(); // Restore the interrupted status
+            return null;
+        }
     }
+
 
     // ---------------- Chats ----------------
     public Chat getChat(long chatId) throws SQLException {
@@ -134,6 +159,23 @@ public class DataManager {
             }
         });
     }
+
+    // --- NEW METHOD ---
+    /**
+     * Retrieves a list of all member IDs for a given chat.
+     * This is required for broadcasting messages.
+     * NOTE: This method relies on a new method in the Database class.
+     *
+     * @param chatId The ID of the chat.
+     * @return A list of user IDs who are members of the chat.
+     * @throws SQLException if a database access error occurs.
+     */
+    public List<Long> getChatMemberIds(long chatId) throws SQLException {
+        // You need to implement the actual database query logic in your Database class.
+        // This is a placeholder for the logic.
+        return Database.getMemberIdsForChat(chatId);
+    }
+
     public List<PrivateChat> getPrivateChatsForUser(long userId) throws SQLException {
         List<PrivateChat> allChats = Database.getPrivateChatsByUserId(userId);
         List<PrivateChat> privateChats = new ArrayList<>();
@@ -301,43 +343,4 @@ public class DataManager {
         groupChatCache.put(groupChat.getChatId(), groupChat);
         return groupChat;
     }
-    /*
-
-    public GroupMembers getOrJoinGroupMember(GroupChat groupChat, Users member, Users invitedBy) throws SQLException {
-        String key = groupChat.getChatId() + "_" + member.getId();
-
-        if (groupMemberCache.containsKey(key)) {
-            return groupMemberCache.get(key);
-        }
-
-        GroupMembers groupMember = GroupMembersHandler.getInstance().joinUser(groupChat, member, invitedBy);
-        groupMemberCache.put(key, groupMember);
-        return groupMember;
-    }
-    public boolean isUserMemberOfChat(long chatId, long userId, ChatType chatType) throws SQLException {
-        String cacheKey = "member_" + chatId + "_" + userId + "_" + chatType;
-
-        synchronized (cacheLock) {
-            Boolean cachedResult = membershipCache.get(cacheKey);
-            if (cachedResult != null) {
-                return cachedResult;
-            }
-        }
-
-        boolean isMember = switch (chatType) {
-            case GROUP_CHAT -> Database.checkMemberGroup(chatId, userId);
-            case CHANNEL -> Database.isMemberChannel(chatId, userId);
-            case PRIVATE_CHAT -> true;
-        };
-        synchronized (cacheLock) {
-            membershipCache.put(cacheKey, isMember);
-        }
-
-        return isMember;
-    }
-
-     */
-
-
-
 }
