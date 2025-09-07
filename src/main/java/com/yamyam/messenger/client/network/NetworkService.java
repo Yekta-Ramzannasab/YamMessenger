@@ -451,4 +451,8 @@ public class NetworkService {
         System.out.println("🚀 Sending chat message to server. Type: 20, Payload: " + payload);
         sendJsonMessage(messageToServer);
     }
+
+    public ObjectInputStream getObjectInputStream() {
+        return this.objectInputStream;
+    }
 }
