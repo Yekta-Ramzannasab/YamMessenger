@@ -95,6 +95,7 @@ public class ChatController implements Initializable {
     );
 
     private final DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
+    private long activeChatId = -1;
 
     /* -----* *------
        Lifecycle
