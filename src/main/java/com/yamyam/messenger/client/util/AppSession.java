@@ -1,6 +1,9 @@
 package com.yamyam.messenger.client.util;
 
+import com.yamyam.messenger.client.gui.controller.chat.ChatController;
+import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.shared.model.user.Users;
+import javafx.collections.ObservableList;
 
 import java.util.concurrent.atomic.AtomicReference; // این import را اضافه کن
 
@@ -38,5 +41,28 @@ public final class AppSession {
             throw new IllegalStateException("No logged-in user in session");
         }
         return u.getId();
+    }
+
+    public static void listenActively(long chatId, ObservableList<ChatController.Msg> messages) {
+        // Ensure any previous listener is stopped before starting a new one.
+        stopListening();
+
+        System.out.println("▶️ Starting to listen actively on chatId: " + chatId);
+        try {
+            // Get the singleton instance of our network service
+            NetworkService networkService = NetworkService.getInstance();
+
+            // Create the runnable task that will listen for messages
+            activeChatReceiver = new ChatReceiver(networkService, messages);
+
+            // Create and start the thread
+            activeChatListenerThread = new Thread(activeChatReceiver, "ChatListenerThread-" + chatId);
+            activeChatListenerThread.setDaemon(true); // Ensures the thread doesn't prevent the app from closing
+            activeChatListenerThread.start();
+
+        } catch (Exception e) {
+            System.err.println("❌ Failed to start chat listener: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
