@@ -282,3 +282,82 @@
 
 .chat-info__members { -fx-text-fill: #666; -fx-font-size: 13px; }
 .chat-info__description { -fx-wrap-text: true; -fx-text-alignment: justify; }
+
+
+/* ===== MyProfileView (append at the very end of chat.css) ===== */
+
+/* Card */
+.themed.chat-root .profile-card {
+  -fx-alignment: top-center;
+  -fx-spacing: 12;
+  -fx-padding: 8 0 0 0;
+}
+.themed.chat-root .profile-title {
+  -fx-text-fill: -app-text;
+  -fx-font-size: 18px;
+  -fx-font-weight: 700;
+}
+
+/* Avatar */
+.themed.chat-root .profile-avatar {
+  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 16, .25, 0, 3);
+}
+
+/* "Change photo" link */
+.themed.chat-root .profile-link {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-padding: 2 0 0 0;
+  -fx-font-size: 12px;
+  -fx-underline: true;
+}
+.themed.chat-root .profile-link:hover { -fx-opacity: 0.9; }
+
+/* Inputs: Telegram-like underline style */
+.themed.chat-root .profile-input {
+  -fx-background-color: transparent;
+  -fx-text-fill: -app-text;
+  -fx-padding: 6 2 6 2;
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+  -fx-border-color: transparent;
+  -fx-border-radius: 0;
+  -fx-prompt-text-fill: -app-muted;
+  -fx-font-size: 13px;
+}
+.themed.chat-root .profile-underline {
+  -fx-border-color: transparent transparent -app-input-border transparent;
+  -fx-border-width: 0 0 1 0;
+}
+.themed.chat-root .profile-input:focused {
+  -fx-border-color: transparent transparent #7c6cf3 transparent;
+}
+.themed.chat-root .profile-input.text-area .content {
+  -fx-background-color: transparent;
+}
+
+/* Readonly state */
+.themed.chat-root .profile-readonly { -fx-opacity: 0.95; -fx-cursor: default; }
+
+/* Actions (Save/Cancel) */
+.themed.chat-root .profile-actions {
+  -fx-alignment: center;
+  -fx-padding: 8 0 0 0;
+  -fx-spacing: 10;
+}
+.themed.chat-root .profile-primary {
+  -fx-background-color: linear-gradient(to right, -app-accent-start, -app-accent-end);
+  -fx-text-fill: white;
+  -fx-background-radius: 999;
+  -fx-padding: 8 16;
+  -fx-font-weight: 700;
+}
+.themed.chat-root .profile-primary:pressed { -fx-opacity: 0.9; }
+.themed.chat-root .profile-secondary {
+  -fx-background-color: transparent;
+  -fx-text-fill: #A78BFA;
+  -fx-padding: 8 12;
+  -fx-font-weight: 700;
+}
+.themed.chat-root .profile-secondary:hover { -fx-underline: true; }
+
