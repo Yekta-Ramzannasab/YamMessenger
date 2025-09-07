@@ -1024,6 +1024,79 @@ public class Database {
         }
     }
 
+    public static List<Long> getMemberIdsForChat(long chatId) throws SQLException {
+        List<Long> memberIds = new ArrayList<>();
+        String chatType = null;
+
+        try (Connection connection = Database.getConnection()) {
+            // Step 1: Find the type of the chat from the main 'chat' table.
+            String findTypeSql = "SELECT chat_type FROM chat WHERE chat_id = ?";
+            try (PreparedStatement typeStmt = connection.prepareStatement(findTypeSql)) {
+                typeStmt.setLong(1, chatId);
+                try (ResultSet rs = typeStmt.executeQuery()) {
+                    if (rs.next()) {
+                        chatType = rs.getString("chat_type");
+                    } else {
+                        // If no chat with this ID exists, return an empty list.
+                        System.err.println("SERVER: No chat found with ID: " + chatId);
+                        return memberIds;
+                    }
+                }
+            }
+
+            // If chat type could not be determined, exit.
+            if (chatType == null) {
+                return memberIds;
+            }
+
+            // Step 2: Based on the chat type, query the correct table for member IDs.
+            String membersSql;
+            switch (chatType) {
+                case "private_chat":
+                    membersSql = "SELECT user1_id, user2_id FROM private_chat WHERE chat_id = ?";
+                    try (PreparedStatement membersStmt = connection.prepareStatement(membersSql)) {
+                        membersStmt.setLong(1, chatId);
+                        try (ResultSet rs = membersStmt.executeQuery()) {
+                            if (rs.next()) {
+                                memberIds.add(rs.getLong("user1_id"));
+                                memberIds.add(rs.getLong("user2_id"));
+                            }
+                        }
+                    }
+                    break;
+
+                case "group":
+                    membersSql = "SELECT user_id FROM group_members WHERE chat_id = ?";
+                    try (PreparedStatement membersStmt = connection.prepareStatement(membersSql)) {
+                        membersStmt.setLong(1, chatId);
+                        try (ResultSet rs = membersStmt.executeQuery()) {
+                            while (rs.next()) {
+                                memberIds.add(rs.getLong("user_id"));
+                            }
+                        }
+                    }
+                    break;
+
+                case "channel":
+                    membersSql = "SELECT user_id FROM channel_subscribers WHERE chat_id = ?";
+                    try (PreparedStatement membersStmt = connection.prepareStatement(membersSql)) {
+                        membersStmt.setLong(1, chatId);
+                        try (ResultSet rs = membersStmt.executeQuery()) {
+                            while (rs.next()) {
+                                memberIds.add(rs.getLong("user_id"));
+                            }
+                        }
+                    }
+                    break;
+
+                default:
+                    System.err.println("SERVER: Unknown chat type '" + chatType + "' for chatId: " + chatId);
+                    break;
+            }
+        }
+        return memberIds;
+    }
+
 
 
 
