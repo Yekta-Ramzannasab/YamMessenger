@@ -139,14 +139,13 @@
     <StackPane fx:id="subPageOverlay"
                styleClass="subpage-overlay"
                visible="false" managed="false"
-               maxWidth="440" maxHeight="520"
+               maxWidth="360" maxHeight="400"
                StackPane.alignment="CENTER">
 
         <VBox spacing="10" alignment="TOP_CENTER" fx:id="subPageContent">
             <HBox alignment="CENTER" spacing="8">
                 <Button text="Back" onAction="#backToMenu" styleClass="menu-back-btn"/>
                 <Pane HBox.hgrow="ALWAYS"/>
-                <Button fx:id="editTopBtn" text="Edit" visible="false" managed="false" styleClass="menu-back-btn"/>
                 <Button text="✕" onAction="#closeAllOverlays" styleClass="menu-close-btn"/>
             </HBox>
 
