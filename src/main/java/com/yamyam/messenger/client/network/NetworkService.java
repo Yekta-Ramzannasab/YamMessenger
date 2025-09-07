@@ -27,7 +27,6 @@ import java.lang.reflect.Type;
 
 public class NetworkService {
     private final int PORT = 5001;
-    private ObjectInputStream objectInputStream;
 
     // Singleton section
     private static NetworkService instance;
@@ -450,9 +449,5 @@ public class NetworkService {
         // Send the final message using the existing helper method
         System.out.println("🚀 Sending chat message to server. Type: 20, Payload: " + payload);
         sendJsonMessage(messageToServer);
-    }
-
-    public ObjectInputStream getObjectInputStream() {
-        return this.objectInputStream;
     }
 }
