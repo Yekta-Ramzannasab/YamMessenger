@@ -328,24 +328,25 @@ public class ClientHandler implements Runnable {
                             sendJsonMessage(new Message(19, "Server", content));
                             break;
                         }
-                        case 20 :
+                        case 20:
                             System.out.println("✅ Received message with Type 20: Handling new chat message.");
                             try {
-                                // Get the message content (which is a JSON string from MessageDto)
                                 String payload = request.getContent();
+                                MessageDto messageDto = MessageDto.fromString(payload);
 
-                                // Convert JSON string to MessageDto object
-//                                MessageDto messageDto = MessageDto.fromString(payload) ;
-                                com.yamyam.messenger.client.network.dto.MessageDto messageDto =
-                                        com.yamyam.messenger.client.network.dto.MessageDto.fromString(payload);
-
-                                // Extracting the necessary information from the DTO
                                 long chatId = messageDto.getChatId();
                                 long senderId = messageDto.getSenderId();
                                 String text = messageDto.getText();
 
-                                // Calling the addMessage method on the DataManager to save the message to the database
-                                DataManager.getInstance().addMessage(chatId, senderId, text);
+                                // Save the message to the DB and get the full MessageEntity object back
+                                // IMPORTANT: Your addMessage method should return the created MessageEntity
+                                MessageEntity newMessage = DataManager.getInstance().addMessage(chatId, senderId, text);
+
+                                // If the message was saved successfully, broadcast it to other clients
+                                if (newMessage != null) {
+                                    broadcastMessage(newMessage);
+                                }
+
                             } catch (com.google.gson.JsonSyntaxException e) {
                                 System.err.println("❌ Error parsing MessageDto JSON: " + e.getMessage());
                             } catch (Exception e) {
