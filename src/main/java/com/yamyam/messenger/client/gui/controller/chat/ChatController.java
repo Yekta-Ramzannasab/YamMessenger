@@ -114,7 +114,11 @@ public class ChatController implements Initializable {
 
         if (!allChats.isEmpty()) {
             chatList.getSelectionModel().select(0);
-            openChat(chatList.getSelectionModel().getSelectedItem());
+            try {
+                openChat(chatList.getSelectionModel().getSelectedItem());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             System.out.println("ℹ️ No chats available for user: " + me.getEmail());
         }
@@ -325,7 +329,6 @@ public class ChatController implements Initializable {
                     chatList.getSelectionModel().select(existingItem.get());
                     chatList.scrollTo(existingItem.get());
                 } else {
-                    // ایجاد چت جدید با اطلاعات کامل
                     Image avatar = getAvatarForChat(c, AppSession.requireUserId());
                     String title = getChatTitle(c, AppSession.requireUserId());
 
@@ -351,7 +354,12 @@ public class ChatController implements Initializable {
             }
 
             System.out.println("💬 Chat selected: " + sel.title + " | chatId=" + sel.contactId);
-            openChat(sel);
+            sel.messages.clear();
+            try {
+                openChat(sel);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
 
             long meUserId = AppSession.requireUserId();
             long chatId = sel.contactId;
@@ -375,6 +383,8 @@ public class ChatController implements Initializable {
                 openChat(sel);
             } catch (IOException ex) {
                 System.err.println("❌ Failed to load messages: " + ex.getMessage());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
 
             try {
@@ -593,7 +603,7 @@ public class ChatController implements Initializable {
                 .filter(item -> !item.title().equals("Unknown"))
                 .toList();
     }
-    private void showChatInfo(Chat chat) {
+    private void showChatInfo(Chat chat) throws SQLException {
         if (chat instanceof Channel channel) {
 
             infoAvatar.setImage(channel.getChannelAvatarUrl() != null ?
@@ -609,6 +619,9 @@ public class ChatController implements Initializable {
             infoName.setText(group.getGroupName() != null ? group.getGroupName() : "No name");
             infoBio.setText(group.getDescription() != null ? group.getDescription() : "No description");
             infoPresence.setText("Group • " + group.getMemberCount() + " members");
+        }
+        else if (chat instanceof PrivateChat privateChat){
+            showUserProfile(Database.loadUser(privateChat.getUser2()));
         }
 
         mediaGrid.getChildren().clear();
@@ -728,7 +741,7 @@ public class ChatController implements Initializable {
        - Backend/DataManager should call this after fetching user's chats by userId.
        -----* *------
     */
-    public void loadChats(List<Contact> contacts) {
+    public void loadChats(List<Contact> contacts) throws SQLException {
         if (contacts == null || contacts.isEmpty()) {
             loadChatsGeneric(Collections.emptyList());
             return;
@@ -758,7 +771,7 @@ public class ChatController implements Initializable {
     }
 
 
-    public void loadChatsGeneric(List<ChatRef> refs) {
+    public void loadChatsGeneric(List<ChatRef> refs) throws SQLException {
         Long keepSelectedId = Optional.ofNullable(chatList.getSelectionModel().getSelectedItem())
                 .map(ci -> ci.contactId).orElse(null);
 
@@ -802,7 +815,9 @@ public class ChatController implements Initializable {
        - Updates header/avatar/presence info based on the selected chat type.
        - Binds messageList items to the selected ChatItem.messages observable.
        -----* *------ */
-    private void openChat(ChatItem c) {
+    private void openChat(ChatItem c) throws SQLException {
+
+
         headerAvatar.setImage(c.avatar != null ? c.avatar : placeholder);
         headerName.setText(c.title);
 
