@@ -2,10 +2,11 @@ package com.yamyam.messenger.client.util;
 
 import com.yamyam.messenger.client.gui.controller.chat.ChatController;
 import com.yamyam.messenger.client.network.NetworkService;
+import com.yamyam.messenger.client.network.receiver.ChatReceiver;
 import com.yamyam.messenger.shared.model.user.Users;
 import javafx.collections.ObservableList;
 
-import java.util.concurrent.atomic.AtomicReference; // این import را اضافه کن
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class AppSession {
 
