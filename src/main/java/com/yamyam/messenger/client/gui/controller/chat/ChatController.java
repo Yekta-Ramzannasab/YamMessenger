@@ -376,6 +376,7 @@ public class ChatController implements Initializable {
 
                     ServiceLocator.chat().openChat(meUserId, sel.contactId);
 
+
                     return messages;
                 }
             };
