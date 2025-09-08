@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.5
 
--- Started on 2025-09-08 03:26:39
+-- Started on 2025-09-08 10:49:25
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -648,6 +648,8 @@ COPY public.messages (message_id, chat_id, sender_id, message_text, message_type
 50	27	12	hi\\	text	\N	\N	f	f	sent	2025-09-07 21:33:07.558381+03:30	'hi':1
 51	25	12	xv	text	\N	\N	f	f	sent	2025-09-08 01:26:35.62866+03:30	'xv':1
 52	25	12	zxc	text	\N	\N	f	f	sent	2025-09-08 01:26:43.18178+03:30	'zxc':1
+53	25	12	hi	text	\N	\N	f	f	sent	2025-09-08 07:54:11.370391+03:30	'hi':1
+54	26	12	mo	text	\N	\N	f	f	sent	2025-09-08 07:54:17.000606+03:30	'mo':1
 \.
 
 
@@ -714,7 +716,7 @@ SELECT pg_catalog.setval('public.chat_chat_id_seq', 85, true);
 -- Name: messages_message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.messages_message_id_seq', 52, true);
+SELECT pg_catalog.setval('public.messages_message_id_seq', 54, true);
 
 
 --
@@ -1066,7 +1068,7 @@ ALTER TABLE ONLY public.user_profiles
     ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
--- Completed on 2025-09-08 03:26:39
+-- Completed on 2025-09-08 10:49:25
 
 --
 -- PostgreSQL database dump complete
