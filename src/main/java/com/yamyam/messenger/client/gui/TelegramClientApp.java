@@ -1,9 +1,11 @@
 package com.yamyam.messenger.client.gui;
 
+import com.yamyam.messenger.client.gui.controller.chat.ChatController; // این import اضافه شده است
 import com.yamyam.messenger.client.gui.theme.ThemeManager;
 import com.yamyam.messenger.client.network.NetworkService;
 import com.yamyam.messenger.client.network.impl.NetworkChatServiceAdapter;
 import com.yamyam.messenger.client.network.impl.NetworkContactServiceAdapter;
+import com.yamyam.messenger.client.util.ServiceLocator;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -20,13 +22,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import com.yamyam.messenger.client.util.ServiceLocator;
 
 public class TelegramClientApp extends Application {
 
-    private static Scene scene;                  // Global scene
-    private static StackPane appRoot;            // Single root for view switching
+    private static Scene scene;
+    private static StackPane appRoot;
     private static final Map<String, Parent> cache = new HashMap<>();
+    // << تغییر ۱: کش برای نگهداری کنترلرها >>
+    private static final Map<String, Object> controllerCache = new HashMap<>();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -63,6 +66,16 @@ public class TelegramClientApp extends Application {
         // 7) preload chat to avoid flash
         preloadForNoFlash("chat/chat");
 
+        // << تغییر ۳: افزودن منطق خاموش کردن scheduler هنگام بستن برنامه >>
+        stage.setOnCloseRequest(event -> {
+            System.out.println("Window is closing, attempting to shut down services...");
+            Object chatControllerObj = controllerCache.get("chat/chat");
+            if (chatControllerObj instanceof ChatController) {
+                System.out.println("ChatController found, calling shutdown().");
+                ((ChatController) chatControllerObj).shutdown();
+            }
+        });
+
         stage.show();
     }
 
@@ -80,12 +93,20 @@ public class TelegramClientApp extends Application {
     }
 
     private static Parent loadView(String fxmlSimpleName) {
+        // << تغییر ۲: ذخیره کردن کنترلر در کش بعد از بارگذاری >>
         return cache.computeIfAbsent(fxmlSimpleName, key -> {
             try {
                 URL url = TelegramClientApp.class.getResource(
                         "/com/yamyam/messenger/client/gui/fxml/" + key + ".fxml");
                 FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(url, key + ".fxml not found"));
-                return loader.load();
+                Parent parent = loader.load();
+
+                // کنترلر را در کش ذخیره می‌کنیم
+                if (loader.getController() != null) {
+                    controllerCache.put(key, loader.getController());
+                }
+
+                return parent;
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
