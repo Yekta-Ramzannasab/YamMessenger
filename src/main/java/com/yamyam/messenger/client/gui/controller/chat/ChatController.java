@@ -47,9 +47,14 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class ChatController implements Initializable {
+
+    private ScheduledExecutorService scheduler;
 
     /* -----* *------
        FXML references (wired from .fxml)
@@ -149,6 +154,8 @@ public class ChatController implements Initializable {
             ThemeManager.reapply(scene);
             syncThemeMenu(ThemeManager.current());
         });
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(this::refreshDataPeriodically, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     /* ================== Chat list ================== */
@@ -1184,6 +1191,80 @@ public class ChatController implements Initializable {
         b.getStyleClass().add("menu-back-btn"); // reuse existing rounded/light style
         b.setMaxWidth(Double.MAX_VALUE);
         return b;
+    }
+
+    private void refreshDataPeriodically() {
+        // گرفتن چت انتخاب شده فعلی
+        final ChatItem selectedChat = chatList.getSelectionModel().getSelectedItem();
+        final long meUserId = AppSession.requireUserId();
+
+        // 1. به‌روزرسانی لیست پیام‌های چت باز
+        if (selectedChat != null) {
+            try {
+                // دریافت پیام‌های جدید از شبکه
+                List<MessageEntity> messages = NetworkService.getInstance().fetchMessages(selectedChat.contactId);
+
+                // تبدیل مدل شبکه به مدل UI
+                List<Msg> uiMessages = new ArrayList<>();
+                for (MessageEntity m : messages) {
+                    uiMessages.add(new Msg(
+                            m.getSender().getId() == meUserId,
+                            m.getText(),
+                            m.getSentAt().toLocalDateTime()
+                    ));
+                }
+
+                // به‌روزرسانی لیست پیام‌ها در نخ اصلی UI
+                Platform.runLater(() -> {
+                    // برای جلوگیری از پرش، فقط در صورت تغییر، لیست را آپدیت می‌کنیم
+                    // این یک بهینه‌سازی ساده است
+                    if (!selectedChat.messages.equals(uiMessages)) {
+                        selectedChat.messages.setAll(uiMessages);
+                    }
+                });
+
+            } catch (IOException e) {
+                // بهتر است لاگ شود تا کنسول شلوغ نشود
+                // System.err.println("Failed to refresh messages: " + e.getMessage());
+            }
+        }
+
+        // 2. به‌روزرسانی لیست کلی چت‌ها (این منطق از متد loadAllChats شما گرفته شده است)
+        try {
+            NetworkChatServiceAdapter chatServiceAdapter = new NetworkChatServiceAdapter(NetworkService.getInstance());
+            List<Chat> chats = chatServiceAdapter.getAllChats(meUserId);
+
+            Platform.runLater(() -> {
+                // آیدی چت انتخاب شده را نگه می‌داریم تا بعد از رفرش دوباره انتخاب شود
+                long selectedId = (selectedChat != null) ? selectedChat.contactId : -1;
+
+                allChats.clear();
+                for (Chat chat : chats) {
+                    Image avatar = getAvatarForChat(chat, meUserId);
+                    String title = getChatTitle(chat, meUserId);
+                    ChatItem item = createChatItemFromRealChat(chat, title, avatar);
+                    allChats.add(item);
+                }
+
+                // انتخاب مجدد آیتمی که قبلا انتخاب شده بود
+                if (selectedId != -1) {
+                    allChats.stream()
+                            .filter(item -> item.contactId == selectedId)
+                            .findFirst()
+                            .ifPresent(itemToReselect -> chatList.getSelectionModel().select(itemToReselect));
+                }
+            });
+
+        } catch (Exception e) {
+            // System.err.println("Failed to refresh chat list: " + e.getMessage());
+        }
+    }
+
+    public void shutdown() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            System.out.println("Shutting down chat refresh scheduler...");
+            scheduler.shutdown();
+        }
     }
 
 }
