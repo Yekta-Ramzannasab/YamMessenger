@@ -372,7 +372,7 @@ public class ChatController implements Initializable {
                     long chatId = sel.contactId;
 
                     System.out.println("📡 Fetching messages for chatId=" + chatId);
-                    List<MessageEntity> messages = DataManager.getInstance().getMessages(meUserId);
+                    List<MessageEntity> messages = DataManager.getInstance().getMessages(chatId);
 
                     ServiceLocator.chat().openChat(meUserId, sel.contactId);
 
