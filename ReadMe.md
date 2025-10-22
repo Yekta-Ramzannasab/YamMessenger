@@ -1,5 +1,6 @@
-# Advanced Messenger (YAM Messenger)
-![Yam](photo_2025-10-22_23-39-28.jpg)
+# YAM Messenger
+![Yam](https://github.com/Yekta-Ramzannasab/YamMessenger/blob/main/photo_2025-10-22_23-39-28.jpg?raw=true)
+
 
 A powerful and scalable Java-based messenger designed with a multi-layered architecture, an optimized database, and a custom socket-based API. This project includes comprehensive features such as private chats, groups, and channels, an advanced search system, cache management, and an API for building intelligent bots.
 
