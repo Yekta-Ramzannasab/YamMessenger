@@ -1,4 +1,5 @@
 # Advanced Messenger (YAM Messenger)
+![Yam](photo_2025-10-22_23-39-28.jpg)
 
 A powerful and scalable Java-based messenger designed with a multi-layered architecture, an optimized database, and a custom socket-based API. This project includes comprehensive features such as private chats, groups, and channels, an advanced search system, cache management, and an API for building intelligent bots.
 
@@ -15,6 +16,20 @@ A powerful and scalable Java-based messenger designed with a multi-layered archi
       * Displays the selected user's or chat's profile on the right side.
       * A floating menu for creating groups, channels, and accessing settings.
   * Login System: Implemented using the powerful Java Simple Mail API.
+
+  ![Yam](photo_2025-10-22_23-35-40.jpg) 
+  ![Yam](photo_2025-10-22_23-35-38.jpg) 
+  ![Yam](photo_2025-10-22_23-46-19.jpg) 
+  ![Yam](photo_2025-10-22_23-46-23.jpg) 
+
+  ![Yam](photo_2025-10-22_23-46-33.jpg) 
+  ![Yam](photo_2025-10-22_23-46-36.jpg) 
+  ![Yam](photo_2025-10-22_23-46-53.jpg) 
+  ![Yam](photo_2025-10-22_23-46-56.jpg) 
+
+
+ 
+
 
 -----
 
